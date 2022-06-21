@@ -147,4 +147,4 @@ class OrthonormalityAlignment final
 
 } // namespace hyper
 
-HYPER_DECLARE_TEMPLATED_EIGEN_MAP(OrthonormalityAlignment, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::OrthonormalityAlignment, int)

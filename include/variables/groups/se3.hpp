@@ -217,8 +217,8 @@ class Tangent<SE3<TScalar>> final
 
 } // namespace hyper
 
-HYPER_DECLARE_EIGEN_MAP(SE3)
-HYPER_DECLARE_TANGENT_MAP(SE3)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::SE3)
+HYPER_DECLARE_TANGENT_MAP(hyper::SE3)
 
 namespace hyper {
 

@@ -215,4 +215,4 @@ auto IterativeRadialDistortionBase<TDerived>::InverseIterativePixelDistortionJac
 
 } // namespace hyper
 
-HYPER_DECLARE_TEMPLATED_EIGEN_MAP(IterativeRadialDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::IterativeRadialDistortion, int)

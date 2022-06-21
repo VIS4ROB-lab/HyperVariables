@@ -171,4 +171,4 @@ class Intrinsics final
 
 } // namespace hyper
 
-HYPER_DECLARE_EIGEN_MAP(Intrinsics)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::Intrinsics)

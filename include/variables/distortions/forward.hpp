@@ -28,7 +28,7 @@ struct Traits<EquidistantDistortion<TScalar, TOrder>>
   using PlainDerivedType = EquidistantDistortion<TScalar, TOrder>;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_MAP_TRAITS(EquidistantDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::EquidistantDistortion, int)
 
 template <typename, int>
 class RadialTangentialDistortion;
@@ -47,7 +47,7 @@ struct Traits<RadialTangentialDistortion<TScalar, TOrder>>
   using PlainDerivedType = RadialTangentialDistortion<TScalar, TOrder>;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_MAP_TRAITS(RadialTangentialDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::RadialTangentialDistortion, int)
 
 template <typename, int>
 class IterativeRadialDistortion;
@@ -64,6 +64,6 @@ struct Traits<IterativeRadialDistortion<TScalar, TOrder>>
   using PlainDerivedType = IterativeRadialDistortion<TScalar, TOrder>;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_MAP_TRAITS(IterativeRadialDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::IterativeRadialDistortion, int)
 
 } // namespace hyper
