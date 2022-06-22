@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <glog/logging.h>
+
 #include "metrics/abstract.hpp"
 #include "variables/cartesian.hpp"
 
@@ -47,10 +49,16 @@ class AngularMetric final
     return Output{std::acos(x)};
   }
 
-  /// Retrieves the shape (i.e. input and output size).
+  /// Retrieves the metric shape (i.e. input and output size).
   /// \return Metric shape.
-  [[nodiscard]] constexpr auto shape() const -> MetricShape final {
+  [[nodiscard]] constexpr auto shape() const -> Shape final {
     return {Traits<Input>::kNumParameters, 1};
+  }
+
+  /// Retrieves the Jacobian shape.
+  /// \return Jacobian shape.
+  [[nodiscard]] constexpr auto jacobianShape() const -> Shape final {
+    return shape();
   }
 
   /// Computes the distance between elements.

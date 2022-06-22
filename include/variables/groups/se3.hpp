@@ -69,10 +69,6 @@ class SE3Base
   /// \return Translation.
   auto translation() -> Eigen::Map<TranslationWithConstIfNotLvalue>;
 
-  /// Conversion to tangent element.
-  /// \return Tangent element.
-  auto toTangent() const -> Tangent<SE3<Scalar>>;
-
   /// Group inverse.
   /// \param raw_J Input Jacobian (if requested).
   /// \param frame Frame of the requested Jacobian.
@@ -98,6 +94,12 @@ class SE3Base
   /// \return Additive element.
   template <typename TOtherDerived_>
   auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& vector, Scalar* raw_J_this = nullptr, Scalar* raw_J_vector = nullptr, Frame frame = Frame::DEFAULT) const -> Translation;
+
+  /// Conversion to tangent element.
+  /// \param raw_J Input Jacobian (if requested).
+  /// \param frame Frame of the requested Jacobian(s).
+  /// \return Tangent element.
+  auto toTangent(Scalar* raw_J = nullptr, Frame frame = Frame::DEFAULT) const -> Tangent<SE3<Scalar>>;
 };
 
 template <typename TScalar>
@@ -199,10 +201,10 @@ class SE3TangentBase
   }
 
   /// Converts this to a manifold element.
+  /// \param raw_J Input Jacobian (if requested).
+  /// \param frame Frame of the requested Jacobian(s).
   /// \return Manifold element.
-  auto toManifold() const -> SE3<Scalar> {
-    return {angular().toManifold(), linear()};
-  }
+  auto toManifold(Scalar* raw_J = nullptr, Frame frame = Frame::DEFAULT) const -> SE3<Scalar>;
 };
 
 template <typename TScalar>
@@ -260,14 +262,6 @@ auto SE3Base<TDerived>::translation() const -> Eigen::Map<const Translation> {
 template <typename TDerived>
 auto SE3Base<TDerived>::translation() -> Eigen::Map<TranslationWithConstIfNotLvalue> {
   return Eigen::Map<TranslationWithConstIfNotLvalue>{this->data() + Traits<TDerived>::kTranslationOffset};
-}
-
-template <typename TDerived>
-auto SE3Base<TDerived>::toTangent() const -> Tangent<SE3<Scalar>> {
-  Tangent<SE3<Scalar>> tangent;
-  tangent.angular().noalias() = rotation().toTangent();
-  tangent.linear().noalias() = translation();
-  return tangent;
 }
 
 template <typename TDerived>
@@ -355,6 +349,80 @@ auto SE3Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& vect
 
   if (raw_J_vector) {
     Eigen::Map<Jacobian<Translation>>{raw_J_vector}.noalias() = R;
+  }
+
+  return output;
+}
+
+template <typename TDerived>
+auto SE3Base<TDerived>::toTangent(Scalar* raw_J, const Frame frame) const -> Tangent<SE3<Scalar>> {
+  Tangent<SE3<Scalar>> output;
+
+  if (raw_J) {
+    Jacobian<Tangent<SU2<Scalar>>> J_r;
+    const auto t = rotation().toTangent(J_r.data(), frame);
+
+    using SE3Tangent = Tangent<SE3<Scalar>>;
+    auto J = Eigen::Map<Jacobian<SE3Tangent>>{raw_J};
+
+    if (frame == Frame::GLOBAL) {
+      J.setIdentity();
+      SE3Tangent::template AngularJacobian<Traits<SE3Tangent>::kNumAngularParameters>(J, Traits<SE3Tangent>::kAngularOffset).noalias() = J_r;
+      SE3Tangent::template AngularJacobian<Traits<SE3Tangent>::kNumLinearParameters>(J, Traits<SE3Tangent>::kLinearOffset).noalias() = Scalar{-1} * translation().hat();
+      // SE3Tangent::template LinearJacobian<Traits<SE3Tangent>::kNumAngularParameters>(J, Traits<SE3Tangent>::kAngularOffset).setZero();
+      // SE3Tangent::template LinearJacobian<Traits<SE3Tangent>::kNumLinearParameters>(J, Traits<SE3Tangent>::kLinearOffset).setIdentity();
+
+    } else {
+      J.setZero();
+      SE3Tangent::template AngularJacobian<Traits<SE3Tangent>::kNumAngularParameters>(J, Traits<SE3Tangent>::kAngularOffset).noalias() = J_r;
+      // SE3Tangent::template AngularJacobian<Traits<SE3Tangent>::kNumLinearParameters>(J, Traits<SE3Tangent>::kLinearOffset).setZero();
+      // SE3Tangent::template LinearJacobian<Traits<SE3Tangent>::kNumAngularParameters>(J, Traits<SE3Tangent>::kAngularOffset).setZero();
+      SE3Tangent::template LinearJacobian<Traits<SE3Tangent>::kNumLinearParameters>(J, Traits<SE3Tangent>::kLinearOffset).noalias() = rotation().matrix();
+    }
+
+    output.angular().noalias() = t;
+    output.linear().noalias() = translation();
+
+  } else {
+    output.angular().noalias() = rotation().toTangent();
+    output.linear().noalias() = translation();
+  }
+
+  return output;
+}
+
+template <typename TDerived>
+auto SE3TangentBase<TDerived>::toManifold(Scalar* raw_J, const Frame frame) const -> SE3<Scalar> {
+  SE3<Scalar> output;
+
+  if (raw_J) {
+    Jacobian<Tangent<SU2<Scalar>>> J_r;
+    const auto r = angular().toManifold(J_r.data(), frame);
+
+    using SE3Tangent = Tangent<SE3<Scalar>>;
+    auto J = Eigen::Map<Jacobian<SE3Tangent>>{raw_J};
+
+    if (frame == Frame::GLOBAL) {
+      J.setIdentity();
+      SE3Tangent::template AngularJacobian<Traits<SE3Tangent>::kNumAngularParameters>(J, Traits<SE3Tangent>::kAngularOffset).noalias() = J_r;
+      SE3Tangent::template AngularJacobian<Traits<SE3Tangent>::kNumLinearParameters>(J, Traits<SE3Tangent>::kLinearOffset).noalias() = linear().hat() * J_r;
+      // SE3Tangent::template LinearJacobian<Traits<SE3Tangent>::kNumAngularParameters>(J, Traits<SE3Tangent>::kAngularOffset).setZero();
+      // SE3Tangent::template LinearJacobian<Traits<SE3Tangent>::kNumLinearParameters>(J, Traits<SE3Tangent>::kLinearOffset).setIdentity();
+
+    } else {
+      J.setZero();
+      SE3Tangent::template AngularJacobian<Traits<SE3Tangent>::kNumAngularParameters>(J, Traits<SE3Tangent>::kAngularOffset).noalias() = J_r;
+      // SE3Tangent::template AngularJacobian<Traits<SE3Tangent>::kNumLinearParameters>(J, Traits<SE3Tangent>::kLinearOffset).setZero();
+      // SE3Tangent::template LinearJacobian<Traits<SE3Tangent>::kNumAngularParameters>(J, Traits<SE3Tangent>::kAngularOffset).setZero();
+      SE3Tangent::template LinearJacobian<Traits<SE3Tangent>::kNumLinearParameters>(J, Traits<SE3Tangent>::kLinearOffset).noalias() = r.inverse().matrix();
+    }
+
+    output.rotation() = r;
+    output.translation().noalias() = linear();
+
+  } else {
+    output.rotation() = angular().toManifold();
+    output.translation().noalias() = linear();
   }
 
   return output;

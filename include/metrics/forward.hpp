@@ -5,8 +5,8 @@
 
 namespace hyper {
 
-struct MetricShape {
-  using Size = int;
+struct Shape {
+  using Size = std::int32_t;
   Size num_inputs;
   Size num_outputs;
 };

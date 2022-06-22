@@ -36,10 +36,16 @@ class CartesianMetric final
     return lhs - rhs;
   }
 
-  /// Retrieves the shape (i.e. input and output size).
+  /// Retrieves the metric shape (i.e. input and output size).
   /// \return Metric shape.
-  [[nodiscard]] constexpr auto shape() const -> MetricShape final {
+  [[nodiscard]] constexpr auto shape() const -> Shape final {
     return {Traits<Input>::kNumParameters, Traits<Output>::kNumParameters};
+  }
+
+  /// Retrieves the Jacobian shape.
+  /// \return Jacobian shape.
+  [[nodiscard]] constexpr auto jacobianShape() const -> Shape final {
+    return shape();
   }
 
   /// Computes the distance between elements.

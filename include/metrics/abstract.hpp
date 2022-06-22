@@ -15,9 +15,13 @@ class AbstractMetric {
   /// Default destructor.
   virtual ~AbstractMetric() = default;
 
-  /// Retrieves the shape (i.e. input and output size).
+  /// Retrieves the metric shape (i.e. input and output size).
   /// \return Metric shape.
-  [[nodiscard]] virtual auto shape() const -> MetricShape = 0;
+  [[nodiscard]] virtual auto shape() const -> Shape = 0;
+
+  /// Retrieves the Jacobian shape.
+  /// \return Jacobian shape.
+  [[nodiscard]] virtual auto jacobianShape() const -> Shape = 0;
 
   /// Computes the distance between elements.
   /// \param raw_output Distance between elements.
