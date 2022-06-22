@@ -8,7 +8,7 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 # Set properties.
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED YES)
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror -Wnon-virtual-dtor -pedantic)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wnon-virtual-dtor -pedantic)
 target_compile_options(${PROJECT_NAME} PRIVATE -O3 -march=native)
 
 # Add includes and link libraries.

@@ -16,7 +16,7 @@ add_library(Hyper::Variables ALIAS ${PROJECT_NAME})
 
 # Set properties.
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED YES)
-target_compile_options(${PROJECT_NAME} INTERFACE -Wall -Wextra -Werror -Wnon-virtual-dtor -pedantic)
+target_compile_options(${PROJECT_NAME} INTERFACE -Wall -Wextra -Wnon-virtual-dtor -pedantic)
 target_compile_options(${PROJECT_NAME} INTERFACE -O3 -march=native)
 
 # Find Eigen target if not present.

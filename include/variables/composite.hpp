@@ -17,6 +17,7 @@ class CompositeVariable {
  public:
   using Variable = AbstractVariable<TScalar>;
   using Variables = std::vector<std::unique_ptr<Variable>>;
+  using Size = typename Variables::size_type;
 
   /// Deleted default constructor.
   CompositeVariable() = delete;
@@ -26,7 +27,7 @@ class CompositeVariable {
 
   /// Retrieves the number of variables.
   /// \return Number of variables.
-  [[nodiscard]] auto numVariables() const -> typename Variables::size_type {
+  [[nodiscard]] auto numVariables() const -> Size {
     return variables_.size();
   }
 
@@ -39,7 +40,7 @@ class CompositeVariable {
   /// Variable modifier.
   /// \param index Variable index.
   /// \return Variable.
-  [[nodiscard]] auto variable(int index) const -> Variable& {
+  [[nodiscard]] auto variable(const Size index) const -> Variable& {
     DCHECK_LT(index, variables_.size());
     DCHECK(variables_[index] != nullptr);
     return *variables_[index];
@@ -65,7 +66,7 @@ class CompositeVariable {
   /// Sets a variable at index.
   /// \param index Variable index.
   /// \param variable Input variable.
-  auto setVariable(int index, std::unique_ptr<Variable>&& variable) -> void {
+  auto setVariable(const Size index, std::unique_ptr<Variable>&& variable) -> void {
     DCHECK_LT(index, variables_.size());
     variables_[index] = std::move(variable);
   }
