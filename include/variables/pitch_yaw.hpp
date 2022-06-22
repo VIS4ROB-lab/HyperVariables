@@ -55,4 +55,4 @@ class PitchYaw final
 
 } // namespace hyper
 
-HYPER_DECLARE_EIGEN_MAP(PitchYaw)
+HYPER_DECLARE_EIGEN_INTERFACE(PitchYaw)
