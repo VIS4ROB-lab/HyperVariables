@@ -2,11 +2,6 @@
 cmake_minimum_required(VERSION 3.16)
 enable_language(CXX)
 
-# Include CMake packages.
-include(CMakePackageConfigHelpers)
-include(FetchContent)
-include(GNUInstallDirs)
-
 # Define projects.
 project(HyperVariables VERSION 22.06.14 DESCRIPTION "" HOMEPAGE_URL https://github.com/VIS4ROB-lab/HyperVariables LANGUAGES CXX)
 
@@ -25,21 +20,18 @@ if (NOT TARGET Eigen3::Eigen)
     target_compile_definitions(${PROJECT_NAME} INTERFACE EIGEN_MATRIXBASE_PLUGIN="${PROJECT_SOURCE_DIR}/plugins/matrix_base_plugin.hpp")
 endif ()
 
-# Fetch (external) content.
-FetchContent_Declare(gtest GIT_REPOSITORY https://github.com/google/googletest.git GIT_TAG release-1.11.0)
-FetchContent_Declare(glog GIT_REPOSITORY https://github.com/google/glog.git GIT_TAG v0.6.0)
+# Find gtest target if not present.
+if (NOT TARGET GTest::gtest)
+    find_package(GTest REQUIRED)
+endif ()
 
-# Make (external) content available.
-set(WITH_GTEST FALSE)
-set(WITH_UNWIND FALSE)
-set(BUILD_TESTING FALSE)
-FetchContent_MakeAvailable(gtest glog)
-set(HAVE_LIB_GTEST TRUE)
-set(HAVE_LIB_GMOCK TRUE)
+# Find glog library.
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(glog REQUIRED libglog)
 
 # Add includes and link libraries.
 target_include_directories(${PROJECT_NAME} INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-target_link_libraries(${PROJECT_NAME} INTERFACE Eigen3::Eigen glog::glog GTest::gtest)
+target_link_libraries(${PROJECT_NAME} INTERFACE Eigen3::Eigen glog GTest::gtest)
 
 # Build tests.
 option(HYPER_BUILD_TESTING "Build tests." TRUE)
