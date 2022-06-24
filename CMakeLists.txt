@@ -36,5 +36,5 @@ target_link_libraries(${PROJECT_NAME} INTERFACE Eigen3::Eigen glog GTest::GTest)
 # Build tests.
 option(HYPER_BUILD_TESTING "Build tests." TRUE)
 if (HYPER_BUILD_TESTING)
-    add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/apps/tests)
 endif (HYPER_BUILD_TESTING)
