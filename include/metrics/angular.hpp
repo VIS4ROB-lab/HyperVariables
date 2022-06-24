@@ -27,26 +27,24 @@ class AngularMetric final
   static auto Distance(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, Scalar* raw_J_lhs = nullptr, Scalar* raw_J_rhs = nullptr) -> Output {
     using Jacobian = Jacobian<Output, Input>;
 
-    const auto nl2 = lhs.squaredNorm();
-    const auto nr2 = rhs.squaredNorm();
-    const auto n2 = nl2 * nr2;
-    DLOG_IF(WARNING, n2 < Eigen::NumTraits<Scalar>::epsilon()) << "Singularity detected.";
-    const auto i_n = Scalar{1} / std::sqrt(n2);
-
-    const auto d = lhs.dot(rhs);
-    const auto x = i_n * d;
+    const auto cross = lhs.cross(rhs).eval();
+    const auto ncross = cross.norm();
+    const auto dot = lhs.dot(rhs);
 
     if (raw_J_lhs || raw_J_rhs) {
-      const auto a = (Scalar{1} <= x + Eigen::NumTraits<Scalar>::epsilon()) ? Scalar{0} : Scalar{-i_n} / std::sqrt(Scalar{1} - x * x);
+      DLOG_IF(WARNING, ncross < Eigen::NumTraits<Scalar>::epsilon()) << "Singularity detected.";
+      const auto a = ncross * ncross + dot * dot;
+      const auto b = (dot / (a * ncross));
+      const auto c = (ncross / a);
       if (raw_J_lhs) {
-        Eigen::Map<Jacobian>{raw_J_lhs}.noalias() = a * (rhs.transpose() - d * lhs.transpose() / nl2);
+        Eigen::Map<Jacobian>{raw_J_lhs}.noalias() = (b * rhs.cross(cross) - c * rhs).transpose();
       }
       if (raw_J_rhs) {
-        Eigen::Map<Jacobian>{raw_J_rhs}.noalias() = a * (lhs.transpose() - d * rhs.transpose() / nr2);
+        Eigen::Map<Jacobian>{raw_J_rhs}.noalias() = (b * cross.cross(lhs) - c * lhs).transpose();
       }
     }
 
-    return Output{std::acos(x)};
+    return Output{std::atan2(ncross, dot)};
   }
 
   /// Retrieves the metric shape (i.e. input and output size).

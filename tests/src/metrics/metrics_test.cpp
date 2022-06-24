@@ -54,7 +54,8 @@ class MetricsTests
       J_rhs_n.col(i) = (Metric::Distance(u, v + kNumericIncrement * Input::Unit(i)) - f) / kNumericIncrement;
     }
 
-    return J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) &&
+    return std::abs(f[0] - std::acos(u.dot(v) / (u.norm() * v.norm()))) <= kNumericTolerance &&
+           J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) &&
            J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
   }
 
