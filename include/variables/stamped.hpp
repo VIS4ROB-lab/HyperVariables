@@ -104,4 +104,4 @@ class StampedVariable final
 
 } // namespace hyper
 
-HYPER_DECLARE_EIGEN_INTERFACE(StampedVariable)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::StampedVariable)
