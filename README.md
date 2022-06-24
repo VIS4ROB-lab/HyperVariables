@@ -56,7 +56,7 @@ alternatives). The compilation process itself (without additional compile flags)
 ```
 # Install Eigen.
 sudo apt-get update
-sudo apt-get install googletest libgoogle-glog-dev libeigen3-dev
+sudo apt-get install libgtest-dev libgoogle-glog-dev libeigen3-dev
 
 # Compile library/tests.
 git clone https://github.com/VIS4ROB-lab/HyperVariables.git
