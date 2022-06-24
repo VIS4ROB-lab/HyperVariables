@@ -32,15 +32,23 @@ class AngularMetric final
     const auto dot = lhs.dot(rhs);
 
     if (raw_J_lhs || raw_J_rhs) {
-      DLOG_IF(WARNING, ncross < Eigen::NumTraits<Scalar>::epsilon()) << "Singularity detected.";
-      const auto a = ncross * ncross + dot * dot;
-      const auto b = (dot / (a * ncross));
-      const auto c = (ncross / a);
-      if (raw_J_lhs) {
-        Eigen::Map<Jacobian>{raw_J_lhs}.noalias() = (b * rhs.cross(cross) - c * rhs).transpose();
-      }
-      if (raw_J_rhs) {
-        Eigen::Map<Jacobian>{raw_J_rhs}.noalias() = (b * cross.cross(lhs) - c * lhs).transpose();
+      if (ncross < Eigen::NumTraits<Scalar>::epsilon()) {
+        if (raw_J_lhs) {
+          Eigen::Map<Jacobian>{raw_J_lhs}.setZero();
+        }
+        if (raw_J_rhs) {
+          Eigen::Map<Jacobian>{raw_J_rhs}.setZero();
+        }
+      } else {
+        const auto a = ncross * ncross + dot * dot;
+        const auto b = (dot / (a * ncross));
+        const auto c = (ncross / a);
+        if (raw_J_lhs) {
+          Eigen::Map<Jacobian>{raw_J_lhs}.noalias() = (b * rhs.cross(cross) - c * rhs).transpose();
+        }
+        if (raw_J_rhs) {
+          Eigen::Map<Jacobian>{raw_J_rhs}.noalias() = (b * cross.cross(lhs) - c * lhs).transpose();
+        }
       }
     }
 
