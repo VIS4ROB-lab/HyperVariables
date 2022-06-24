@@ -22,7 +22,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/VIS4ROB-lab/HyperVariables">
-    <img src="resources/images/emblem.png" alt="" style="width: 150px;">
+    <img src="https://drive.google.com/uc?export=view&id=1UAFr3tepqKwdnTomhKaeI2eIag3HOISY" alt="" style="width: 150px;">
   </a>
 
 <h2><em>Hyper</em>Variables</h2>
@@ -51,16 +51,15 @@ the [Eigen](https://eigen.tuxfamily.org/), [Google Logging](https://github.com/g
 [Google Test](https://github.com/google/googletest) libraries and uses features from the
 [C++20](https://en.cppreference.com/w/cpp/20) standard (see
 [link](https://askubuntu.com/questions/26498/how-to-choose-the-default-gcc-and-g-version) to update gcc and g++
-alternatives). All dependencies aside from Eigen are automatically fetched during compilation. The compilation
-process itself (without additional compile flags) is as follows:
+alternatives). The compilation process itself (without additional compile flags) is as follows:
 
 ```
 # Install Eigen.
 sudo apt-get update
-sudo apt-get install libeigen3-dev
+sudo apt-get install googletest libgoogle-glog-dev libeigen3-dev
 
 # Compile library/tests.
-https://github.com/VIS4ROB-lab/HyperVariables.git
+git clone https://github.com/VIS4ROB-lab/HyperVariables.git
 cd HyperVariables/
 mkdir build
 cd build/

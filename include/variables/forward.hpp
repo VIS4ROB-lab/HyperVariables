@@ -47,7 +47,7 @@ struct Traits<Cartesian<TScalar, TNumParameters>> {
   using Base = Eigen::Matrix<TScalar, TNumParameters, 1>;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_MAP_TRAITS(Cartesian, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::Cartesian, int)
 
 template <typename>
 class PitchYaw;
@@ -63,7 +63,7 @@ struct Traits<PitchYaw<TScalar>>
   static constexpr auto kNumParameters = kNumPitchParameters + kNumYawParameters;
 };
 
-HYPER_DECLARE_EIGEN_MAP_TRAITS(PitchYaw)
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::PitchYaw)
 
 template <typename>
 class Bearing;
@@ -75,7 +75,7 @@ struct Traits<Bearing<TScalar>>
   static constexpr auto kNorm = TScalar{1};
 };
 
-HYPER_DECLARE_EIGEN_MAP_TRAITS(Bearing)
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::Bearing)
 
 template <typename>
 class Gravity;
@@ -87,7 +87,7 @@ struct Traits<Gravity<TScalar>>
   static constexpr auto kNorm = TScalar{9.80741}; // Magnitude of local gravity for Zurich in [m/s²].
 };
 
-HYPER_DECLARE_EIGEN_MAP_TRAITS(Gravity)
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::Gravity)
 
 template <typename>
 class Intrinsics;
@@ -106,7 +106,7 @@ struct Traits<Intrinsics<TScalar>>
   static constexpr auto kNumFocalParameters = 2;
 };
 
-HYPER_DECLARE_EIGEN_MAP_TRAITS(Intrinsics)
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::Intrinsics)
 
 template <typename, int>
 class OrthonormalityAlignment;
@@ -121,7 +121,7 @@ struct Traits<OrthonormalityAlignment<TScalar, TOrder>>
   static constexpr auto kNumParameters = kNumDiagonalParameters + kNumOffDiagonalParameters;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_MAP_TRAITS(OrthonormalityAlignment, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::OrthonormalityAlignment, int)
 
 template <typename TVariable>
 struct Traits<StampedVariable<TVariable>>

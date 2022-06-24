@@ -168,4 +168,4 @@ auto EquidistantDistortionBase<TDerived>::distortTheta(const Scalar& theta, Scal
 
 } // namespace hyper
 
-HYPER_DECLARE_TEMPLATED_EIGEN_MAP(EquidistantDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::EquidistantDistortion, int)

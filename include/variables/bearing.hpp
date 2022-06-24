@@ -94,4 +94,4 @@ class Bearing final
 
 } // namespace hyper
 
-HYPER_DECLARE_EIGEN_MAP(Bearing)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::Bearing)

@@ -161,4 +161,4 @@ auto RadialTangentialDistortionBase<TDerived>::distort(const PixelRef& pixel, Sc
 
 } // namespace hyper
 
-HYPER_DECLARE_TEMPLATED_EIGEN_MAP(RadialTangentialDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::RadialTangentialDistortion, int)

@@ -50,4 +50,4 @@ class Gravity final
 
 } // namespace hyper
 
-HYPER_DECLARE_EIGEN_MAP(Gravity)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::Gravity)

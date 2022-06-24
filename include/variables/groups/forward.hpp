@@ -16,7 +16,7 @@ struct Traits<Quaternion<TScalar>>
   using Base = Eigen::Quaternion<TScalar>;
 };
 
-HYPER_DECLARE_EIGEN_MAP_TRAITS(Quaternion)
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::Quaternion)
 
 template <typename>
 class SU2;
@@ -25,7 +25,7 @@ template <typename TScalar>
 struct Traits<SU2<TScalar>>
     : Traits<Quaternion<TScalar>> {};
 
-HYPER_DECLARE_EIGEN_MAP_TRAITS(SU2)
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::SU2)
 
 template <typename>
 class SE3;
@@ -39,7 +39,7 @@ struct Traits<SE3<TScalar>>
   static constexpr auto kNumTranslationParameters = 3;
 };
 
-HYPER_DECLARE_EIGEN_MAP_TRAITS(SE3)
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::SE3)
 
 template <typename>
 class Algebra;
@@ -88,7 +88,7 @@ struct Traits<Tangent<SU2<TScalar>>>
   static constexpr auto kNumAngularParameters = 3;
 };
 
-HYPER_DECLARE_TANGENT_MAP_TRAITS(SU2)
+HYPER_DECLARE_TANGENT_MAP_TRAITS(hyper::SU2)
 
 template <typename TScalar>
 struct Traits<Tangent<SE3<TScalar>>>
@@ -99,6 +99,6 @@ struct Traits<Tangent<SE3<TScalar>>>
   static constexpr auto kNumLinearParameters = 3;
 };
 
-HYPER_DECLARE_TANGENT_MAP_TRAITS(SE3)
+HYPER_DECLARE_TANGENT_MAP_TRAITS(hyper::SE3)
 
 } // namespace hyper

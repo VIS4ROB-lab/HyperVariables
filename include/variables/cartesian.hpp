@@ -44,7 +44,7 @@ class Cartesian final
 
 } // namespace hyper
 
-HYPER_DECLARE_TEMPLATED_EIGEN_MAP(Cartesian, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::Cartesian, int)
 
 namespace hyper {
 

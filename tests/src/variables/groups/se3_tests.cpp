@@ -69,15 +69,40 @@ class SE3Tests
            J_p_n.isApprox(J_r_p_a, kNumericTolerance);
   }
 
+  [[nodiscard]] auto checkGroupExponentials() const -> bool {
+    const auto se3 = se3_.toTangent().toManifold();
+    return se3.isApprox(se3_, kNumericTolerance);
+  }
+
+  [[nodiscard]] auto checkGroupExponentialsJacobians(const Frame frame) const -> bool {
+    using Tangent = Tangent<SE3<Scalar>>;
+
+    Jacobian<Tangent> J_l_a, J_e_a;
+    const auto tangent = se3_.toTangent(J_l_a.data(), frame);
+    const auto se3 = tangent.toManifold(J_e_a.data(), frame);
+
+    Jacobian<Tangent> J_l_n, J_e_n;
+    for (auto j = 0; j < Traits<Tangent>::kNumParameters; ++j) {
+      const auto d_tangent = Tangent{tangent + kNumericIncrement * Tangent::Unit(j)};
+      J_l_n.col(j) = (NumericGroupPlus(se3_, frame, j).toTangent() - tangent) / kNumericIncrement;
+      J_e_n.col(j) = NumericGroupMinus(d_tangent.toManifold(), se3_, frame);
+    }
+
+    return se3.isApprox(se3_, kNumericTolerance) &&
+           (J_l_a * J_e_a).isIdentity(kNumericTolerance) &&
+           J_l_n.isApprox(J_l_a, kNumericTolerance) &&
+           J_e_n.isApprox(J_e_a, kNumericTolerance);
+  }
+
   SE3<Scalar> se3_;
 
  private:
-  static auto NumericGroupPlus(const SE3<Scalar>& se3, const Frame frame, const Eigen::Index i) -> SE3<Scalar> {
+  static auto NumericGroupPlus(const Eigen::Ref<const SE3<Scalar>>& se3, const Frame frame, const Eigen::Index i) -> SE3<Scalar> {
     const auto delta = Tangent<SE3<Scalar>>{kNumericIncrement * Tangent<SE3<Scalar>>::Unit(i)};
     return (frame == Frame::GLOBAL) ? delta.toManifold().groupPlus(se3) : se3.groupPlus(delta.toManifold());
   }
 
-  static auto NumericGroupMinus(const SE3<Scalar>& d_se3, const SE3<Scalar>& se3, const Frame frame) -> Tangent<SE3<Scalar>> {
+  static auto NumericGroupMinus(const Eigen::Ref<const SE3<Scalar>>& d_se3, const Eigen::Ref<const SE3<Scalar>>& se3, const Frame frame) -> Tangent<SE3<Scalar>> {
     return ((frame == Frame::GLOBAL) ? d_se3.groupPlus(se3.groupInverse()) : se3.groupInverse().groupPlus(d_se3)).toTangent() / kNumericIncrement;
   }
 };
@@ -103,6 +128,15 @@ TEST_F(SE3Tests, VectorPlus) {
   for (auto i = 0; i < kNumIterations; ++i) {
     se3_ = SE3<Scalar>::Random();
     EXPECT_TRUE(checkVectorPlusJacobian());
+  }
+}
+
+TEST_F(SE3Tests, GroupExponentials) {
+  for (auto i = 0; i < kNumIterations; ++i) {
+    se3_ = SE3<Scalar>::Random();
+    EXPECT_TRUE(checkGroupExponentials());
+    EXPECT_TRUE(checkGroupExponentialsJacobians(Frame::GLOBAL));
+    EXPECT_TRUE(checkGroupExponentialsJacobians(Frame::LOCAL));
   }
 }
 
