@@ -22,7 +22,7 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install googletest libgoogle-glog-dev libeigen3-dev
+        sudo apt-get install libgtest-dev libgoogle-glog-dev libeigen3-dev
 
     - name: Configure CMake
       run: mkdir build && cd build && cmake .. 
