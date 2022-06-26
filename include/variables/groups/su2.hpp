@@ -69,10 +69,10 @@ class QuaternionBase
 
   /// Vector plus.
   /// \tparam TOtherDerived_ Other derived type.
-  /// \param vector Input vector.
+  /// \param v Input vector.
   /// \return Additive element.
   template <typename TOtherDerived_>
-  auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& vector) const -> Translation;
+  auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v) const -> Translation;
 
   /// Group logarithm.
   /// \return Logarithmic element.
@@ -133,13 +133,13 @@ class SU2Base
 
   /// Vector plus.
   /// \tparam TOtherDerived_ Other derived type.
-  /// \param vector Input vector.
+  /// \param v Input vector.
   /// \param raw_J_this This input Jacobian (if requested).
   /// \param raw_J_vector Point input Jacobian (if requested).
   /// \param frame Frame of the requested Jacobian(s).
   /// \return Additive element.
   template <typename TOtherDerived_>
-  auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& vector, Scalar* raw_J_this = nullptr, Scalar* raw_J_vector = nullptr, Frame frame = Frame::DEFAULT) const -> Translation;
+  auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, Scalar* raw_J_this = nullptr, Scalar* raw_J_vector = nullptr, Frame frame = Frame::DEFAULT) const -> Translation;
 
   /// Group logarithm.
   /// \return Logarithmic element.
@@ -246,8 +246,6 @@ class SU2TangentBase
   using Base = CartesianBase<TDerived>;
   using Base::Base;
 
-  using SquareMatrix = typename Base::SquareMatrixType;
-
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SU2TangentBase)
 
   /// Conversion to algebra element.
@@ -304,9 +302,9 @@ auto QuaternionBase<TDerived>::groupPlus(const Eigen::QuaternionBase<TOtherDeriv
 
 template <typename TDerived>
 template <typename TOtherDerived_>
-auto QuaternionBase<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& vector) const -> Translation {
+auto QuaternionBase<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v) const -> Translation {
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TOtherDerived_, 3);
-  return (*this) * vector;
+  return (*this) * v;
 }
 
 template <typename TDerived>
@@ -394,15 +392,16 @@ auto SU2Base<TDerived>::groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* 
 
 template <typename TDerived>
 template <typename TOtherDerived_>
-auto SU2Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& vector, Scalar* raw_J_this, Scalar* raw_J_vector, const Frame frame) const -> Translation {
-  auto output = Base::vectorPlus(vector);
+auto SU2Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, Scalar* raw_J_this, Scalar* raw_J_vector, const Frame frame) const -> Translation {
+  auto output = Base::vectorPlus(v);
 
   if (raw_J_this) {
     using Tangent = Tangent<SU2<Scalar>>;
+    auto J = Eigen::Map<Jacobian<Translation, Tangent>>{raw_J_this};
     if (frame == Frame::GLOBAL) {
-      Eigen::Map<Jacobian<Translation, Tangent>>{raw_J_this}.noalias() = Scalar{-1} * output.hat();
+      J.noalias() = Scalar{-1} * output.hat();
     } else {
-      Eigen::Map<Jacobian<Translation, Tangent>>{raw_J_this}.noalias() = Scalar{-1} * this->matrix() * vector.hat();
+      J.noalias() = Scalar{-1} * this->matrix() * v.hat();
     }
   }
 
