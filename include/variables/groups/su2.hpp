@@ -69,10 +69,10 @@ class QuaternionBase
 
   /// Vector plus.
   /// \tparam TOtherDerived_ Other derived type.
-  /// \param vector Input vector.
+  /// \param v Input vector.
   /// \return Additive element.
   template <typename TOtherDerived_>
-  auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& vector) const -> Translation;
+  auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v) const -> Translation;
 
   /// Group logarithm.
   /// \return Logarithmic element.
@@ -117,29 +117,29 @@ class SU2Base
 
   /// Group inverse.
   /// \param raw_J Input Jacobian (if requested).
-  /// \param frame Frame of the requested Jacobian.
+  /// \param global Request global Jacobians flag.
   /// \return Inverse element.
-  [[nodiscard]] auto groupInverse(Scalar* raw_J = nullptr, Frame frame = Frame::DEFAULT) const -> SU2<Scalar>;
+  [[nodiscard]] auto groupInverse(Scalar* raw_J = nullptr, bool global = true) const -> SU2<Scalar>;
 
   /// Group plus.
   /// \tparam TOtherDerived_ Other derived type.
   /// \param other Other input.
   /// \param raw_J_this This input Jacobian (if requested).
   /// \param raw_J_other Other input Jacobian (if requested).
-  /// \param frame Frame of the requested Jacobian(s).
+  /// \param global Request global Jacobians flag.
   /// \return Additive element.
   template <typename TOtherDerived_>
-  auto groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* raw_J_this = nullptr, Scalar* raw_J_other = nullptr, Frame frame = Frame::DEFAULT) const -> SU2<Scalar>;
+  auto groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* raw_J_this = nullptr, Scalar* raw_J_other = nullptr, bool global = true) const -> SU2<Scalar>;
 
   /// Vector plus.
   /// \tparam TOtherDerived_ Other derived type.
-  /// \param vector Input vector.
+  /// \param v Input vector.
   /// \param raw_J_this This input Jacobian (if requested).
   /// \param raw_J_vector Point input Jacobian (if requested).
-  /// \param frame Frame of the requested Jacobian(s).
+  /// \param global Request global Jacobians flag.
   /// \return Additive element.
   template <typename TOtherDerived_>
-  auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& vector, Scalar* raw_J_this = nullptr, Scalar* raw_J_vector = nullptr, Frame frame = Frame::DEFAULT) const -> Translation;
+  auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, Scalar* raw_J_this = nullptr, Scalar* raw_J_vector = nullptr, bool global = true) const -> Translation;
 
   /// Group logarithm.
   /// \return Logarithmic element.
@@ -151,9 +151,9 @@ class SU2Base
 
   /// Conversion to tangent element.
   /// \param raw_J_this Input Jacobian (if requested).
-  /// \param frame Frame of the requested Jacobian(s).
+  /// \param global Request global Jacobians flag.
   /// \return Tangent element.
-  auto toTangent(Scalar* raw_J = nullptr, Frame frame = Frame::DEFAULT) const -> Tangent<SU2<Scalar>>;
+  auto toTangent(Scalar* raw_J = nullptr, bool global = true) const -> Tangent<SU2<Scalar>>;
 };
 
 template <typename TDerived>
@@ -246,8 +246,6 @@ class SU2TangentBase
   using Base = CartesianBase<TDerived>;
   using Base::Base;
 
-  using SquareMatrix = typename Base::SquareMatrixType;
-
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SU2TangentBase)
 
   /// Conversion to algebra element.
@@ -256,9 +254,9 @@ class SU2TangentBase
 
   /// Conversion to manifold element.
   /// \param raw_J_this Input Jacobian (if requested).
-  /// \param frame Frame of the requested Jacobian(s).
+  /// \param global Request global Jacobians flag.
   /// \return Manifold element.
-  auto toManifold(Scalar* raw_J = nullptr, Frame frame = Frame::DEFAULT) const -> SU2<Scalar>;
+  auto toManifold(Scalar* raw_J = nullptr, bool global = true) const -> SU2<Scalar>;
 };
 
 template <typename TScalar>
@@ -304,9 +302,9 @@ auto QuaternionBase<TDerived>::groupPlus(const Eigen::QuaternionBase<TOtherDeriv
 
 template <typename TDerived>
 template <typename TOtherDerived_>
-auto QuaternionBase<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& vector) const -> Translation {
+auto QuaternionBase<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v) const -> Translation {
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TOtherDerived_, 3);
-  return (*this) * vector;
+  return (*this) * v;
 }
 
 template <typename TDerived>
@@ -351,12 +349,12 @@ auto QuaternionBase<TDerived>::groupExp() const -> Quaternion<Scalar> {
 }
 
 template <typename TDerived>
-auto SU2Base<TDerived>::groupInverse(Scalar* raw_J, const Frame frame) const -> SU2<Scalar> {
+auto SU2Base<TDerived>::groupInverse(Scalar* raw_J, const bool global) const -> SU2<Scalar> {
   const auto i_q = this->conjugate();
 
   if (raw_J) {
     auto J = Eigen::Map<Jacobian<Tangent<SU2<Scalar>>>>{raw_J};
-    if (frame == Frame::GLOBAL) {
+    if (global) {
       J.noalias() = Scalar{-1} * i_q.matrix();
     } else {
       J.noalias() = Scalar{-1} * this->matrix();
@@ -368,12 +366,12 @@ auto SU2Base<TDerived>::groupInverse(Scalar* raw_J, const Frame frame) const -> 
 
 template <typename TDerived>
 template <typename TOtherDerived_>
-auto SU2Base<TDerived>::groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* raw_J_this, Scalar* raw_J_other, const Frame frame) const -> SU2<Scalar> {
+auto SU2Base<TDerived>::groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* raw_J_this, Scalar* raw_J_other, const bool global) const -> SU2<Scalar> {
   auto output = (*this) * other;
 
   if (raw_J_this) {
     auto J = Eigen::Map<Jacobian<Tangent<SU2<Scalar>>>>{raw_J_this};
-    if (frame == Frame::GLOBAL) {
+    if (global) {
       J.setIdentity();
     } else {
       J.noalias() = other.inverse().matrix();
@@ -382,7 +380,7 @@ auto SU2Base<TDerived>::groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* 
 
   if (raw_J_other) {
     auto J = Eigen::Map<Jacobian<Tangent<SU2<Scalar>>>>{raw_J_other};
-    if (frame == Frame::GLOBAL) {
+    if (global) {
       J.noalias() = this->matrix();
     } else {
       J.setIdentity();
@@ -394,15 +392,16 @@ auto SU2Base<TDerived>::groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* 
 
 template <typename TDerived>
 template <typename TOtherDerived_>
-auto SU2Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& vector, Scalar* raw_J_this, Scalar* raw_J_vector, const Frame frame) const -> Translation {
-  auto output = Base::vectorPlus(vector);
+auto SU2Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, Scalar* raw_J_this, Scalar* raw_J_vector, const bool global) const -> Translation {
+  auto output = Base::vectorPlus(v);
 
   if (raw_J_this) {
     using Tangent = Tangent<SU2<Scalar>>;
-    if (frame == Frame::GLOBAL) {
-      Eigen::Map<Jacobian<Translation, Tangent>>{raw_J_this}.noalias() = Scalar{-1} * output.hat();
+    auto J = Eigen::Map<Jacobian<Translation, Tangent>>{raw_J_this};
+    if (global) {
+      J.noalias() = Scalar{-1} * output.hat();
     } else {
-      Eigen::Map<Jacobian<Translation, Tangent>>{raw_J_this}.noalias() = Scalar{-1} * this->matrix() * vector.hat();
+      J.noalias() = Scalar{-1} * this->matrix() * v.hat();
     }
   }
 
@@ -438,7 +437,7 @@ auto SU2Base<TDerived>::groupExp() const -> Quaternion<Scalar> {
 }
 
 template <typename TDerived>
-auto SU2Base<TDerived>::toTangent(Scalar* raw_J, const Frame frame) const -> Tangent<SU2<Scalar>> {
+auto SU2Base<TDerived>::toTangent(Scalar* raw_J, const bool global) const -> Tangent<SU2<Scalar>> {
   auto output = groupLog().toTangent();
 
   if (raw_J) {
@@ -451,7 +450,7 @@ auto SU2Base<TDerived>::toTangent(Scalar* raw_J, const Frame frame) const -> Tan
       J.setIdentity();
     } else {
       const auto Wx = output.hat();
-      if (frame == Frame::GLOBAL) {
+      if (global) {
         J.noalias() = Jacobian::Identity() - Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
       } else {
         J.noalias() = Jacobian::Identity() + Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
@@ -511,7 +510,7 @@ auto SU2TangentBase<TDerived>::toAlgebra() const -> Algebra<SU2<Scalar>> {
 }
 
 template <typename TDerived>
-auto SU2TangentBase<TDerived>::toManifold(Scalar* raw_J, const Frame frame) const -> SU2<Scalar> {
+auto SU2TangentBase<TDerived>::toManifold(Scalar* raw_J, const bool global) const -> SU2<Scalar> {
   auto output = toAlgebra().groupExp();
 
   if (raw_J) {
@@ -524,7 +523,7 @@ auto SU2TangentBase<TDerived>::toManifold(Scalar* raw_J, const Frame frame) cons
       J.setIdentity();
     } else {
       const auto Wx = this->hat();
-      if (frame == Frame::GLOBAL) {
+      if (global) {
         J.noalias() = Jacobian::Identity() + (Scalar{1} - std::cos(nw)) / nw2 * Wx + (nw - std::sin(nw)) / nw3 * Wx * Wx;
       } else {
         J.noalias() = Jacobian::Identity() - (Scalar{1} - std::cos(nw)) / nw2 * Wx + (nw - std::sin(nw)) / nw3 * Wx * Wx;

@@ -7,14 +7,6 @@
 
 namespace hyper {
 
-enum class Frame {
-  LEFT,
-  RIGHT,
-  GLOBAL = LEFT,
-  LOCAL = RIGHT,
-  DEFAULT = LEFT
-};
-
 constexpr auto DefaultMatrixStorageOptionOrder(const int rows, const int cols) -> int {
   return Eigen::AutoAlign | ((rows == 1 && cols != 1)      ? Eigen::RowMajor
                                 : (cols == 1 && rows != 1) ? Eigen::ColMajor // NOLINT
