@@ -59,7 +59,7 @@ class MetricsTests
            J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
   }
 
-  [[nodiscard]] static auto CheckManifoldMetric(const bool coupled, const Frame frame) -> bool {
+  [[nodiscard]] static auto CheckManifoldMetric(const bool coupled, const bool global) -> bool {
     using Input = SE3<Scalar>;
     using Metric = ManifoldMetric<Input>;
     using Output = Metric::Output;
@@ -69,10 +69,10 @@ class MetricsTests
     Input v = Input::Random();
 
     Jacobian J_lhs_a, J_rhs_a, J_lhs_n, J_rhs_n;
-    const auto f = Metric::Distance(u, v, J_lhs_a.data(), J_rhs_a.data(), coupled, frame);
+    const auto f = Metric::Distance(u, v, J_lhs_a.data(), J_rhs_a.data(), coupled, global);
     for (auto i = Eigen::Index{0}; i < Traits<Tangent<SE3<Scalar>>>::kNumParameters; ++i) {
-      J_lhs_n.col(i) = (Metric::Distance(SE3NumericGroupPlus(u, coupled, frame, i), v) - f) / kNumericIncrement;
-      J_rhs_n.col(i) = (Metric::Distance(u, SE3NumericGroupPlus(v, coupled, frame, i)) - f) / kNumericIncrement;
+      J_lhs_n.col(i) = (Metric::Distance(SE3NumericGroupPlus(u, coupled, global, i), v) - f) / kNumericIncrement;
+      J_rhs_n.col(i) = (Metric::Distance(u, SE3NumericGroupPlus(v, coupled, global, i)) - f) / kNumericIncrement;
     }
 
     return J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) &&
@@ -80,17 +80,17 @@ class MetricsTests
   }
 
  private:
-  static auto SE3NumericGroupPlus(const Eigen::Ref<const SE3<Scalar>>& se3, const bool coupled, const Frame frame, const Eigen::Index i) -> SE3<Scalar> {
+  static auto SE3NumericGroupPlus(const Eigen::Ref<const SE3<Scalar>>& se3, const bool coupled, const bool global, const Eigen::Index i) -> SE3<Scalar> {
     const auto tau = Tangent<SE3<Scalar>>{kNumericIncrement * Tangent<SE3<Scalar>>::Unit(i)};
 
     if (coupled) {
-      if (frame == Frame::GLOBAL) {
+      if (global) {
         return tau.toManifold().groupPlus(se3);
       } else {
         return se3.groupPlus(tau.toManifold());
       }
     } else {
-      if (frame == Frame::GLOBAL) {
+      if (global) {
         return {tau.angular().toManifold().groupPlus(se3.rotation()), se3.translation() + tau.linear()};
       } else {
         return {se3.rotation().groupPlus(tau.angular().toManifold()), se3.translation() + tau.linear()};
@@ -113,10 +113,10 @@ TEST_F(MetricsTests, Angular) {
 
 TEST_F(MetricsTests, Manifold) {
   for (auto k = 0; k < kNumIterations; ++k) {
-    EXPECT_TRUE(CheckManifoldMetric(false, Frame::GLOBAL));
-    EXPECT_TRUE(CheckManifoldMetric(false, Frame::LOCAL));
-    EXPECT_TRUE(CheckManifoldMetric(true, Frame::GLOBAL));
-    EXPECT_TRUE(CheckManifoldMetric(true, Frame::LOCAL));
+    EXPECT_TRUE(CheckManifoldMetric(false, true));
+    EXPECT_TRUE(CheckManifoldMetric(false, false));
+    EXPECT_TRUE(CheckManifoldMetric(true, true));
+    EXPECT_TRUE(CheckManifoldMetric(true, false));
   }
 }
 

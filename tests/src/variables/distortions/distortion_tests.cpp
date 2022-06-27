@@ -26,7 +26,7 @@ class DistortionTests
   static constexpr auto kNumOuterIterations = 5;
   static constexpr auto kNumInnerIterations = 25;
   static constexpr auto kNumericIncrement = 1e-7;
-  static constexpr auto kNumericTolerance = 1e-6;
+  static constexpr auto kNumericTolerance = 1e-5;
 
   DistortionTests()
       : distortion_{nullptr} {}
@@ -49,9 +49,7 @@ class DistortionTests
       const Pixel<Scalar> px = Pixel<Scalar>::Random();
       const Pixel<Scalar> py = distortion_->distort(px, nullptr, nullptr);
       const Pixel<Scalar> pz = distortion_->undistort(py, nullptr, nullptr);
-
-      const auto error = (pz - px).norm();
-      EXPECT_TRUE(error < kNumericTolerance);
+      EXPECT_TRUE(pz.isApprox(px, kNumericTolerance));
     }
   }
 
@@ -70,12 +68,11 @@ class DistortionTests
         J_n.col(j) = (d_py_1 - d_py_0) / (Scalar{2} * kNumericIncrement);
       }
 
-      const auto error = (J_a - J_n).lpNorm<Eigen::Infinity>();
-      EXPECT_TRUE(error < kNumericTolerance);
+      EXPECT_TRUE(J_n.isApprox(J_a, kNumericTolerance));
     }
   }
 
-  auto checkParameterJacobian() const -> void {
+  auto checkDistortionJacobian() const -> void {
     for (auto i = 0; i < kNumInnerIterations; ++i) {
       auto J_a = distortion_->allocatePixelDistortionJacobian();
       const Pixel<Scalar> px = Pixel<Scalar>::Random();
@@ -93,8 +90,7 @@ class DistortionTests
         address[j] = tmp;
       }
 
-      const auto error = (J_a - J_n).lpNorm<Eigen::Infinity>();
-      EXPECT_TRUE(error < kNumericTolerance);
+      EXPECT_TRUE(J_n.isApprox(J_a, kNumericTolerance));
     }
   }
 
@@ -107,8 +103,7 @@ class DistortionTests
       const Pixel<Scalar> py = distortion_->distort(px, J_a.data(), nullptr);
       const Pixel<Scalar> pz = distortion_->undistort(py, J_b.data(), nullptr);
 
-      const auto error = (J_a * J_b - Jacobian<Pixel<Scalar>>::Identity()).lpNorm<Eigen::Infinity>();
-      EXPECT_TRUE(error < kNumericTolerance) << error;
+      EXPECT_TRUE((J_a * J_b).isIdentity(kNumericTolerance));
     }
   }
 
@@ -128,12 +123,11 @@ class DistortionTests
         J_n.col(j) = (d_py_1 - d_py_0) / (Scalar{2} * kNumericIncrement);
       }
 
-      const auto error = (J_a - J_n).lpNorm<Eigen::Infinity>();
-      EXPECT_TRUE(error < kNumericTolerance) << px.transpose();
+      EXPECT_TRUE(J_n.isApprox(J_a, kNumericTolerance));
     }
   }
 
-  auto checkInverseParameterJacobian() const -> void {
+  auto checkInverseDistortionJacobian() const -> void {
     for (auto i = 0; i < kNumInnerIterations; ++i) {
       const Pixel<Scalar> px = Pixel<Scalar>::Random();
 
@@ -152,8 +146,7 @@ class DistortionTests
         address[j] = tmp;
       }
 
-      const auto error = (J_a - J_n).lpNorm<Eigen::Infinity>();
-      EXPECT_TRUE(error < kNumericTolerance);
+      EXPECT_TRUE(J_n.isApprox(J_a, kNumericTolerance));
     }
   }
 
@@ -183,7 +176,7 @@ TEST_P(DistortionTests, PixelJacobian) {
 
 TEST_P(DistortionTests, DistortionJacobian) {
   for (auto i = 0; i < kNumOuterIterations; ++i) {
-    checkParameterJacobian();
+    checkDistortionJacobian();
     setPerturbed();
   }
 }
@@ -204,7 +197,7 @@ TEST_P(DistortionTests, InversePixelJacobian) {
 
 TEST_P(DistortionTests, InverseDistortionJacobian) {
   for (auto i = 0; i < kNumOuterIterations; ++i) {
-    checkInverseParameterJacobian();
+    checkInverseDistortionJacobian();
     setPerturbed();
   }
 }

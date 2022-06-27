@@ -18,10 +18,10 @@ class ManifoldMetric<SE3<TScalar>> final
 
   ///
   /// \param coupled Compute SE3 instead of SU2 x R3 Jacobians.
-  /// \param frame
-  explicit ManifoldMetric(const bool coupled = false, const Frame frame = Frame::DEFAULT)
+  /// \param global Request global Jacobians flag.
+  explicit ManifoldMetric(const bool coupled = false, const bool global = true)
       : coupled_{coupled},
-        frame_{frame} {}
+        global_{global} {}
 
   /// Computes the distance between elements.
   /// \param lhs Left input element.
@@ -35,15 +35,15 @@ class ManifoldMetric<SE3<TScalar>> final
       Scalar* raw_J_lhs = nullptr,
       Scalar* raw_J_rhs = nullptr,
       const bool coupled = false,
-      const Frame frame = Frame::DEFAULT) -> Output {
+      const bool global = true) -> Output {
     using Jacobian = Jacobian<Output, Tangent<Input>>;
 
     if (raw_J_lhs || raw_J_rhs) {
       if (raw_J_lhs && raw_J_rhs) {
         Jacobian J_t_p, J_p_l, J_p_ir, J_ir_r;
-        const auto i_rhs = rhs.groupInverse(J_ir_r.data(), coupled, frame);
-        const auto lhs_plus_i_rhs = lhs.groupPlus(i_rhs, J_p_l.data(), J_p_ir.data(), coupled, frame);
-        auto output = lhs_plus_i_rhs.toTangent(J_t_p.data(), coupled, frame);
+        const auto i_rhs = rhs.groupInverse(J_ir_r.data(), coupled, global);
+        const auto lhs_plus_i_rhs = lhs.groupPlus(i_rhs, J_p_l.data(), J_p_ir.data(), coupled, global);
+        auto output = lhs_plus_i_rhs.toTangent(J_t_p.data(), coupled, global);
         Eigen::Map<Jacobian>{raw_J_lhs}.noalias() = J_t_p * J_p_l;
         Eigen::Map<Jacobian>{raw_J_rhs}.noalias() = J_t_p * J_p_ir * J_ir_r;
         return output;
@@ -51,16 +51,16 @@ class ManifoldMetric<SE3<TScalar>> final
       } else {
         if (raw_J_lhs) {
           Jacobian J_t_p, J_p_l;
-          const auto i_rhs = rhs.groupInverse(nullptr, coupled, frame);
-          const auto lhs_plus_i_rhs = lhs.groupPlus(i_rhs, J_p_l.data(), nullptr, coupled, frame);
-          auto output = lhs_plus_i_rhs.toTangent(J_t_p.data(), coupled, frame);
+          const auto i_rhs = rhs.groupInverse(nullptr, coupled, global);
+          const auto lhs_plus_i_rhs = lhs.groupPlus(i_rhs, J_p_l.data(), nullptr, coupled, global);
+          auto output = lhs_plus_i_rhs.toTangent(J_t_p.data(), coupled, global);
           Eigen::Map<Jacobian>{raw_J_lhs}.noalias() = J_t_p * J_p_l;
           return output;
         } else {
           Jacobian J_t_p, J_p_ir, J_ir_r;
-          const auto i_rhs = rhs.groupInverse(J_ir_r.data(), coupled, frame);
-          const auto lhs_plus_i_rhs = lhs.groupPlus(i_rhs, nullptr, J_p_ir.data(), coupled, frame);
-          auto output = lhs_plus_i_rhs.toTangent(J_t_p.data(), coupled, frame);
+          const auto i_rhs = rhs.groupInverse(J_ir_r.data(), coupled, global);
+          const auto lhs_plus_i_rhs = lhs.groupPlus(i_rhs, nullptr, J_p_ir.data(), coupled, global);
+          auto output = lhs_plus_i_rhs.toTangent(J_t_p.data(), coupled, global);
           Eigen::Map<Jacobian>{raw_J_rhs}.noalias() = J_t_p * J_p_ir * J_ir_r;
           return output;
         }
@@ -91,12 +91,12 @@ class ManifoldMetric<SE3<TScalar>> final
   auto distance(Scalar* raw_output, const Scalar* raw_lhs, const Scalar* raw_rhs, Scalar* raw_J_lhs = nullptr, Scalar* raw_J_rhs = nullptr) const -> void final {
     const auto lhs = Eigen::Map<const Input>{raw_lhs};
     const auto rhs = Eigen::Map<const Input>{raw_rhs};
-    Eigen::Map<Output>{raw_output}.noalias() = Distance(lhs, rhs, raw_J_lhs, raw_J_rhs, coupled_, frame_);
+    Eigen::Map<Output>{raw_output}.noalias() = Distance(lhs, rhs, raw_J_lhs, raw_J_rhs, coupled_, global_);
   }
 
  private:
   bool coupled_;
-  Frame frame_;
+  bool global_;
 };
 
 } // namespace hyper
