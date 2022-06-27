@@ -120,8 +120,8 @@ class SU2Tests
 
  private:
   static auto NumericGroupPlus(const SU2<Scalar>& su2, const Frame frame, const Eigen::Index i) -> SU2<Scalar> {
-    const auto delta = Tangent<SU2<Scalar>>{kNumericIncrement * Tangent<SU2<Scalar>>::Unit(i)};
-    return (frame == Frame::GLOBAL) ? delta.toManifold() * su2 : su2 * delta.toManifold();
+    const auto tau = Tangent<SU2<Scalar>>{kNumericIncrement * Tangent<SU2<Scalar>>::Unit(i)};
+    return (frame == Frame::GLOBAL) ? tau.toManifold() * su2 : su2 * tau.toManifold();
   }
 
   static auto NumericGroupMinus(const SU2<Scalar>& d_su2, const SU2<Scalar>& su2, const Frame frame) -> Tangent<SU2<Scalar>> {
