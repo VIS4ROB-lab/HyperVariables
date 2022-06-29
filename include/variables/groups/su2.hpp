@@ -95,6 +95,8 @@ class SU2Base
 
   using Translation = typename Base::Translation;
 
+  static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES;
+
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SU2Base)
 
   /// Constructs an identity element.
@@ -119,7 +121,7 @@ class SU2Base
   /// \param raw_J Input Jacobian (if requested).
   /// \param global Request global Jacobians flag.
   /// \return Inverse element.
-  [[nodiscard]] auto groupInverse(Scalar* raw_J = nullptr, bool global = true) const -> SU2<Scalar>;
+  [[nodiscard]] auto groupInverse(Scalar* raw_J = nullptr, bool global = kDefaultDerivativesAreGlobal) const -> SU2<Scalar>;
 
   /// Group plus.
   /// \tparam TOtherDerived_ Other derived type.
@@ -129,7 +131,7 @@ class SU2Base
   /// \param global Request global Jacobians flag.
   /// \return Additive element.
   template <typename TOtherDerived_>
-  auto groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* raw_J_this = nullptr, Scalar* raw_J_other = nullptr, bool global = true) const -> SU2<Scalar>;
+  auto groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* raw_J_this = nullptr, Scalar* raw_J_other = nullptr, bool global = kDefaultDerivativesAreGlobal) const -> SU2<Scalar>;
 
   /// Vector plus.
   /// \tparam TOtherDerived_ Other derived type.
@@ -139,7 +141,7 @@ class SU2Base
   /// \param global Request global Jacobians flag.
   /// \return Additive element.
   template <typename TOtherDerived_>
-  auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, Scalar* raw_J_this = nullptr, Scalar* raw_J_vector = nullptr, bool global = true) const -> Translation;
+  auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, Scalar* raw_J_this = nullptr, Scalar* raw_J_vector = nullptr, bool global = kDefaultDerivativesAreGlobal) const -> Translation;
 
   /// Group logarithm.
   /// \return Logarithmic element.
@@ -153,7 +155,7 @@ class SU2Base
   /// \param raw_J_this Input Jacobian (if requested).
   /// \param global Request global Jacobians flag.
   /// \return Tangent element.
-  auto toTangent(Scalar* raw_J = nullptr, bool global = true) const -> Tangent<SU2<Scalar>>;
+  auto toTangent(Scalar* raw_J = nullptr, bool global = kDefaultDerivativesAreGlobal) const -> Tangent<SU2<Scalar>>;
 };
 
 template <typename TDerived>
@@ -246,6 +248,8 @@ class SU2TangentBase
   using Base = CartesianBase<TDerived>;
   using Base::Base;
 
+  static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES;
+
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SU2TangentBase)
 
   /// Conversion to algebra element.
@@ -256,7 +260,7 @@ class SU2TangentBase
   /// \param raw_J_this Input Jacobian (if requested).
   /// \param global Request global Jacobians flag.
   /// \return Manifold element.
-  auto toManifold(Scalar* raw_J = nullptr, bool global = true) const -> SU2<Scalar>;
+  auto toManifold(Scalar* raw_J = nullptr, bool global = kDefaultDerivativesAreGlobal) const -> SU2<Scalar>;
 };
 
 template <typename TScalar>

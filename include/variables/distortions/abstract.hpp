@@ -20,7 +20,6 @@ class AbstractDistortion<TScalar, true>
     : public AbstractVariable<TScalar> {
  public:
   using Scalar = std::remove_const_t<TScalar>;
-  using PixelRef = Eigen::Ref<const typename Traits<Pixel<Scalar>>::Base>;
 
   /// Allocates a Jacobian.
   /// \return Allocated Jacobian.
@@ -31,14 +30,14 @@ class AbstractDistortion<TScalar, true>
   /// \param raw_J_p_p Pixel Jacobian.
   /// \param raw_J_p_d  Distortion Jacobian.
   /// \return Distorted pixel.
-  virtual auto distort(const PixelRef& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> = 0;
+  virtual auto distort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> = 0;
 
   /// Undistorts a pixel.
   /// \param pixel Pixel to undistort.
   /// \param raw_J_p_p Pixel Jacobian.
   /// \param raw_J_p_d  Distortion Jacobian.
   /// \return Undistorted pixel.
-  virtual auto undistort(const PixelRef& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar>;
+  virtual auto undistort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar>;
 
   /// Maps a distortion.
   /// \param raw_distortion Raw distortion.
@@ -72,7 +71,7 @@ auto AbstractDistortion<TScalar, true>::allocatePixelDistortionJacobian() const 
 }
 
 template <typename TScalar>
-auto AbstractDistortion<TScalar, true>::undistort(const PixelRef& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> {
+auto AbstractDistortion<TScalar, true>::undistort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> {
   Pixel<Scalar> output = pixel;
   Jacobian<Pixel<Scalar>> J_p_p, J_p_p_i;
 

@@ -22,7 +22,7 @@ class SE3Tests
            (se3_.groupPlus(se3_.groupInverse())).isApprox(SE3<Scalar>::Identity(), kNumericTolerance);
   }
 
-  [[nodiscard]] auto checkGroupInverseJacobian(const bool coupled, const bool global) const -> bool {
+  [[nodiscard]] auto checkGroupInverseJacobian(const bool global, const bool coupled) const -> bool {
     Jacobian<Tangent<SE3<Scalar>>> J_a, J_n;
     const auto i_se3 = se3_.groupInverse(J_a.data(), coupled, global);
     for (auto j = 0; j < Traits<Tangent<SE3<Scalar>>>::kNumParameters; ++j) {
@@ -32,7 +32,7 @@ class SE3Tests
     return J_n.isApprox(J_a, kNumericTolerance);
   }
 
-  [[nodiscard]] auto checkGroupPlusJacobian(const bool coupled, const bool global) const -> bool {
+  [[nodiscard]] auto checkGroupPlusJacobian(const bool global, const bool coupled) const -> bool {
     const auto other_se3 = SE3<Scalar>::Random();
 
     Jacobian<Tangent<SE3<Scalar>>> J_lhs_a, J_lhs_n, J_rhs_a, J_rhs_n;
@@ -74,7 +74,7 @@ class SE3Tests
     return se3.isApprox(se3_, kNumericTolerance);
   }
 
-  [[nodiscard]] auto checkGroupExponentialsJacobians(const bool coupled, const bool global) const -> bool {
+  [[nodiscard]] auto checkGroupExponentialsJacobians(const bool global, const bool coupled) const -> bool {
     Jacobian<Tangent<SE3<Scalar>>> J_l_a, J_e_a;
     const auto tangent = se3_.toTangent(J_l_a.data(), coupled, global);
     const auto se3 = tangent.toManifold(J_e_a.data(), coupled, global);
@@ -95,7 +95,7 @@ class SE3Tests
   SE3<Scalar> se3_;
 
  private:
-  static auto NumericGroupPlus(const Eigen::Ref<const SE3<Scalar>>& se3, const bool coupled, const bool global, const Eigen::Index i) -> SE3<Scalar> {
+  static auto NumericGroupPlus(const Eigen::Ref<const SE3<Scalar>>& se3, const bool global, const bool coupled, const Eigen::Index i) -> SE3<Scalar> {
     const auto tau = Tangent<SE3<Scalar>>{kNumericIncrement * Tangent<SE3<Scalar>>::Unit(i)};
 
     if (coupled) {
@@ -113,7 +113,7 @@ class SE3Tests
     }
   }
 
-  static auto NumericGroupMinus(const Eigen::Ref<const SE3<Scalar>>& d_se3, const Eigen::Ref<const SE3<Scalar>>& se3, const bool coupled, const bool global) -> Tangent<SE3<Scalar>> {
+  static auto NumericGroupMinus(const Eigen::Ref<const SE3<Scalar>>& d_se3, const Eigen::Ref<const SE3<Scalar>>& se3, const bool global, const bool coupled) -> Tangent<SE3<Scalar>> {
     if (coupled) {
       if (global) {
         return d_se3.groupPlus(se3.groupInverse()).toTangent() / kNumericIncrement;

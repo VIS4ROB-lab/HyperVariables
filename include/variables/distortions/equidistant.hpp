@@ -16,8 +16,6 @@ class EquidistantDistortionBase
   using Base = DistortionBase<TDerived>;
   using Base::Base;
 
-  using PixelRef = typename Base::PixelRef;
-
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(EquidistantDistortionBase)
 
   /// Order accessor.
@@ -42,7 +40,7 @@ class EquidistantDistortionBase
   /// \param raw_J_p_p Pixel Jacobian.
   /// \param raw_J_p_d  Distortion Jacobian.
   /// \return Distorted pixel.
-  auto distort(const PixelRef& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> final;
+  auto distort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> final;
 
  private:
   using ThetaJacobian = SizedJacobian<Scalar, 1, Eigen::Dynamic>;
@@ -96,7 +94,7 @@ auto EquidistantDistortionBase<TDerived>::perturb(const Scalar& scale) -> Equidi
 }
 
 template <typename TDerived>
-auto EquidistantDistortionBase<TDerived>::distort(const PixelRef& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> {
+auto EquidistantDistortionBase<TDerived>::distort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> {
   // Map inputs.
   const auto size = this->size();
   const auto x2 = pixel.x() * pixel.x();

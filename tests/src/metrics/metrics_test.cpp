@@ -59,7 +59,7 @@ class MetricsTests
            J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
   }
 
-  [[nodiscard]] static auto CheckManifoldMetric(const bool coupled, const bool global) -> bool {
+  [[nodiscard]] static auto CheckManifoldMetric(const bool global, const bool coupled) -> bool {
     using Input = SE3<Scalar>;
     using Metric = ManifoldMetric<Input>;
     using Output = Metric::Output;
@@ -80,7 +80,7 @@ class MetricsTests
   }
 
  private:
-  static auto SE3NumericGroupPlus(const Eigen::Ref<const SE3<Scalar>>& se3, const bool coupled, const bool global, const Eigen::Index i) -> SE3<Scalar> {
+  static auto SE3NumericGroupPlus(const Eigen::Ref<const SE3<Scalar>>& se3, const bool global, const bool coupled, const Eigen::Index i) -> SE3<Scalar> {
     const auto tau = Tangent<SE3<Scalar>>{kNumericIncrement * Tangent<SE3<Scalar>>::Unit(i)};
 
     if (coupled) {

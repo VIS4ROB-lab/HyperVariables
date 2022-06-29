@@ -5,6 +5,9 @@
 
 #include "variables/forward.hpp"
 
+#define HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES false
+#define HYPER_DEFAULT_TO_COUPLED_LIE_GROUP_DERIVATIVES false
+
 namespace hyper {
 
 template <typename>

@@ -16,8 +16,6 @@ class IterativeRadialDistortionBase
   using Base = DistortionBase<TDerived>;
   using Base::Base;
 
-  using PixelRef = typename Base::PixelRef;
-
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(IterativeRadialDistortionBase)
 
   /// Order accessor.
@@ -42,14 +40,14 @@ class IterativeRadialDistortionBase
   /// \param raw_J_p Pixel Jacobian.
   /// \param raw_J_d  Distortion Jacobian.
   /// \return Distorted pixel.
-  auto distort(const PixelRef& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> final;
+  auto distort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> final;
 
   /// Undistorts a pixel.
   /// \param pixel Pixel to undistort.
   /// \param raw_J_p_p Pixel Jacobian.
   /// \param raw_J_p_d  Distortion Jacobian.
   /// \return Undistorted pixel.
-  auto undistort(const PixelRef& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> final;
+  auto undistort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> final;
 
  private:
   auto IterativePixelPixelJacobian(const Scalar& x2, const Scalar& xy, const Scalar& y2, const Scalar& rho2, const Scalar& alpha) const -> Jacobian<Pixel<Scalar>>;
@@ -98,7 +96,7 @@ auto IterativeRadialDistortionBase<TDerived>::perturb(const Scalar& scale) -> It
 }
 
 template <typename TDerived>
-auto IterativeRadialDistortionBase<TDerived>::distort(const PixelRef& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> {
+auto IterativeRadialDistortionBase<TDerived>::distort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> {
   Pixel<Scalar> output = pixel;
 
   const auto size = this->size();
@@ -134,7 +132,7 @@ auto IterativeRadialDistortionBase<TDerived>::distort(const PixelRef& pixel, Sca
 }
 
 template <typename TDerived>
-auto IterativeRadialDistortionBase<TDerived>::undistort(const PixelRef& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> {
+auto IterativeRadialDistortionBase<TDerived>::undistort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> {
   Pixel<Scalar> output = pixel;
 
   const auto size = this->size();

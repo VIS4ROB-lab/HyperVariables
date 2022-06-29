@@ -16,12 +16,15 @@ class ManifoldMetric<SE3<TScalar>> final
   using Input = SE3<Scalar>;
   using Output = Tangent<Input>;
 
-  ///
-  /// \param coupled Compute SE3 instead of SU2 x R3 Jacobians.
+  static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES;
+  static constexpr auto kDefaultDerivativesAreCoupled = HYPER_DEFAULT_TO_COUPLED_LIE_GROUP_DERIVATIVES;
+
+  /// Default constructor.
   /// \param global Request global Jacobians flag.
-  explicit ManifoldMetric(const bool coupled = false, const bool global = true)
-      : coupled_{coupled},
-        global_{global} {}
+  /// \param coupled Compute SE3 instead of SU2 x R3 Jacobians.
+  explicit ManifoldMetric(const bool global = kDefaultDerivativesAreGlobal, const bool coupled = kDefaultDerivativesAreCoupled)
+      : global_{global},
+        coupled_{coupled} {}
 
   /// Computes the distance between elements.
   /// \param lhs Left input element.
@@ -34,8 +37,8 @@ class ManifoldMetric<SE3<TScalar>> final
       const Eigen::Ref<const Input>& rhs,
       Scalar* raw_J_lhs = nullptr,
       Scalar* raw_J_rhs = nullptr,
-      const bool coupled = false,
-      const bool global = true) -> Output {
+      const bool coupled = kDefaultDerivativesAreCoupled,
+      const bool global = kDefaultDerivativesAreGlobal) -> Output {
     using Jacobian = Jacobian<Output, Tangent<Input>>;
 
     if (raw_J_lhs || raw_J_rhs) {
@@ -95,8 +98,8 @@ class ManifoldMetric<SE3<TScalar>> final
   }
 
  private:
-  bool coupled_;
   bool global_;
+  bool coupled_;
 };
 
 } // namespace hyper
