@@ -42,7 +42,20 @@ implemented variables are fully interoperable with [Eigen](https://eigen.tuxfami
 are mappable from raw memory locations. All variables inherit from an abstract base, which allows
 storing non-homogeneous variables in a simple and unified manner. At present, three different distortion models along
 with two common Lie groups and other common variables are implemented. Where adequate, we also provide analytic
-Jacobians for the implemented operations.
+Jacobians for the implemented operations. If you use this repository, please cite it as below.
+
+```
+@article{RAL2022Hug,
+    author={Hug, David and B\"anninger, Philipp and Alzugaray, Ignacio and Chli, Margarita},
+    journal={IEEE Robotics and Automation Letters},
+    title={Continuous-Time Stereo-Inertial Odometry},
+    year={2022},
+    volume={7},
+    number={3},
+    pages={6455-6462},
+    doi={10.1109/LRA.2022.3173705}
+}
+```
 
 ## Installation
 
@@ -68,10 +81,11 @@ make
 ```
 
 ## Literature
-
-1. [A Micro Lie Theory for State Estimation in Robotics, Solà et al. (2018)](https://arxiv.org/abs/1812.01537)
-2. [A Generic Camera Model and Calibration Method for Conventional, Wide-Angle, and Fish-Eye Lenses, Kannala and Brandt (2006)](https://ieeexplore.ieee.org/document/1642666)
-3. [Single View Point Omnidirectional Camera Calibration from Planar Grids, Mei and Rives (2007)](https://ieeexplore.ieee.org/document/4209702)
+1. [Continuous-Time Stereo-Inertial Odometry, Hug et al. (2022)](https://ieeexplore.ieee.org/document/9772323)
+2. [HyperSLAM: A Generic and Modular Approach to Sensor Fusion and Simultaneous<br /> Localization And Mapping in Continuous-Time, Hug and Chli (2020)](https://ieeexplore.ieee.org/document/9320417)
+3. [A Micro Lie Theory for State Estimation in Robotics, Solà et al. (2018)](https://arxiv.org/abs/1812.01537)
+4. [A Generic Camera Model and Calibration Method for Conventional,<br /> Wide-Angle, and Fish-Eye Lenses, Kannala and Brandt (2006)](https://ieeexplore.ieee.org/document/1642666)
+5. [Single View Point Omnidirectional Camera Calibration from Planar Grids, Mei and Rives (2007)](https://ieeexplore.ieee.org/document/4209702)
 
 ### Known Issues
 
