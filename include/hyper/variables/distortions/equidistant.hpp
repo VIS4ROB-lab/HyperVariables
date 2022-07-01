@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "variables/distortions/base.hpp"
+#include "hyper/variables/distortions/base.hpp"
 
 namespace hyper {
 

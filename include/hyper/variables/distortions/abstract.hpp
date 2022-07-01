@@ -8,10 +8,10 @@
 #include <glog/logging.h>
 #include <Eigen/LU>
 
-#include "variables/distortions/forward.hpp"
+#include "hyper/variables/distortions/forward.hpp"
 
-#include "variables/cartesian.hpp"
-#include "variables/jacobian.hpp"
+#include "hyper/variables/cartesian.hpp"
+#include "hyper/variables/jacobian.hpp"
 
 namespace hyper {
 

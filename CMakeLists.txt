@@ -24,14 +24,15 @@ if (NOT TARGET GTest::GTest)
     find_package(GTest REQUIRED)
 endif ()
 
-# Find glog library.
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(glog REQUIRED libglog)
+# Find GTest target if not present.
+if (NOT TARGET glog::glog)
+    find_package(glog REQUIRED)
+endif ()
 
 # Add includes and link libraries.
 target_compile_definitions(${PROJECT_NAME} INTERFACE EIGEN_MATRIXBASE_PLUGIN="${PROJECT_SOURCE_DIR}/plugins/matrix_base_plugin.hpp")
 target_include_directories(${PROJECT_NAME} INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-target_link_libraries(${PROJECT_NAME} INTERFACE Eigen3::Eigen glog GTest::GTest)
+target_link_libraries(${PROJECT_NAME} INTERFACE Eigen3::Eigen glog::glog GTest::GTest)
 
 # Build tests.
 option(HYPER_BUILD_TESTING "Build tests." TRUE)

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "variables/forward.hpp"
+#include "hyper/variables/forward.hpp"
 
 namespace hyper {
 
@@ -16,13 +16,13 @@ constexpr auto DefaultMatrixStorageOptionOrder(const int rows, const int cols) -
 template <typename TScalar, int NumRows, int NumCols = NumRows, int TOptions = DefaultMatrixStorageOptionOrder(NumRows, NumCols)> // NOLINT
 using SizedJacobian = Eigen::Matrix<TScalar, NumRows, NumCols, TOptions>;
 
-template <typename TDerived, typename TOtherDerived = TDerived, typename TScalar = typename Traits<TDerived>::Scalar, int TOptions = DefaultMatrixStorageOptionOrder(Traits<TDerived>::kNumParameters, Traits<TOtherDerived>::kNumParameters)> // NOLINT
+template <typename TDerived, typename TOtherDerived = TDerived, int TOptions = DefaultMatrixStorageOptionOrder(Traits<TDerived>::kNumParameters, Traits<TOtherDerived>::kNumParameters), typename TScalar = typename Traits<TDerived>::Scalar> // NOLINT
 using Jacobian = SizedJacobian<TScalar, Traits<TDerived>::kNumParameters, Traits<TOtherDerived>::kNumParameters, TOptions>;
 
-template <typename TDerived, typename TScalar = typename Traits<TDerived>::Scalar, int TOptions = DefaultMatrixStorageOptionOrder(Traits<TDerived>::kNumParameters, Eigen::Dynamic)> // NOLINT
+template <typename TDerived, int TOptions = DefaultMatrixStorageOptionOrder(Traits<TDerived>::kNumParameters, Eigen::Dynamic), typename TScalar = typename Traits<TDerived>::Scalar> // NOLINT
 using DynamicInputJacobian = SizedJacobian<TScalar, Traits<TDerived>::kNumParameters, Eigen::Dynamic, TOptions>;
 
-template <typename TDerived, typename TScalar = typename Traits<TDerived>::Scalar, int TOptions = DefaultMatrixStorageOptionOrder(Eigen::Dynamic, Traits<TDerived>::kNumParameters)> // NOLINT
+template <typename TDerived, int TOptions = DefaultMatrixStorageOptionOrder(Eigen::Dynamic, Traits<TDerived>::kNumParameters), typename TScalar = typename Traits<TDerived>::Scalar> // NOLINT
 using DynamicOutputJacobian = SizedJacobian<TScalar, Eigen::Dynamic, Traits<TDerived>::kNumParameters, TOptions>;
 
 template <typename TScalar, int TOptions = DefaultMatrixStorageOptionOrder(Eigen::Dynamic, Eigen::Dynamic)> // NOLINT

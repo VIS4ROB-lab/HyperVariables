@@ -8,7 +8,7 @@
 
 #include <glog/logging.h>
 
-#include "variables/abstract.hpp"
+#include "hyper/variables/abstract.hpp"
 
 namespace hyper {
 

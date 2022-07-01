@@ -5,7 +5,7 @@
 
 #include <glog/logging.h>
 
-#include "variables/cartesian.hpp"
+#include "hyper/variables/cartesian.hpp"
 
 namespace hyper {
 

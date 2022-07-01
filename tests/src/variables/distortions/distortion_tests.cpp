@@ -5,9 +5,9 @@
 
 #include <glog/logging.h>
 
-#include "variables/distortions/equidistant.hpp"
-#include "variables/distortions/iterative_radial.hpp"
-#include "variables/distortions/radial_tangential.hpp"
+#include "hyper/variables/distortions/equidistant.hpp"
+#include "hyper/variables/distortions/iterative_radial.hpp"
+#include "hyper/variables/distortions/radial_tangential.hpp"
 
 namespace hyper::tests {
 

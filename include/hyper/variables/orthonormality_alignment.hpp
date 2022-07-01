@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "variables/cartesian.hpp"
-#include "variables/jacobian.hpp"
+#include "hyper/variables/cartesian.hpp"
+#include "hyper/variables/jacobian.hpp"
 
 namespace hyper {
 

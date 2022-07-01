@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include "variables/orthonormality_alignment.hpp"
+#include "hyper/variables/orthonormality_alignment.hpp"
 
 namespace hyper::tests {
 

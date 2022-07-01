@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "variables/abstract.hpp"
+#include "hyper/variables/abstract.hpp"
 
 namespace hyper {
 
