@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include "variables/groups/se3.hpp"
+#include "hyper/variables/groups/se3.hpp"
 
 namespace hyper::tests {
 

@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "metrics/abstract.hpp"
-#include "variables/groups/se3.hpp"
+#include "hyper/metrics/abstract.hpp"
+#include "hyper/variables/groups/se3.hpp"
 
 namespace hyper {
 

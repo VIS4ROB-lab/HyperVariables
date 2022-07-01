@@ -5,7 +5,7 @@
 
 #include <Eigen/Core>
 
-#include "variables/macros.hpp"
+#include "hyper/variables/macros.hpp"
 
 namespace hyper {
 

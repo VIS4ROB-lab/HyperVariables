@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include "variables/intrinsics.hpp"
+#include "hyper/variables/intrinsics.hpp"
 
 namespace hyper::tests {
 

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "variables/cartesian.hpp"
+#include "hyper/variables/cartesian.hpp"
 
 namespace hyper {
 

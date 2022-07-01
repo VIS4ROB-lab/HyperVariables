@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "metrics/forward.hpp"
+#include "hyper/metrics/forward.hpp"
 
-#include "variables/jacobian.hpp"
+#include "hyper/variables/jacobian.hpp"
 
 namespace hyper {
 

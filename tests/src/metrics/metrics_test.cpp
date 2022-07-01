@@ -3,9 +3,9 @@
 
 #include <gtest/gtest.h>
 
-#include "metrics/angular.hpp"
-#include "metrics/cartesian.hpp"
-#include "metrics/manifold.hpp"
+#include "hyper/metrics/angular.hpp"
+#include "hyper/metrics/cartesian.hpp"
+#include "hyper/metrics/manifold.hpp"
 
 namespace hyper::tests {
 

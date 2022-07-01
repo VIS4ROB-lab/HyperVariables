@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "variables/forward.hpp"
+#include "hyper/variables/forward.hpp"
 
-#include "variables/memory.hpp"
+#include "hyper/variables/memory.hpp"
 
 namespace hyper {
 
