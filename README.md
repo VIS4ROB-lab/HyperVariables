@@ -51,18 +51,18 @@ the [Eigen](https://eigen.tuxfamily.org/), [Google Logging](https://github.com/g
 [Google Test](https://github.com/google/googletest) libraries and uses features from the
 [C++20](https://en.cppreference.com/w/cpp/20) standard (see
 [link](https://askubuntu.com/questions/26498/how-to-choose-the-default-gcc-and-g-version) to update gcc and g++
-alternatives). The compilation process itself (without additional compile flags) is as follows:
+alternatives). The setup process itself (without additional compile flags) is as follows:
 
 ```
-# Install Eigen.
-sudo apt-get update
-sudo apt-get install libgtest-dev libgoogle-glog-dev libeigen3-dev
+# Clone repository.
+git clone https://github.com/VIS4ROB-lab/HyperVariables.git && cd HyperVariables/
 
-# Compile library/tests.
-git clone https://github.com/VIS4ROB-lab/HyperVariables.git
-cd HyperVariables/
-mkdir build
-cd build/
+# Run installation.
+chmod +x install.sh
+sudo install.sh
+
+# Build repository.
+mkdir build && cd build
 cmake ..
 make
 ```

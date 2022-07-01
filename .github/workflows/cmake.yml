@@ -19,12 +19,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Install Dependencies
+      - name: Install
         run: |
-          sudo apt-get update
-          sudo apt-get install libgflags-dev libeigen3-dev
+          chmod +x ${{github.workspace}}/install.sh
+          sudo ${{github.workspace}}/install.sh
 
-      - name: Configure CMake
+      - name: Configure
         run: mkdir build && cd build && cmake ..
 
       - name: Build
@@ -35,7 +35,7 @@ jobs:
         working-directory: ${{github.workspace}}/build
         run: ./apps/tests/HyperVariablesTests --gtest_output="xml:${{github.workspace}}/test-results/logs/results.xml"
 
-      - name: Publish Test Results
+      - name: Publish
         uses: EnricoMi/publish-unit-test-result-action@v1
         if: always()
         with:
