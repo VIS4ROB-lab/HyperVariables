@@ -19,10 +19,10 @@ template <typename>
 class AbstractVariable;
 
 template <typename>
-class AbstractStampedVariable;
+class AbstractStamped;
 
 template <typename>
-class StampedVariable;
+class Stamped;
 
 template <typename>
 class CompositeVariable;
@@ -124,7 +124,7 @@ struct Traits<OrthonormalityAlignment<TScalar, TOrder>>
 HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::OrthonormalityAlignment, int)
 
 template <typename TVariable>
-struct Traits<StampedVariable<TVariable>>
+struct Traits<Stamped<TVariable>>
     : public Traits<Cartesian<typename Traits<TVariable>::Scalar, Traits<TVariable>::kNumParameters + 1>> {
   // Constants.
   static constexpr auto kVariableOffset = 0;
@@ -140,18 +140,18 @@ struct Traits<StampedVariable<TVariable>>
 };
 
 template <typename TVariable, int TMapOptions>
-struct Traits<Eigen::Map<StampedVariable<TVariable>, TMapOptions>> final
-    : public Traits<StampedVariable<TVariable>> {
-  using Base = Eigen::Map<typename Traits<StampedVariable<TVariable>>::Base, TMapOptions>;
+struct Traits<Eigen::Map<Stamped<TVariable>, TMapOptions>> final
+    : public Traits<Stamped<TVariable>> {
+  using Base = Eigen::Map<typename Traits<Stamped<TVariable>>::Base, TMapOptions>;
 };
 
 template <typename TVariable, int TMapOptions>
-struct Traits<Eigen::Map<const StampedVariable<TVariable>, TMapOptions>> final
-    : public Traits<StampedVariable<TVariable>> {
-  using ScalarWithConstIfNotLvalue = const typename Traits<StampedVariable<TVariable>>::Scalar;
-  using StampWithConstIfNotLvalue = const typename Traits<StampedVariable<TVariable>>::Stamp;
-  using VariableWithConstIfNotLvalue = const typename Traits<StampedVariable<TVariable>>::Variable;
-  using Base = Eigen::Map<const typename Traits<StampedVariable<TVariable>>::Base, TMapOptions>;
+struct Traits<Eigen::Map<const Stamped<TVariable>, TMapOptions>> final
+    : public Traits<Stamped<TVariable>> {
+  using ScalarWithConstIfNotLvalue = const typename Traits<Stamped<TVariable>>::Scalar;
+  using StampWithConstIfNotLvalue = const typename Traits<Stamped<TVariable>>::Stamp;
+  using VariableWithConstIfNotLvalue = const typename Traits<Stamped<TVariable>>::Variable;
+  using Base = Eigen::Map<const typename Traits<Stamped<TVariable>>::Base, TMapOptions>;
 };
 
 template <typename TScalar, int TNumParameters = 2>

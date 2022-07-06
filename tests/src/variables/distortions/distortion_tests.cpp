@@ -72,7 +72,7 @@ class DistortionTests
     }
   }
 
-  auto checkDistortionJacobian() const -> void {
+  auto checkParameterJacobian() const -> void {
     for (auto i = 0; i < kNumInnerIterations; ++i) {
       auto J_a = distortion_->allocatePixelDistortionJacobian();
       const Pixel<Scalar> px = Pixel<Scalar>::Random();
@@ -127,7 +127,7 @@ class DistortionTests
     }
   }
 
-  auto checkInverseDistortionJacobian() const -> void {
+  auto checkInverseParameterJacobian() const -> void {
     for (auto i = 0; i < kNumInnerIterations; ++i) {
       const Pixel<Scalar> px = Pixel<Scalar>::Random();
 
@@ -167,16 +167,16 @@ TEST_P(DistortionTests, Duality) {
   }
 }
 
-TEST_P(DistortionTests, PixelJacobian) {
+TEST_P(DistortionTests, InputJacobian) {
   for (auto i = 0; i < kNumOuterIterations; ++i) {
     checkInputJacobian();
     setPerturbed();
   }
 }
 
-TEST_P(DistortionTests, DistortionJacobian) {
+TEST_P(DistortionTests, ParameterJacobian) {
   for (auto i = 0; i < kNumOuterIterations; ++i) {
-    checkDistortionJacobian();
+    checkParameterJacobian();
     setPerturbed();
   }
 }
@@ -188,16 +188,16 @@ TEST_P(DistortionTests, InverseTheorem) {
   }
 }
 
-TEST_P(DistortionTests, InversePixelJacobian) {
+TEST_P(DistortionTests, InverseInputJacobian) {
   for (auto i = 0; i < kNumOuterIterations; ++i) {
     checkInverseInputJacobian();
     setPerturbed();
   }
 }
 
-TEST_P(DistortionTests, InverseDistortionJacobian) {
+TEST_P(DistortionTests, InverseParameterJacobian) {
   for (auto i = 0; i < kNumOuterIterations; ++i) {
-    checkInverseDistortionJacobian();
+    checkInverseParameterJacobian();
     setPerturbed();
   }
 }
