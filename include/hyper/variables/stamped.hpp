@@ -8,35 +8,35 @@
 namespace hyper {
 
 template <typename TScalar>
-class AbstractStampedVariable
+class AbstractStamped
     : public AbstractVariable<TScalar> {
  public:
   using Scalar = std::remove_const_t<TScalar>;
   using ScalarWithConstIfNotLvalue = TScalar;
 
   /// Virtual default destructor.
-  ~AbstractStampedVariable() override = default;
+  ~AbstractStamped() override = default;
 
-  /// Time accessor.
-  /// \return Time.
-  [[nodiscard]] virtual auto time() const -> const Scalar& = 0;
+  /// Stamp accessor.
+  /// \return Stamp.
+  [[nodiscard]] virtual auto stamp() const -> const Scalar& = 0;
 
-  /// Time modifier.
-  /// \return Time.
-  [[nodiscard]] virtual auto time() -> ScalarWithConstIfNotLvalue& = 0;
+  /// Stamp modifier.
+  /// \return Stamp.
+  [[nodiscard]] virtual auto stamp() -> ScalarWithConstIfNotLvalue& = 0;
 };
 
 template <typename TDerived>
-class StampedVariableBase
+class StampedBase
     : public Traits<TDerived>::Base,
-      public AbstractStampedVariable<typename Traits<TDerived>::ScalarWithConstIfNotLvalue> {
+      public AbstractStamped<typename Traits<TDerived>::ScalarWithConstIfNotLvalue> {
  public:
   using Scalar = typename Traits<TDerived>::Scalar;
   using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Base = typename Traits<TDerived>::Base;
   using Base::Base;
 
-  HYPER_INHERIT_ASSIGNMENT_OPERATORS(StampedVariableBase)
+  HYPER_INHERIT_ASSIGNMENT_OPERATORS(StampedBase)
 
   /// Memory accessor.
   /// \return Memory block.
@@ -50,15 +50,15 @@ class StampedVariableBase
     return {this->data(), this->size()};
   }
 
-  /// Time accessor.
-  /// \return Time.
-  [[nodiscard]] auto time() const -> const Scalar& final {
+  /// Stamp accessor.
+  /// \return Stamp.
+  [[nodiscard]] auto stamp() const -> const Scalar& final {
     return this->data()[Traits<TDerived>::kStampOffset];
   }
 
-  /// Time modifier.
-  /// \return Time.
-  auto time() -> ScalarWithConstIfNotLvalue& {
+  /// Stamp modifier.
+  /// \return Stamp.
+  auto stamp() -> ScalarWithConstIfNotLvalue& {
     return this->data()[Traits<TDerived>::kStampOffset];
   }
 
@@ -76,15 +76,15 @@ class StampedVariableBase
 };
 
 template <typename TVariable>
-class StampedVariable final
-    : public StampedVariableBase<StampedVariable<TVariable>> {
+class Stamped final
+    : public StampedBase<Stamped<TVariable>> {
  public:
-  using Base = StampedVariableBase<StampedVariable<TVariable>>;
+  using Base = StampedBase<Stamped<TVariable>>;
   using Base::Base;
 
-  HYPER_INHERIT_ASSIGNMENT_OPERATORS(StampedVariable)
+  HYPER_INHERIT_ASSIGNMENT_OPERATORS(Stamped)
 };
 
 } // namespace hyper
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::StampedVariable)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::Stamped)
