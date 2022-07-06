@@ -23,7 +23,7 @@ class AbstractStamped
 
   /// Stamp modifier.
   /// \return Stamp.
-  [[nodiscard]] virtual auto Stamp() -> ScalarWithConstIfNotLvalue& = 0;
+  [[nodiscard]] virtual auto stamp() -> ScalarWithConstIfNotLvalue& = 0;
 };
 
 template <typename TDerived>
