@@ -24,9 +24,9 @@ class SE3Tests
 
   [[nodiscard]] auto checkGroupInverseJacobian(const bool global, const bool coupled) const -> bool {
     Jacobian<Tangent<SE3<Scalar>>> J_a, J_n;
-    const auto i_se3 = se3_.groupInverse(J_a.data(), coupled, global);
+    const auto i_se3 = se3_.groupInverse(J_a.data(), global, coupled);
     for (auto j = 0; j < Traits<Tangent<SE3<Scalar>>>::kNumParameters; ++j) {
-      J_n.col(j) = NumericGroupMinus(NumericGroupPlus(se3_, coupled, global, j).groupInverse(), i_se3, coupled, global);
+      J_n.col(j) = NumericGroupMinus(NumericGroupPlus(se3_, global, coupled, j).groupInverse(), i_se3, global, coupled);
     }
 
     return J_n.isApprox(J_a, kNumericTolerance);
@@ -36,10 +36,10 @@ class SE3Tests
     const auto other_se3 = SE3<Scalar>::Random();
 
     Jacobian<Tangent<SE3<Scalar>>> J_lhs_a, J_lhs_n, J_rhs_a, J_rhs_n;
-    const auto se3 = se3_.groupPlus(other_se3, J_lhs_a.data(), J_rhs_a.data(), coupled, global);
+    const auto se3 = se3_.groupPlus(other_se3, J_lhs_a.data(), J_rhs_a.data(), global, coupled);
     for (auto j = 0; j < Traits<Tangent<SE3<Scalar>>>::kNumParameters; ++j) {
-      J_lhs_n.col(j) = NumericGroupMinus(NumericGroupPlus(se3_, coupled, global, j).groupPlus(other_se3), se3, coupled, global);
-      J_rhs_n.col(j) = NumericGroupMinus(se3_.groupPlus(NumericGroupPlus(other_se3, coupled, global, j)), se3, coupled, global);
+      J_lhs_n.col(j) = NumericGroupMinus(NumericGroupPlus(se3_, global, coupled, j).groupPlus(other_se3), se3, global, coupled);
+      J_rhs_n.col(j) = NumericGroupMinus(se3_.groupPlus(NumericGroupPlus(other_se3, global, coupled, j)), se3, global, coupled);
     }
 
     return J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) && J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
@@ -76,14 +76,14 @@ class SE3Tests
 
   [[nodiscard]] auto checkGroupExponentialsJacobians(const bool global, const bool coupled) const -> bool {
     Jacobian<Tangent<SE3<Scalar>>> J_l_a, J_e_a;
-    const auto tangent = se3_.toTangent(J_l_a.data(), coupled, global);
-    const auto se3 = tangent.toManifold(J_e_a.data(), coupled, global);
+    const auto tangent = se3_.toTangent(J_l_a.data(), global, coupled);
+    const auto se3 = tangent.toManifold(J_e_a.data(), global, coupled);
 
     Jacobian<Tangent<SE3<Scalar>>> J_l_n, J_e_n;
     for (auto j = 0; j < Traits<Tangent<SE3<Scalar>>>::kNumParameters; ++j) {
       const auto d_tangent = Tangent<SE3<Scalar>>{tangent + kNumericIncrement * Tangent<SE3<Scalar>>::Unit(j)};
-      J_l_n.col(j) = (NumericGroupPlus(se3_, coupled, global, j).toTangent() - tangent) / kNumericIncrement;
-      J_e_n.col(j) = NumericGroupMinus(d_tangent.toManifold(), se3_, coupled, global);
+      J_l_n.col(j) = (NumericGroupPlus(se3_, global, coupled, j).toTangent() - tangent) / kNumericIncrement;
+      J_e_n.col(j) = NumericGroupMinus(d_tangent.toManifold(), se3_, global, coupled);
     }
 
     return se3.isApprox(se3_, kNumericTolerance) &&

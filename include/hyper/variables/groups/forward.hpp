@@ -10,6 +10,13 @@
 
 namespace hyper {
 
+struct QuaternionOrder {
+  static constexpr auto kW = 3;
+  static constexpr auto kX = 0;
+  static constexpr auto kY = 1;
+  static constexpr auto kZ = 2;
+};
+
 template <typename>
 class Quaternion;
 
