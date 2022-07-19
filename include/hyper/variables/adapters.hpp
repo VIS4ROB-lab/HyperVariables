@@ -55,10 +55,10 @@ auto SE3JacobianAdapter(const TScalar* raw_se3) -> Jacobian<Tangent<SE3<TScalar>
   using SE3Traits = Traits<SE3<TScalar>>;
   using SE3TangentTraits = Traits<Tangent<SE3<TScalar>>>;
   Jacobian<Tangent<SE3<TScalar>>, SE3<TScalar>> J;
-  SE3<TScalar>::RotationJacobian<SE3TangentTraits::kNumAngularParameters>(J, SE3TangentTraits::kAngularOffset).noalias() = SU2JacobianAdapter(raw_se3 + SE3Traits::kRotationOffset);
-  SE3<TScalar>::TranslationJacobian<SE3TangentTraits::kNumAngularParameters>(J, SE3TangentTraits::kAngularOffset).setZero();
-  SE3<TScalar>::RotationJacobian<SE3TangentTraits::kNumLinearParameters>(J, SE3TangentTraits::kLinearOffset).setZero();
-  SE3<TScalar>::TranslationJacobian<SE3TangentTraits::kNumLinearParameters>(J, SE3TangentTraits::kLinearOffset).setIdentity();
+  SE3<TScalar>::template RotationJacobian<SE3TangentTraits::kNumAngularParameters>(J, SE3TangentTraits::kAngularOffset).noalias() = SU2JacobianAdapter(raw_se3 + SE3Traits::kRotationOffset);
+  SE3<TScalar>::template TranslationJacobian<SE3TangentTraits::kNumAngularParameters>(J, SE3TangentTraits::kAngularOffset).setZero();
+  SE3<TScalar>::template RotationJacobian<SE3TangentTraits::kNumLinearParameters>(J, SE3TangentTraits::kLinearOffset).setZero();
+  SE3<TScalar>::template TranslationJacobian<SE3TangentTraits::kNumLinearParameters>(J, SE3TangentTraits::kLinearOffset).setIdentity();
   return J;
 }
 
