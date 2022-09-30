@@ -12,23 +12,25 @@ class CartesianBase
     : public Traits<TDerived>::Base,
       public AbstractVariable<typename Traits<TDerived>::ScalarWithConstIfNotLvalue> {
  public:
+  // Definitions.
   using Scalar = typename Traits<TDerived>::Scalar;
   using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
+  using DynamicVectorWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const DynamicVector<Scalar>, DynamicVector<Scalar>>;
   using Base = typename Traits<TDerived>::Base;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(CartesianBase)
 
-  /// Memory accessor.
-  /// \return Memory block.
-  [[nodiscard]] auto memory() const -> MemoryBlock<const Scalar> final {
-    return {this->data(), this->size()};
+  /// Map as Eigen vector.
+  /// \return Vector.
+  auto asVector() const -> Eigen::Map<const DynamicVector<Scalar>> final {
+    return {this->data(), this->size(), 1};
   }
 
-  /// Memory modifier.
-  /// \return Memory block.
-  [[nodiscard]] auto memory() -> MemoryBlock<ScalarWithConstIfNotLvalue> final {
-    return {this->data(), this->size()};
+  /// Map as Eigen vector.
+  /// \return Vector.
+  auto asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> final {
+    return {this->data(), this->size(), 1};
   }
 };
 

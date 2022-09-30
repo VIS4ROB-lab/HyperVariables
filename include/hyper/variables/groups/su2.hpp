@@ -18,8 +18,10 @@ class QuaternionBase
     : public Traits<TDerived>::Base,
       public AbstractVariable<typename Traits<TDerived>::ScalarWithConstIfNotLvalue> {
  public:
+  // Definitions.
   using Scalar = typename Traits<TDerived>::Scalar;
   using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
+  using DynamicVectorWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const DynamicVector<Scalar>, DynamicVector<Scalar>>;
   using Base = typename Traits<TDerived>::Base;
   using Base::Base;
   using Base::operator*;
@@ -48,13 +50,13 @@ class QuaternionBase
   /// \return Data pointer.
   [[nodiscard]] auto data() -> ScalarWithConstIfNotLvalue*;
 
-  /// Memory accessor.
-  /// \return Memory block.
-  [[nodiscard]] auto memory() const -> MemoryBlock<const Scalar> final;
+  /// Map as Eigen vector.
+  /// \return Vector.
+  auto asVector() const -> Eigen::Map<const DynamicVector<Scalar>> final;
 
-  /// Memory modifier.
-  /// \return Memory block.
-  [[nodiscard]] auto memory() -> MemoryBlock<ScalarWithConstIfNotLvalue> final;
+  /// Map as Eigen vector.
+  /// \return Vector.
+  auto asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> final;
 
   /// Group inverse.
   /// \return Inverse element.
@@ -284,13 +286,13 @@ auto QuaternionBase<TDerived>::data() -> ScalarWithConstIfNotLvalue* {
 }
 
 template <typename TDerived>
-auto QuaternionBase<TDerived>::memory() const -> MemoryBlock<const Scalar> {
-  return {this->data(), Traits<TDerived>::kNumParameters};
+auto QuaternionBase<TDerived>::asVector() const -> Eigen::Map<const DynamicVector<Scalar>> {
+  return {this->data(), Traits<TDerived>::kNumParameters, 1};
 }
 
 template <typename TDerived>
-auto QuaternionBase<TDerived>::memory() -> MemoryBlock<ScalarWithConstIfNotLvalue> {
-  return {this->data(), Traits<TDerived>::kNumParameters};
+auto QuaternionBase<TDerived>::asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> {
+  return {this->data(), Traits<TDerived>::kNumParameters, 1};
 }
 
 template <typename TDerived>

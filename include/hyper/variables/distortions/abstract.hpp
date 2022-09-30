@@ -19,6 +19,7 @@ template <typename TScalar>
 class AbstractDistortion<TScalar, true>
     : public AbstractVariable<TScalar> {
  public:
+  // Definitions.
   using Scalar = std::remove_const_t<TScalar>;
 
   /// Allocates a Jacobian.
@@ -66,7 +67,7 @@ class AbstractDistortion<TScalar, false>
 
 template <typename TScalar>
 auto AbstractDistortion<TScalar, true>::allocatePixelDistortionJacobian() const -> DynamicInputJacobian<Pixel<Scalar>> {
-  const auto [_, size] = this->memory();
+  const auto size = this->asVector().size();
   return {Traits<Pixel<Scalar>>::kNumParameters, size};
 }
 
@@ -93,7 +94,7 @@ auto AbstractDistortion<TScalar, true>::undistort(const Eigen::Ref<const Pixel<S
   }
 
   if (raw_J_p_d) {
-    const auto [_, size] = this->memory();
+    const auto size = this->asVector().size();
     auto J_p_d_i = DynamicInputJacobian<Pixel<Scalar>>{Traits<Pixel<Scalar>>::kNumParameters, size};
     distort(output, nullptr, J_p_d_i.data());
     Eigen::Map<DynamicInputJacobian<Pixel<Scalar>>>{raw_J_p_d, Traits<Pixel<Scalar>>::kNumParameters, size}.noalias() = Scalar{-1} * J_p_p * J_p_d_i;

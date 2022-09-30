@@ -79,15 +79,15 @@ class DistortionTests
       const Pixel<Scalar> d_px = distortion_->distort(px, nullptr, J_a.data());
 
       auto J_n = distortion_->allocatePixelDistortionJacobian();
-      auto [address, size] = distortion_->memory();
-      for (auto j = 0; j < size; ++j) {
-        const auto tmp = address[j];
-        address[j] = tmp - kNumericIncrement;
+      auto vector = distortion_->asVector();
+      for (auto j = 0; j < vector.size(); ++j) {
+        const auto tmp = vector[j];
+        vector[j] = tmp - kNumericIncrement;
         const Pixel<Scalar> d_py_0 = distortion_->distort(px, nullptr, nullptr);
-        address[j] = tmp + kNumericIncrement;
+        vector[j] = tmp + kNumericIncrement;
         const Pixel<Scalar> d_py_1 = distortion_->distort(px, nullptr, nullptr);
         J_n.col(j) = (d_py_1 - d_py_0) / (Scalar{2} * kNumericIncrement);
-        address[j] = tmp;
+        vector[j] = tmp;
       }
 
       EXPECT_TRUE(J_n.isApprox(J_a, kNumericTolerance));
@@ -135,15 +135,15 @@ class DistortionTests
       const Pixel<Scalar> d_px = distortion_->undistort(px, nullptr, J_a.data());
 
       auto J_n = distortion_->allocatePixelDistortionJacobian();
-      auto [address, size] = distortion_->memory();
-      for (auto j = 0; j < size; ++j) {
-        const auto tmp = address[j];
-        address[j] = tmp - kNumericIncrement;
+      auto vector = distortion_->asVector();
+      for (auto j = 0; j < vector.size(); ++j) {
+        const auto tmp = vector[j];
+        vector[j] = tmp - kNumericIncrement;
         const Pixel<Scalar> d_py_0 = distortion_->undistort(px, nullptr, nullptr);
-        address[j] = tmp + kNumericIncrement;
+        vector[j] = tmp + kNumericIncrement;
         const Pixel<Scalar> d_py_1 = distortion_->undistort(px, nullptr, nullptr);
         J_n.col(j) = (d_py_1 - d_py_0) / (Scalar{2} * kNumericIncrement);
-        address[j] = tmp;
+        vector[j] = tmp;
       }
 
       EXPECT_TRUE(J_n.isApprox(J_a, kNumericTolerance));

@@ -5,23 +5,25 @@
 
 #include "hyper/variables/forward.hpp"
 
-#include "hyper/variables/memory.hpp"
-
 namespace hyper {
 
 template <typename TScalar>
 class AbstractVariable {
  public:
+  // Definitions.
+  using Scalar = std::remove_const_t<TScalar>;
+  using DynamicVectorWithConstIfNotLvalue = std::conditional_t<std::is_const_v<TScalar>, const DynamicVector<Scalar>, DynamicVector<Scalar>>;
+
   /// Virtual default destructor.
   virtual ~AbstractVariable() = default;
 
-  /// Memory accessor.
-  /// \return Memory block.
-  [[nodiscard]] virtual auto memory() const -> MemoryBlock<std::add_const_t<TScalar>> = 0;
+  /// Map as Eigen vector.
+  /// \return Vector.
+  virtual auto asVector() const -> Eigen::Map<const DynamicVector<Scalar>> = 0;
 
-  /// Memory modifier.
-  /// \return Memory block.
-  [[nodiscard]] virtual auto memory() -> MemoryBlock<TScalar> = 0;
+  /// Map as Eigen vector.
+  /// \return Vector.
+  virtual auto asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> = 0;
 };
 
 } // namespace hyper

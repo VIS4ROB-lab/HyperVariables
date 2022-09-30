@@ -12,20 +12,22 @@ class DistortionBase<TDerived, true>
     : public Traits<TDerived>::Base,
       public AbstractDistortion<typename Traits<TDerived>::ScalarWithConstIfNotLvalue> {
  public:
+  // Definitions.
   using Scalar = typename Traits<TDerived>::Scalar;
   using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
+  using DynamicVectorWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const DynamicVector<Scalar>, DynamicVector<Scalar>>;
   using Base = typename Traits<TDerived>::Base;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(DistortionBase)
 
-  /// Memory accessor.
-  /// \return Memory block.
-  [[nodiscard]] auto memory() const -> MemoryBlock<const Scalar> final;
+  /// Map as Eigen vector.
+  /// \return Vector.
+  auto asVector() const -> Eigen::Map<const DynamicVector<Scalar>> final;
 
-  /// Memory modifier.
-  /// \return Memory block.
-  [[nodiscard]] auto memory() -> MemoryBlock<ScalarWithConstIfNotLvalue> final;
+  /// Map as Eigen vector.
+  /// \return Vector.
+  auto asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> final;
 
   /// Maps a distortion.
   /// \param raw_distortion Raw distortion.
@@ -58,13 +60,13 @@ class DistortionBase<TDerived, false>
 };
 
 template <typename TDerived>
-auto DistortionBase<TDerived, true>::memory() const -> MemoryBlock<const Scalar> {
-  return {this->data(), this->size()};
+auto DistortionBase<TDerived, true>::asVector() const -> Eigen::Map<const DynamicVector<Scalar>> {
+  return {this->data(), this->size(), 1};
 }
 
 template <typename TDerived>
-auto DistortionBase<TDerived, true>::memory() -> MemoryBlock<ScalarWithConstIfNotLvalue> {
-  return {this->data(), this->size()};
+auto DistortionBase<TDerived, true>::asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> {
+  return {this->data(), this->size(), 1};
 }
 
 template <typename TDerived>

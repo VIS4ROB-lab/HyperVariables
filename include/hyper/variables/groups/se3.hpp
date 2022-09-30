@@ -13,8 +13,10 @@ class SE3Base
     : public Traits<TDerived>::Base,
       public AbstractVariable<typename Traits<TDerived>::ScalarWithConstIfNotLvalue> {
  public:
+  // Definitions.
   using Scalar = typename Traits<TDerived>::Scalar;
   using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
+  using DynamicVectorWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const DynamicVector<Scalar>, DynamicVector<Scalar>>;
   using Base = typename Traits<TDerived>::Base;
   using Base::Base;
 
@@ -48,13 +50,13 @@ class SE3Base
   /// \return Random element.
   static auto Random() -> SE3<Scalar>;
 
-  /// Memory accessor.
-  /// \return Memory block.
-  [[nodiscard]] auto memory() const -> MemoryBlock<const Scalar> final;
+  /// Map as Eigen vector.
+  /// \return Vector.
+  auto asVector() const -> Eigen::Map<const DynamicVector<Scalar>> final;
 
-  /// Memory modifier.
-  /// \return Memory block.
-  [[nodiscard]] auto memory() -> MemoryBlock<ScalarWithConstIfNotLvalue> final;
+  /// Map as Eigen vector.
+  /// \return Vector.
+  auto asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> final;
 
   /// Rotation accessor.
   /// \return Rotation.
@@ -246,13 +248,13 @@ auto SE3Base<TDerived>::Random() -> SE3<Scalar> {
 }
 
 template <typename TDerived>
-auto SE3Base<TDerived>::memory() const -> MemoryBlock<const Scalar> {
-  return {this->data(), Traits<TDerived>::kNumParameters};
+auto SE3Base<TDerived>::asVector() const -> Eigen::Map<const DynamicVector<Scalar>> {
+  return {this->data(), Traits<TDerived>::kNumParameters, 1};
 }
 
 template <typename TDerived>
-auto SE3Base<TDerived>::memory() -> MemoryBlock<ScalarWithConstIfNotLvalue> {
-  return {this->data(), Traits<TDerived>::kNumParameters};
+auto SE3Base<TDerived>::asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> {
+  return {this->data(), Traits<TDerived>::kNumParameters, 1};
 }
 
 template <typename TDerived>

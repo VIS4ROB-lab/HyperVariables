@@ -9,11 +9,11 @@
 
 namespace hyper {
 
-template <typename, typename = Eigen::Index>
-struct MemoryBlock;
+template <typename TScalar, int TRows>
+using Vector = Eigen::Matrix<TScalar, TRows, 1>;
 
-template <typename, typename = Eigen::Index>
-class MemoryBlocks;
+template <typename TScalar>
+using DynamicVector = Vector<TScalar, Eigen::Dynamic>;
 
 template <typename>
 class AbstractVariable;
