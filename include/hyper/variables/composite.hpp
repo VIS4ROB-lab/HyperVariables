@@ -56,17 +56,6 @@ class CompositeVariable {
     variables_[index] = std::move(variable);
   }
 
-  /// Memory block collector.
-  /// \return Memory blocks.
-  [[nodiscard]] auto memoryBlocks() const -> MemoryBlocks<TScalar> {
-    MemoryBlocks<TScalar> memory_blocks;
-    memory_blocks.reserve(variables_.size());
-    for (const auto& variable : variables_) {
-      memory_blocks.template emplace_back(variable->memory());
-    }
-    return memory_blocks;
-  }
-
  private:
   Variables variables_; ///< Variables.
 };
