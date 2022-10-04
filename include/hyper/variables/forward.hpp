@@ -9,6 +9,8 @@
 
 namespace hyper {
 
+using Index = Eigen::Index;
+
 template <typename TScalar, int TRows>
 using Vector = Eigen::Matrix<TScalar, TRows, 1>;
 

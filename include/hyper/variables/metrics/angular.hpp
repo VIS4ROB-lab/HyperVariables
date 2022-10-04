@@ -14,8 +14,8 @@ template <typename TInput>
 class AngularMetric final
     : public AbstractMetric<typename TInput::Scalar> {
  public:
-  using Scalar = typename Traits<TInput>::Scalar;
   using Input = TInput;
+  using Scalar = typename Traits<Input>::Scalar;
   using Output = Cartesian<Scalar, 1>;
 
   /// Computes the distance between elements.
@@ -24,7 +24,12 @@ class AngularMetric final
   /// \param raw_J_lhs Jacobian w.r.t. left input.
   /// \param raw_J_rhs Jacobian w.r.t. right input.
   /// \return Distance between elements.
-  static auto Distance(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, Scalar* raw_J_lhs = nullptr, Scalar* raw_J_rhs = nullptr) -> Output {
+  static auto Distance(
+      const Eigen::Ref<const Input>& lhs,
+      const Eigen::Ref<const Input>& rhs,
+      Scalar* raw_J_lhs = nullptr,
+      Scalar* raw_J_rhs = nullptr)
+      -> Output {
     using Jacobian = Jacobian<Output, Input>;
 
     const auto cross = lhs.cross(rhs).eval();
@@ -55,28 +60,45 @@ class AngularMetric final
     return Output{std::atan2(ncross, dot)};
   }
 
-  /// Retrieves the metric shape (i.e. input and output size).
-  /// \return Metric shape.
-  [[nodiscard]] constexpr auto shape() const -> Shape final {
-    return {Traits<Input>::kNumParameters, 1};
+  /// Retrieves the input size.
+  /// \return Input size.
+  [[nodiscard]] constexpr auto inputSize() const -> int final {
+    return Traits<Input>::kNumParameters;
   }
 
-  /// Retrieves the Jacobian shape.
-  /// \return Jacobian shape.
-  [[nodiscard]] constexpr auto jacobianShape() const -> Shape final {
-    return shape();
+  /// Retrieves the output size.
+  /// \return Output size.
+  [[nodiscard]] constexpr auto outputSize() const -> int final {
+    return Traits<Output>::kNumParameters;
   }
 
-  /// Computes the distance between elements.
-  /// \param raw_output Distance between elements.
-  /// \param raw_lhs Left input element.
-  /// \param raw_rhs Right input element.
-  /// \param raw_J_lhs Jacobian w.r.t. left input.
-  /// \param raw_J_rhs Jacobian w.r.t. right input.
-  auto distance(Scalar* raw_output, const Scalar* raw_lhs, const Scalar* raw_rhs, Scalar* raw_J_lhs = nullptr, Scalar* raw_J_rhs = nullptr) const -> void final {
-    const auto lhs = Eigen::Map<const Input>{raw_lhs};
-    const auto rhs = Eigen::Map<const Input>{raw_rhs};
-    Eigen::Map<Output>{raw_output}.noalias() = Distance(lhs, rhs, raw_J_lhs, raw_J_rhs);
+  /// Computes the distance between inputs.
+  /// \param lhs Left input.
+  /// \param rhs Right input.
+  /// \param J_lhs Jacobian w.r.t. left input.
+  /// \param J_rhs Jacobian w.r.t. right input.
+  /// \return Distance between inputs.
+  auto distance(
+      const Eigen::Ref<const DynamicVector<Scalar>>& lhs,
+      const Eigen::Ref<const DynamicVector<Scalar>>& rhs,
+      DynamicJacobian<Scalar>* J_lhs = nullptr,
+      DynamicJacobian<Scalar>* J_rhs = nullptr) const
+      -> DynamicVector<Scalar> final {
+    if (J_lhs || J_rhs) {
+      if (J_lhs && J_rhs) {
+        J_lhs->resize(Traits<Output>::kNumParameters, Traits<Input>::kNumParameters);
+        J_rhs->resize(Traits<Output>::kNumParameters, Traits<Input>::kNumParameters);
+        return Distance(lhs, rhs, J_lhs->data(), J_rhs->data());
+      } else if (J_lhs) {
+        J_lhs->resize(Traits<Output>::kNumParameters, Traits<Input>::kNumParameters);
+        return Distance(lhs, rhs, J_lhs->data(), nullptr);
+      } else {
+        J_rhs->resize(Traits<Output>::kNumParameters, Traits<Input>::kNumParameters);
+        return Distance(lhs, rhs, nullptr, J_rhs->data());
+      }
+    } else {
+      return Distance(lhs, rhs, nullptr, nullptr);
+    }
   }
 };
 

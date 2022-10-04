@@ -15,21 +15,26 @@ class AbstractMetric {
   /// Default destructor.
   virtual ~AbstractMetric() = default;
 
-  /// Retrieves the metric shape (i.e. input and output size).
-  /// \return Metric shape.
-  [[nodiscard]] virtual auto shape() const -> Shape = 0;
+  /// Retrieves the input size.
+  /// \return Input size.
+  [[nodiscard]] virtual auto inputSize() const -> int = 0;
 
-  /// Retrieves the Jacobian shape.
-  /// \return Jacobian shape.
-  [[nodiscard]] virtual auto jacobianShape() const -> Shape = 0;
+  /// Retrieves the output size.
+  /// \return Output size.
+  [[nodiscard]] virtual auto outputSize() const -> int = 0;
 
-  /// Computes the distance between elements.
-  /// \param raw_output Distance between elements.
-  /// \param raw_lhs Left input element.
-  /// \param raw_rhs Right input element.
-  /// \param raw_J_lhs Jacobian w.r.t. left input.
-  /// \param raw_J_rhs Jacobian w.r.t. right input.
-  virtual auto distance(TScalar* raw_output, const TScalar* raw_lhs, const TScalar* raw_rhs, TScalar* raw_J_lhs, TScalar* raw_J_rhs) const -> void = 0;
+  /// Computes the distance between inputs.
+  /// \param lhs Left input.
+  /// \param rhs Right input.
+  /// \param J_lhs Jacobian w.r.t. left input.
+  /// \param J_rhs Jacobian w.r.t. right input.
+  /// \return Distance between inputs.
+  virtual auto distance(
+      const Eigen::Ref<const DynamicVector<TScalar>>& lhs,
+      const Eigen::Ref<const DynamicVector<TScalar>>& rhs,
+      DynamicJacobian<TScalar>* J_lhs,
+      DynamicJacobian<TScalar>* J_rhs) const
+      -> DynamicVector<TScalar> = 0;
 };
 
 } // namespace hyper

@@ -5,12 +5,6 @@
 
 namespace hyper {
 
-struct Shape {
-  using Size = std::int32_t;
-  Size num_inputs;
-  Size num_outputs;
-};
-
 template <typename>
 class AbstractMetric;
 
