@@ -79,8 +79,8 @@ class Bearing final
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Bearing)
 
-  /// Deleted default constructor.
-  Bearing() = delete;
+  /// Default constructor. Note: Does not ensure unit norm.
+  Bearing() = default;
 
   /// Forwarding constructor with norm check.
   /// \tparam TArgs_ Input argument types.
