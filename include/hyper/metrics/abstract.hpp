@@ -3,9 +3,10 @@
 
 #pragma once
 
-#include "hyper/variables/metrics/forward.hpp"
+#include "hyper/metrics/forward.hpp"
 
 #include "hyper/variables/jacobian.hpp"
+#include "hyper/vector.hpp"
 
 namespace hyper {
 
@@ -30,11 +31,11 @@ class AbstractMetric {
   /// \param J_rhs Jacobian w.r.t. right input.
   /// \return Distance between inputs.
   virtual auto distance(
-      const Eigen::Ref<const DynamicVector<TScalar>>& lhs,
-      const Eigen::Ref<const DynamicVector<TScalar>>& rhs,
+      const Eigen::Ref<const TVectorX<TScalar>>& lhs,
+      const Eigen::Ref<const TVectorX<TScalar>>& rhs,
       TJacobianX<TScalar>* J_lhs,
       TJacobianX<TScalar>* J_rhs) const
-      -> DynamicVector<TScalar> = 0;
+      -> TVectorX<TScalar> = 0;
 };
 
 } // namespace hyper

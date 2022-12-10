@@ -22,6 +22,6 @@ template <typename TDerived, int TOptions = DefaultVectorStorageOption(TDerived:
 using TVectorN = TVector<typename TDerived::Scalar, TDerived::SizeAtCompileTime, TOptions>;
 
 template <typename TScalar, int TOptions = DefaultVectorStorageOption(Eigen::Dynamic, 1)>
-using TVectorX = TVector<TScalar, TOptions>;
+using TVectorX = TVector<TScalar, Eigen::Dynamic, TOptions>;
 
 } // namespace hyper
