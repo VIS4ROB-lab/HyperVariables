@@ -248,10 +248,15 @@ template <typename TDerived>
 class SU2TangentBase
     : public CartesianBase<TDerived> {
  public:
+  // Definitions.
   using Base = CartesianBase<TDerived>;
   using Scalar = typename Base::Scalar;
   using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using Base::Base;
+
+  // Constants.
+  static constexpr auto kAngularOffset = 0;
+  static constexpr auto kNumAngularParameters = 3;
 
   static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES;
 

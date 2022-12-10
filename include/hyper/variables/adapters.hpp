@@ -19,7 +19,7 @@ auto SU2JacobianAdapter(const TScalar* raw_su2) -> TJacobianNM<Tangent<SU2<TScal
   TJacobianNM<Tangent<SU2<TScalar>>, SU2<TScalar>> J;
 
   using Order = QuaternionOrder;
-  TScalar tau[Traits<SU2<TScalar>>::kNumParameters];
+  TScalar tau[SU2<TScalar>::SizeAtCompileTime];
   tau[Order::kW] = TScalar{2} * raw_su2[Order::kW];
   tau[Order::kX] = TScalar{2} * raw_su2[Order::kX];
   tau[Order::kY] = TScalar{2} * raw_su2[Order::kY];
@@ -52,13 +52,11 @@ auto SU2JacobianAdapter(const TScalar* raw_su2) -> TJacobianNM<Tangent<SU2<TScal
 /// \return Jacobian adapter.
 template <typename TScalar>
 auto SE3JacobianAdapter(const TScalar* raw_se3) -> TJacobianNM<Tangent<SE3<TScalar>>, SE3<TScalar>> {
-  using SE3Traits = Traits<SE3<TScalar>>;
-  using SE3TangentTraits = Traits<Tangent<SE3<TScalar>>>;
   TJacobianNM<Tangent<SE3<TScalar>>, SE3<TScalar>> J;
-  SE3<TScalar>::template RotationJacobian<SE3TangentTraits::kNumAngularParameters>(J, SE3TangentTraits::kAngularOffset).noalias() = SU2JacobianAdapter(raw_se3 + SE3Traits::kRotationOffset);
-  SE3<TScalar>::template TranslationJacobian<SE3TangentTraits::kNumAngularParameters>(J, SE3TangentTraits::kAngularOffset).setZero();
-  SE3<TScalar>::template RotationJacobian<SE3TangentTraits::kNumLinearParameters>(J, SE3TangentTraits::kLinearOffset).setZero();
-  SE3<TScalar>::template TranslationJacobian<SE3TangentTraits::kNumLinearParameters>(J, SE3TangentTraits::kLinearOffset).setIdentity();
+  SE3<TScalar>::template RotationJacobian<Tangent<SE3<TScalar>>::kNumAngularParameters>(J, Tangent<SE3<TScalar>>::kAngularOffset).noalias() = SU2JacobianAdapter(raw_se3 + SE3<TScalar>::kRotationOffset);
+  SE3<TScalar>::template TranslationJacobian<Tangent<SE3<TScalar>>::kNumAngularParameters>(J, Tangent<SE3<TScalar>>::kAngularOffset).setZero();
+  SE3<TScalar>::template RotationJacobian<Tangent<SE3<TScalar>>::kNumLinearParameters>(J, Tangent<SE3<TScalar>>::kLinearOffset).setZero();
+  SE3<TScalar>::template TranslationJacobian<Tangent<SE3<TScalar>>::kNumLinearParameters>(J, Tangent<SE3<TScalar>>::kLinearOffset).setIdentity();
   return J;
 }
 
