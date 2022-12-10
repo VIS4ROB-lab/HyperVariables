@@ -84,12 +84,7 @@ HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::OrthonormalityAlignment, i
 template <typename TVariable>
 struct Traits<Stamped<TVariable>>
     : public Traits<Cartesian<typename TVariable::Scalar, TVariable::SizeAtCompileTime + 1>> {
-  // Definitions.
-  using Scalar = typename TVariable::Scalar;
-  using Stamp = Cartesian<Scalar, 1>;
-  using StampWithConstIfNotLvalue = Stamp;
   using Variable = TVariable;
-  using VariableWithConstIfNotLvalue = TVariable;
 };
 
 template <typename TVariable, int TMapOptions>
@@ -101,8 +96,6 @@ struct Traits<Eigen::Map<Stamped<TVariable>, TMapOptions>> final
 template <typename TVariable, int TMapOptions>
 struct Traits<Eigen::Map<const Stamped<TVariable>, TMapOptions>> final
     : public Traits<Stamped<TVariable>> {
-  using StampWithConstIfNotLvalue = const typename Traits<Stamped<TVariable>>::Stamp;
-  using VariableWithConstIfNotLvalue = const typename Traits<Stamped<TVariable>>::Variable;
   using Base = Eigen::Map<const typename Traits<Stamped<TVariable>>::Base, TMapOptions>;
 };
 
@@ -132,12 +125,12 @@ struct NumericVariableTraits<double> {
 };
 
 template <typename TDerived>
-struct VariableIsLValue_q {
+struct VariableIsLValue {
   static constexpr auto kValue = (!bool(std::is_const_v<TDerived>)) && bool(Traits<TDerived>::Base::Flags & Eigen::LvalueBit);
 };
 
 template <typename TDerived>
-inline constexpr bool VariableIsLValue_v = VariableIsLValue_q<TDerived>::kValue;
+inline constexpr bool VariableIsLValue_v = VariableIsLValue<TDerived>::kValue;
 
 template <typename TDerived, typename TValue>
 struct ConstValueIfVariableIsNotLValue {

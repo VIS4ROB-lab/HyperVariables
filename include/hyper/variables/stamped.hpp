@@ -31,18 +31,23 @@ class StampedBase
     : public Traits<TDerived>::Base,
       public AbstractStamped<ConstScalarIfVariableIsNotLValue_t<TDerived>> {
  public:
-  // Constants.
-  static constexpr auto kVariableOffset = 0;
-  static constexpr auto kNumVariableParameters = Traits<TDerived>::Variable::SizeAtCompileTime;
-  static constexpr auto kStampOffset = kVariableOffset + kNumVariableParameters;
-  static constexpr auto kNumStampParameters = 1;
-
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
   using Scalar = Base::Scalar;
   using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, TVectorX<Scalar>>;
   using Base::Base;
+
+  using Stamp = Cartesian<Scalar, 1>;
+  using Variable = Traits<TDerived>::Variable;
+  using StampWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Stamp>;
+  using VariableWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Variable>;
+
+  // Constants.
+  static constexpr auto kVariableOffset = 0;
+  static constexpr auto kNumVariableParameters = Variable::SizeAtCompileTime;
+  static constexpr auto kStampOffset = kVariableOffset + kNumVariableParameters;
+  static constexpr auto kNumStampParameters = 1;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(StampedBase)
 
@@ -72,14 +77,14 @@ class StampedBase
 
   /// Variable accessor.
   /// \return Variable.
-  [[nodiscard]] auto variable() const -> Eigen::Map<const typename Traits<TDerived>::Variable> {
-    return Eigen::Map<const typename Traits<TDerived>::Variable>{this->data() + kVariableOffset};
+  [[nodiscard]] auto variable() const -> Eigen::Map<const Variable> {
+    return Eigen::Map<const Variable>{this->data() + kVariableOffset};
   }
 
   /// Variable modifier.
   /// \return Variable.
-  auto variable() -> Eigen::Map<typename Traits<TDerived>::VariableWithConstIfNotLvalue> {
-    return Eigen::Map<typename Traits<TDerived>::VariableWithConstIfNotLvalue>{this->data() + kVariableOffset};
+  auto variable() -> Eigen::Map<VariableWithConstIfNotLvalue> {
+    return Eigen::Map<VariableWithConstIfNotLvalue>{this->data() + kVariableOffset};
   }
 };
 
