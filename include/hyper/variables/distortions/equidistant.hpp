@@ -11,9 +11,9 @@ template <typename TDerived>
 class EquidistantDistortionBase
     : public DistortionBase<TDerived> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Base = DistortionBase<TDerived>;
+  using Scalar = typename Base::Scalar;
+  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(EquidistantDistortionBase)
@@ -121,7 +121,7 @@ auto EquidistantDistortionBase<TDerived>::distort(const Eigen::Ref<const Pixel<S
   }
 
   if (raw_J_p_d) {
-    auto J = Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Traits<Pixel<Scalar>>::kNumParameters, size};
+    auto J = Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::SizeAtCompileTime, size};
     if (is_small_angle) {
       J.setZero();
     } else {

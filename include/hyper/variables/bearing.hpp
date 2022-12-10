@@ -14,17 +14,21 @@ template <typename TDerived>
 class BearingBase
     : public CartesianBase<TDerived> {
  public:
+  // Definitions.
   using Scalar = typename Traits<TDerived>::Scalar;
   using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Base = CartesianBase<TDerived>;
   using Base::Base;
+
+  // Constants.
+  static constexpr auto kNorm = Scalar{1};
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(BearingBase)
 
   /// Checks the norm.
   /// \return True if correct.
   [[nodiscard]] auto checkNorm() const -> bool {
-    return Eigen::internal::isApprox(this->norm(), Traits<TDerived>::kNorm);
+    return Eigen::internal::isApprox(this->norm(), kNorm);
   }
 
   /// Finds an orthonormal basis where the first unit

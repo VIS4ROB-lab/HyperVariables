@@ -10,7 +10,7 @@ namespace hyper {
 template <typename TScalar, bool = std::is_const_v<TScalar>>
 class AbstractDistortion;
 
-template <typename TDerived, bool = std::is_const_v<typename Traits<TDerived>::ScalarWithConstIfNotLvalue>>
+template <typename TDerived, bool = !VariableIsLValue<TDerived>::value>
 class DistortionBase;
 
 template <typename, int>

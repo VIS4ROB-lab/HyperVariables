@@ -23,7 +23,6 @@ namespace hyper {
   template <typename TScalar, int TMapOptions>                                         \
   struct Traits<Eigen::BASE<const NAME<TScalar>, TMapOptions>> final                   \
       : public Traits<NAME<TScalar>> {                                                 \
-    using ScalarWithConstIfNotLvalue = const typename Traits<NAME<TScalar>>::Scalar;   \
     using Base = Eigen::BASE<const typename Traits<NAME<TScalar>>::Base, TMapOptions>; \
   };
 
@@ -41,7 +40,6 @@ namespace hyper {
   template <typename TScalar, TYPE TArg, int TMapOptions>                                    \
   struct Traits<Eigen::BASE<const NAME<TScalar, TArg>, TMapOptions>> final                   \
       : public Traits<NAME<TScalar, TArg>> {                                                 \
-    using ScalarWithConstIfNotLvalue = const typename Traits<NAME<TScalar, TArg>>::Scalar;   \
     using Base = Eigen::BASE<const typename Traits<NAME<TScalar, TArg>>::Base, TMapOptions>; \
   };
 
@@ -107,7 +105,6 @@ namespace hyper {
   template <typename TScalar, int TMapOptions>                                                          \
   struct Traits<Eigen::Map<const Tangent<NAME<TScalar>>, TMapOptions>>                                  \
       : Traits<Tangent<NAME<TScalar>>> {                                                                \
-    using ScalarWithConstIfNotLvalue = const typename Traits<Tangent<NAME<TScalar>>>::Scalar;           \
     using Base = typename Eigen::Map<const typename Traits<Tangent<NAME<TScalar>>>::Base, TMapOptions>; \
   };
 

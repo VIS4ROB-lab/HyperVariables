@@ -10,13 +10,13 @@ namespace hyper {
 template <typename TDerived>
 class DistortionBase<TDerived, true>
     : public Traits<TDerived>::Base,
-      public AbstractDistortion<typename Traits<TDerived>::ScalarWithConstIfNotLvalue> {
+      public AbstractDistortion<std::conditional_t<VariableIsLValue<TDerived>::value, typename Traits<TDerived>::Base::Scalar, const typename Traits<TDerived>::Base::Scalar>> {
  public:
   // Definitions.
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
-  using VectorXWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const TVectorX<Scalar>, TVectorX<Scalar>>;
   using Base = typename Traits<TDerived>::Base;
+  using Scalar = typename Base::Scalar;
+  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
+  using VectorXWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, TVectorX<Scalar>, const TVectorX<Scalar>>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(DistortionBase)
@@ -44,9 +44,9 @@ template <typename TDerived>
 class DistortionBase<TDerived, false>
     : public DistortionBase<TDerived, true> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Base = DistortionBase<TDerived, true>;
+  using Scalar = typename Base::Scalar;
+  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(DistortionBase)

@@ -45,7 +45,7 @@ class SU2Tests
   [[nodiscard]] auto checkGroupInverseJacobian(const bool global) const -> bool {
     TJacobianNM<Tangent<SU2<Scalar>>> J_a, J_n;
     const auto i_q = su2_.groupInverse(J_a.data(), global);
-    for (auto j = 0; j < Traits<Tangent<SU2<Scalar>>>::kNumParameters; ++j) {
+    for (auto j = 0; j < Tangent<SU2<Scalar>>::SizeAtCompileTime; ++j) {
       J_n.col(j) = NumericGroupMinus(NumericGroupPlus(su2_, global, j).groupInverse(), i_q, global);
     }
 
@@ -58,7 +58,7 @@ class SU2Tests
 
     TJacobianNM<Tangent<SU2<Scalar>>> J_lhs_a, J_lhs_n, J_rhs_a, J_rhs_n;
     su2_.groupPlus(other_su2, J_lhs_a.data(), J_rhs_a.data(), global);
-    for (auto j = 0; j < Traits<Tangent<SU2<Scalar>>>::kNumParameters; ++j) {
+    for (auto j = 0; j < Tangent<SU2<Scalar>>::SizeAtCompileTime; ++j) {
       J_lhs_n.col(j) = NumericGroupMinus(NumericGroupPlus(su2_, global, j).groupPlus(other_su2), su2, global);
       J_rhs_n.col(j) = NumericGroupMinus(su2_.groupPlus(NumericGroupPlus(other_su2, global, j)), su2, global);
     }
@@ -74,10 +74,10 @@ class SU2Tests
     TJacobianNM<Vector> J_v_a, J_v_n;
     const auto output = su2_.vectorPlus(input);
     su2_.vectorPlus(input, J_a.data(), J_v_a.data(), global);
-    for (auto j = 0; j < Traits<Tangent<SU2<Scalar>>>::kNumParameters; ++j) {
+    for (auto j = 0; j < Tangent<SU2<Scalar>>::SizeAtCompileTime; ++j) {
       J_n.col(j) = (NumericGroupPlus(su2_, global, j).vectorPlus(input) - output) / kNumericIncrement;
     }
-    for (auto j = 0; j < Traits<Vector>::kNumParameters; ++j) {
+    for (auto j = 0; j < Vector::SizeAtCompileTime; ++j) {
       J_v_n.col(j) = (su2_.vectorPlus(input + kNumericIncrement * Vector::Unit(j)) - output) / kNumericIncrement;
     }
 
@@ -99,7 +99,7 @@ class SU2Tests
     const auto su2 = tangent.toManifold(J_e_a.data(), global);
 
     TJacobianNM<Tangent> J_l_n, J_e_n;
-    for (auto j = 0; j < Traits<Tangent>::kNumParameters; ++j) {
+    for (auto j = 0; j < Tangent::SizeAtCompileTime; ++j) {
       const auto d_tangent = Tangent{tangent + kNumericIncrement * Tangent::Unit(j)};
       J_l_n.col(j) = (NumericGroupPlus(su2_, global, j).toTangent() - tangent) / kNumericIncrement;
       J_e_n.col(j) = NumericGroupMinus(d_tangent.toManifold(), su2_, global);

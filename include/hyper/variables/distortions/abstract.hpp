@@ -68,7 +68,7 @@ class AbstractDistortion<TScalar, false>
 template <typename TScalar>
 auto AbstractDistortion<TScalar, true>::allocatePixelDistortionJacobian() const -> TJacobianNX<Pixel<Scalar>> {
   const auto size = this->asVector().size();
-  return {Traits<Pixel<Scalar>>::kNumParameters, size};
+  return {Pixel<Scalar>::SizeAtCompileTime, size};
 }
 
 template <typename TScalar>
@@ -95,9 +95,9 @@ auto AbstractDistortion<TScalar, true>::undistort(const Eigen::Ref<const Pixel<S
 
   if (raw_J_p_d) {
     const auto size = this->asVector().size();
-    auto J_p_d_i = TJacobianNX<Pixel<Scalar>>{Traits<Pixel<Scalar>>::kNumParameters, size};
+    auto J_p_d_i = TJacobianNX<Pixel<Scalar>>{Pixel<Scalar>::SizeAtCompileTime, size};
     distort(output, nullptr, J_p_d_i.data());
-    Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Traits<Pixel<Scalar>>::kNumParameters, size}.noalias() = Scalar{-1} * J_p_p * J_p_d_i;
+    Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::SizeAtCompileTime, size}.noalias() = Scalar{-1} * J_p_p * J_p_d_i;
   }
 
   return output;

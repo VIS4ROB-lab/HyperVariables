@@ -13,17 +13,21 @@ template <typename TDerived>
 class GravityBase
     : public CartesianBase<TDerived> {
  public:
+  // Definitions.
   using Scalar = typename Traits<TDerived>::Scalar;
   using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Base = CartesianBase<TDerived>;
   using Base::Base;
+
+  // Constants.
+  static constexpr auto kNorm = Scalar{9.80741}; // Magnitude of local gravity for Zurich in [m/s²].
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(GravityBase)
 
   /// Checks the norm.
   /// \return True if correct.
   [[nodiscard]] auto checkNorm() const -> bool {
-    return Eigen::internal::isApprox(this->norm(), Traits<Gravity<Scalar>>::kNorm);
+    return Eigen::internal::isApprox(this->norm(), kNorm);
   }
 };
 

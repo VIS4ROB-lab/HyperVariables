@@ -11,6 +11,13 @@ template <typename TDerived>
 class PitchYawBase
     : public CartesianBase<TDerived> {
  public:
+  // Constants.
+  static constexpr auto kPitchOffset = 0;
+  static constexpr auto kNumPitchParameters = 1;
+  static constexpr auto kYawOffset = kPitchOffset + kNumPitchParameters;
+  static constexpr auto kNumYawParameters = 1;
+
+  // Definitions.
   using Scalar = typename Traits<TDerived>::Scalar;
   using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Base = CartesianBase<TDerived>;

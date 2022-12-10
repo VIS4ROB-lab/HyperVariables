@@ -29,13 +29,19 @@ class AbstractStamped
 template <typename TDerived>
 class StampedBase
     : public Traits<TDerived>::Base,
-      public AbstractStamped<typename Traits<TDerived>::ScalarWithConstIfNotLvalue> {
+      public AbstractStamped<std::conditional_t<VariableIsLValue<TDerived>::value, typename Traits<TDerived>::Base::Scalar, const typename Traits<TDerived>::Base::Scalar>> {
  public:
+  // Constants.
+  static constexpr auto kVariableOffset = 0;
+  static constexpr auto kNumVariableParameters = Traits<TDerived>::Variable::SizeAtCompileTime;
+  static constexpr auto kStampOffset = kVariableOffset + kNumVariableParameters;
+  static constexpr auto kNumStampParameters = 1;
+
   // Definitions.
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
-  using VectorXWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const TVectorX<Scalar>, TVectorX<Scalar>>;
   using Base = typename Traits<TDerived>::Base;
+  using Scalar = Base::Scalar;
+  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
+  using VectorXWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, TVectorX<Scalar>, const TVectorX<Scalar>>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(StampedBase)
@@ -55,25 +61,25 @@ class StampedBase
   /// Stamp accessor.
   /// \return Stamp.
   [[nodiscard]] auto stamp() const -> const Scalar& final {
-    return this->data()[Traits<TDerived>::kStampOffset];
+    return this->data()[kStampOffset];
   }
 
   /// Stamp modifier.
   /// \return Stamp.
   auto stamp() -> ScalarWithConstIfNotLvalue& {
-    return this->data()[Traits<TDerived>::kStampOffset];
+    return this->data()[kStampOffset];
   }
 
   /// Variable accessor.
   /// \return Variable.
   [[nodiscard]] auto variable() const -> Eigen::Map<const typename Traits<TDerived>::Variable> {
-    return Eigen::Map<const typename Traits<TDerived>::Variable>{this->data() + Traits<TDerived>::kVariableOffset};
+    return Eigen::Map<const typename Traits<TDerived>::Variable>{this->data() + kVariableOffset};
   }
 
   /// Variable modifier.
   /// \return Variable.
   auto variable() -> Eigen::Map<typename Traits<TDerived>::VariableWithConstIfNotLvalue> {
-    return Eigen::Map<typename Traits<TDerived>::VariableWithConstIfNotLvalue>{this->data() + Traits<TDerived>::kVariableOffset};
+    return Eigen::Map<typename Traits<TDerived>::VariableWithConstIfNotLvalue>{this->data() + kVariableOffset};
   }
 };
 

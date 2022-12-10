@@ -19,8 +19,8 @@ class TManifoldMetric<TScalar, ManifoldEnum::SE3> final : public TMetric<TScalar
   using Jacobian = TJacobianNM<Output, Tangent<Input>>;
 
   // Constants.
-  static constexpr auto kInputDim = Traits<Input>::kNumParameters;
-  static constexpr auto kOutputDim = Traits<Output>::kNumParameters;
+  static constexpr auto kInputDim = Input::SizeAtCompileTime;
+  static constexpr auto kOutputDim = Output::SizeAtCompileTime;
 
   static constexpr auto kGlobal = HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES;
   static constexpr auto kCoupled = HYPER_DEFAULT_TO_COUPLED_LIE_GROUP_DERIVATIVES;

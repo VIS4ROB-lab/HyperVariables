@@ -11,9 +11,9 @@ template <typename TDerived>
 class RadialTangentialDistortionBase
     : public DistortionBase<TDerived> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Base = DistortionBase<TDerived>;
+  using Scalar = typename Base::Scalar;
+  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(RadialTangentialDistortionBase)
@@ -147,7 +147,7 @@ auto RadialTangentialDistortionBase<TDerived>::distort(const Eigen::Ref<const Pi
   if (raw_J_p_d) {
     const auto size = this->size();
     const auto tangential_order = this->tangentialOrder();
-    auto J = Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Traits<Pixel<Scalar>>::kNumParameters, size};
+    auto J = Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::SizeAtCompileTime, size};
     for (auto i = 0; i < radial_order; ++i) {
       J.col(i) = rhos[i] * pixel;
     }

@@ -16,16 +16,16 @@ namespace hyper {
 template <typename TDerived>
 class QuaternionBase
     : public Traits<TDerived>::Base,
-      public AbstractVariable<typename Traits<TDerived>::ScalarWithConstIfNotLvalue> {
+      public AbstractVariable<std::conditional_t<VariableIsLValue<TDerived>::value, typename Traits<TDerived>::Base::Scalar, const typename Traits<TDerived>::Base::Scalar>> {
  public:
   // Constants.
   static constexpr auto SizeAtCompileTime = 4;
 
   // Definitions.
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
-  using VectorXWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const TVectorX<Scalar>, TVectorX<Scalar>>;
   using Base = typename Traits<TDerived>::Base;
+  using Scalar = typename Base::Scalar;
+  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
+  using VectorXWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, TVectorX<Scalar>, const TVectorX<Scalar>>;
   using Base::Base;
   using Base::operator*;
 
@@ -92,9 +92,9 @@ template <typename TDerived>
 class SU2Base
     : public QuaternionBase<TDerived> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Base = QuaternionBase<TDerived>;
+  using Scalar = typename Base::Scalar;
+  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
   using Base::Base;
   using Base::operator*;
 
@@ -167,9 +167,9 @@ template <typename TDerived>
 class SU2AlgebraBase
     : public QuaternionBase<TDerived> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Base = QuaternionBase<TDerived>;
+  using Scalar = typename Base::Scalar;
+  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
   using Base::Base;
   using Base::operator*;
 
@@ -248,9 +248,9 @@ template <typename TDerived>
 class SU2TangentBase
     : public CartesianBase<TDerived> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Base = CartesianBase<TDerived>;
+  using Scalar = typename Base::Scalar;
+  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
   using Base::Base;
 
   static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES;
@@ -290,12 +290,12 @@ auto QuaternionBase<TDerived>::data() -> ScalarWithConstIfNotLvalue* {
 
 template <typename TDerived>
 auto QuaternionBase<TDerived>::asVector() const -> Eigen::Map<const TVectorX<Scalar>> {
-  return {this->data(), Traits<TDerived>::kNumParameters, 1};
+  return {this->data(), TDerived::SizeAtCompileTime, 1};
 }
 
 template <typename TDerived>
 auto QuaternionBase<TDerived>::asVector() -> Eigen::Map<VectorXWithConstIfNotLvalue> {
-  return {this->data(), Traits<TDerived>::kNumParameters, 1};
+  return {this->data(), TDerived::SizeAtCompileTime, 1};
 }
 
 template <typename TDerived>

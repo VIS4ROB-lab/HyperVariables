@@ -11,19 +11,19 @@ namespace hyper {
 template <typename TDerived>
 class SE3Base
     : public Traits<TDerived>::Base,
-      public AbstractVariable<typename Traits<TDerived>::ScalarWithConstIfNotLvalue> {
+      public AbstractVariable<std::conditional_t<VariableIsLValue<TDerived>::value, typename Traits<TDerived>::Base::Scalar, const typename Traits<TDerived>::Base::Scalar>> {
  public:
   // Definitions.
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
-  using VectorXWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const TVectorX<Scalar>, TVectorX<Scalar>>;
   using Base = typename Traits<TDerived>::Base;
+  using Scalar = typename Base::Scalar;
+  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
+  using VectorXWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, TVectorX<Scalar>, const TVectorX<Scalar>>;
   using Base::Base;
 
   using Rotation = SU2<Scalar>;
-  using RotationWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const Rotation, Rotation>;
+  using RotationWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Rotation, const Rotation>;
   using Translation = Cartesian<Scalar, 3>;
-  using TranslationWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const Translation, Translation>;
+  using TranslationWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Translation, const Translation>;
 
   static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES;
   static constexpr auto kDefaultDerivativesAreCoupled = HYPER_DEFAULT_TO_COUPLED_LIE_GROUP_DERIVATIVES;
@@ -162,8 +162,8 @@ class SE3TangentBase
     : public CartesianBase<TDerived> {
  public:
   using Base = CartesianBase<TDerived>;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Scalar = typename Base::Scalar;
+  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
   using Base::Base;
 
   using Angular = Tangent<typename SE3<Scalar>::Rotation>;
@@ -249,12 +249,12 @@ auto SE3Base<TDerived>::Random() -> SE3<Scalar> {
 
 template <typename TDerived>
 auto SE3Base<TDerived>::asVector() const -> Eigen::Map<const TVectorX<Scalar>> {
-  return {this->data(), Traits<TDerived>::kNumParameters, 1};
+  return {this->data(), TDerived::SizeAtCompileTime, 1};
 }
 
 template <typename TDerived>
 auto SE3Base<TDerived>::asVector() -> Eigen::Map<VectorXWithConstIfNotLvalue> {
-  return {this->data(), Traits<TDerived>::kNumParameters, 1};
+  return {this->data(), TDerived::SizeAtCompileTime, 1};
 }
 
 template <typename TDerived>
@@ -408,20 +408,20 @@ auto SE3Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, S
 
     if (coupled) {
       if (global) {
-        Tangent::template AngularJacobian<Traits<Translation>::kNumParameters>(J, 0).noalias() = Scalar{-1} * output.hat();
-        Tangent::template LinearJacobian<Traits<Translation>::kNumParameters>(J, 0).setIdentity();
+        Tangent::template AngularJacobian<Translation::SizeAtCompileTime>(J, 0).noalias() = Scalar{-1} * output.hat();
+        Tangent::template LinearJacobian<Translation::SizeAtCompileTime>(J, 0).setIdentity();
 
       } else {
-        Tangent::template AngularJacobian<Traits<Translation>::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this * v.hat();
-        Tangent::template LinearJacobian<Traits<Translation>::kNumParameters>(J, 0).noalias() = R_this;
+        Tangent::template AngularJacobian<Translation::SizeAtCompileTime>(J, 0).noalias() = Scalar{-1} * R_this * v.hat();
+        Tangent::template LinearJacobian<Translation::SizeAtCompileTime>(J, 0).noalias() = R_this;
       }
     } else {
       if (global) {
-        Tangent::template AngularJacobian<Traits<Translation>::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this_v.hat();
-        Tangent::template LinearJacobian<Traits<Translation>::kNumParameters>(J, 0).setIdentity();
+        Tangent::template AngularJacobian<Translation::SizeAtCompileTime>(J, 0).noalias() = Scalar{-1} * R_this_v.hat();
+        Tangent::template LinearJacobian<Translation::SizeAtCompileTime>(J, 0).setIdentity();
       } else {
-        Tangent::template AngularJacobian<Traits<Translation>::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this * v.hat();
-        Tangent::template LinearJacobian<Traits<Translation>::kNumParameters>(J, 0).setIdentity();
+        Tangent::template AngularJacobian<Translation::SizeAtCompileTime>(J, 0).noalias() = Scalar{-1} * R_this * v.hat();
+        Tangent::template LinearJacobian<Translation::SizeAtCompileTime>(J, 0).setIdentity();
       }
     }
   }

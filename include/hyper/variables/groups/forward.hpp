@@ -44,9 +44,9 @@ template <typename>
 class SE3;
 
 template <typename TScalar>
-struct Traits<SE3<TScalar>> : Traits<Cartesian<TScalar, Traits<SU2<TScalar>>::kNumParameters + 3>> {
+struct Traits<SE3<TScalar>> : Traits<Cartesian<TScalar, SU2<TScalar>::SizeAtCompileTime + 3>> {
   static constexpr auto kRotationOffset = 0;
-  static constexpr auto kNumRotationParameters = Traits<SU2<TScalar>>::kNumParameters;
+  static constexpr auto kNumRotationParameters = SU2<TScalar>::SizeAtCompileTime;
   static constexpr auto kTranslationOffset = kNumRotationParameters;
   static constexpr auto kNumTranslationParameters = 3;
 };
@@ -84,7 +84,6 @@ struct Traits<Eigen::Map<Tangent<TDerived>, TMapOptions>> : Traits<Tangent<TDeri
 template <typename TDerived, int TMapOptions>
 struct Traits<Eigen::Map<const Tangent<TDerived>, TMapOptions>> : Traits<Tangent<TDerived>> {
   using Base = typename Traits<Eigen::Map<const TDerived, TMapOptions>>::Base;
-  using ScalarWithConstIfNotLvalue = const typename Traits<TDerived>::Scalar;
 };
 
 template <typename TScalar>
