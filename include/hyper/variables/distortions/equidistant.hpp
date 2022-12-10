@@ -13,7 +13,7 @@ class EquidistantDistortionBase
  public:
   using Base = DistortionBase<TDerived>;
   using Scalar = typename Base::Scalar;
-  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
+  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(EquidistantDistortionBase)

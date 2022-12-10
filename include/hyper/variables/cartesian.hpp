@@ -10,13 +10,13 @@ namespace hyper {
 template <typename TDerived>
 class CartesianBase
     : public Traits<TDerived>::Base,
-      public AbstractVariable<std::conditional_t<VariableIsLValue<TDerived>::value, typename Traits<TDerived>::Base::Scalar, const typename Traits<TDerived>::Base::Scalar>> {
+      public AbstractVariable<ConstScalarIfVariableIsNotLValue_t<TDerived>> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
   using Scalar = Base::Scalar;
-  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
-  using VectorXWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, TVectorX<Scalar>, const TVectorX<Scalar>>;
+  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
+  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, TVectorX<Scalar>>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(CartesianBase)
@@ -56,7 +56,7 @@ class CartesianTangentBase
  public:
   using Base = CartesianBase<TDerived>;
   using Scalar = typename Base::Scalar;
-  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
+  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(CartesianTangentBase)

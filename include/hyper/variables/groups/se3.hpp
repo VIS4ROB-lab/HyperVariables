@@ -11,19 +11,19 @@ namespace hyper {
 template <typename TDerived>
 class SE3Base
     : public Traits<TDerived>::Base,
-      public AbstractVariable<std::conditional_t<VariableIsLValue<TDerived>::value, typename Traits<TDerived>::Base::Scalar, const typename Traits<TDerived>::Base::Scalar>> {
+      public AbstractVariable<ConstScalarIfVariableIsNotLValue_t<TDerived>> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
   using Scalar = typename Base::Scalar;
-  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
-  using VectorXWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, TVectorX<Scalar>, const TVectorX<Scalar>>;
+  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
+  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, TVectorX<Scalar>>;
   using Base::Base;
 
   using Rotation = SU2<Scalar>;
-  using RotationWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Rotation, const Rotation>;
+  using RotationWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Rotation>;
   using Translation = Cartesian<Scalar, 3>;
-  using TranslationWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Translation, const Translation>;
+  using TranslationWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Translation>;
 
   static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES;
   static constexpr auto kDefaultDerivativesAreCoupled = HYPER_DEFAULT_TO_COUPLED_LIE_GROUP_DERIVATIVES;
@@ -133,7 +133,7 @@ class SE3 final
   /// \param other Other input instance.
   template <typename TOtherDerived_>
   SE3(const SE3Base<TOtherDerived_>& other) // NOLINT
-  : Base{other} {}
+      : Base{other} {}
 
   /// Assignment operator.
   /// \tparam TOtherDerived_ Other dervied type.
@@ -163,13 +163,13 @@ class SE3TangentBase
  public:
   using Base = CartesianBase<TDerived>;
   using Scalar = typename Base::Scalar;
-  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
+  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using Base::Base;
 
   using Angular = Tangent<typename SE3<Scalar>::Rotation>;
-  using AngularWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const Angular, Angular>;
+  using AngularWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Angular>;
   using Linear = Tangent<typename SE3<Scalar>::Translation>;
-  using LinearWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const Linear, Linear>;
+  using LinearWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Linear>;
 
   static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES;
   static constexpr auto kDefaultDerivativesAreCoupled = HYPER_DEFAULT_TO_COUPLED_LIE_GROUP_DERIVATIVES;

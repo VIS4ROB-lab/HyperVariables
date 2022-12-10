@@ -132,9 +132,22 @@ struct NumericVariableTraits<double> {
 };
 
 template <typename TDerived>
-struct VariableIsLValue {
-  enum { value = (!bool(Eigen::internal::is_const<TDerived>::value)) &&
-                 bool(Traits<TDerived>::Base::Flags & Eigen::LvalueBit) };
+struct VariableIsLValue_q {
+  static constexpr auto kValue = (!bool(std::is_const_v<TDerived>)) && bool(Traits<TDerived>::Base::Flags & Eigen::LvalueBit);
 };
+
+template <typename TDerived>
+inline constexpr bool VariableIsLValue_v = VariableIsLValue_q<TDerived>::kValue;
+
+template <typename TDerived, typename TValue>
+struct ConstValueIfVariableIsNotLValue {
+  using Type = std::conditional_t<VariableIsLValue_v<TDerived>, TValue, const TValue>;
+};
+
+template <typename TDerived, typename TValue>
+using ConstValueIfVariableIsNotLValue_t = ConstValueIfVariableIsNotLValue<TDerived, TValue>::Type;
+
+template <typename TDerived>
+using ConstScalarIfVariableIsNotLValue_t = ConstValueIfVariableIsNotLValue_t<TDerived, typename Traits<TDerived>::Base::Scalar>;
 
 } // namespace hyper

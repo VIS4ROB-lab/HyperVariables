@@ -29,7 +29,7 @@ class AbstractStamped
 template <typename TDerived>
 class StampedBase
     : public Traits<TDerived>::Base,
-      public AbstractStamped<std::conditional_t<VariableIsLValue<TDerived>::value, typename Traits<TDerived>::Base::Scalar, const typename Traits<TDerived>::Base::Scalar>> {
+      public AbstractStamped<ConstScalarIfVariableIsNotLValue_t<TDerived>> {
  public:
   // Constants.
   static constexpr auto kVariableOffset = 0;
@@ -40,8 +40,8 @@ class StampedBase
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
   using Scalar = Base::Scalar;
-  using ScalarWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, Scalar, const Scalar>;
-  using VectorXWithConstIfNotLvalue = std::conditional_t<VariableIsLValue<TDerived>::value, TVectorX<Scalar>, const TVectorX<Scalar>>;
+  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
+  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, TVectorX<Scalar>>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(StampedBase)
