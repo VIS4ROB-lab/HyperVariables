@@ -40,7 +40,7 @@ class ManifoldMetric<SE3<TScalar>> final
       const bool coupled = kDefaultDerivativesAreCoupled,
       const bool global = kDefaultDerivativesAreGlobal)
       -> Output {
-    using Jacobian = Jacobian<Output, Tangent<Input>>;
+    using Jacobian = TJacobianNM<Output, Tangent<Input>>;
 
     if (raw_J_lhs || raw_J_rhs) {
       if (raw_J_lhs && raw_J_rhs) {
@@ -92,8 +92,8 @@ class ManifoldMetric<SE3<TScalar>> final
   auto distance(
       const Eigen::Ref<const DynamicVector<Scalar>>& lhs,
       const Eigen::Ref<const DynamicVector<Scalar>>& rhs,
-      DynamicJacobian<Scalar>* J_lhs,
-      DynamicJacobian<Scalar>* J_rhs) const
+      TJacobianX<Scalar>* J_lhs,
+      TJacobianX<Scalar>* J_rhs) const
       -> DynamicVector<Scalar> final {
     if (J_lhs || J_rhs) {
       if (J_lhs && J_rhs) {

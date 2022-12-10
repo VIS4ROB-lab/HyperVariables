@@ -30,7 +30,7 @@ class AngularMetric final
       Scalar* raw_J_lhs = nullptr,
       Scalar* raw_J_rhs = nullptr)
       -> Output {
-    using Jacobian = Jacobian<Output, Input>;
+    using Jacobian = TJacobianNM<Output, Input>;
 
     const auto cross = lhs.cross(rhs).eval();
     const auto ncross = cross.norm();
@@ -81,8 +81,8 @@ class AngularMetric final
   auto distance(
       const Eigen::Ref<const DynamicVector<Scalar>>& lhs,
       const Eigen::Ref<const DynamicVector<Scalar>>& rhs,
-      DynamicJacobian<Scalar>* J_lhs = nullptr,
-      DynamicJacobian<Scalar>* J_rhs = nullptr) const
+      TJacobianX<Scalar>* J_lhs = nullptr,
+      TJacobianX<Scalar>* J_rhs = nullptr) const
       -> DynamicVector<Scalar> final {
     if (J_lhs || J_rhs) {
       if (J_lhs && J_rhs) {

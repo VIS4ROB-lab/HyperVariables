@@ -21,8 +21,8 @@ class OrthonormalityAlignmentTests
   using Alignment = OrthonormalityAlignment<Scalar, Order>;
   using Input = Alignment::Input;
 
-  using InputJacobian = Jacobian<Alignment::Output, Alignment::Input>;
-  using ParameterJacobian = Jacobian<Alignment::Output, Alignment>;
+  using InputJacobian = TJacobianNM<Alignment::Output, Alignment::Input>;
+  using ParameterJacobian = TJacobianNM<Alignment::Output, Alignment>;
 
   auto setRandom() -> void {
     alignment_.setRandom();

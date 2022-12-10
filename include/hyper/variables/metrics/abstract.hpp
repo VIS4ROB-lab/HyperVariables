@@ -32,8 +32,8 @@ class AbstractMetric {
   virtual auto distance(
       const Eigen::Ref<const DynamicVector<TScalar>>& lhs,
       const Eigen::Ref<const DynamicVector<TScalar>>& rhs,
-      DynamicJacobian<TScalar>* J_lhs,
-      DynamicJacobian<TScalar>* J_rhs) const
+      TJacobianX<TScalar>* J_lhs,
+      TJacobianX<TScalar>* J_rhs) const
       -> DynamicVector<TScalar> = 0;
 };
 

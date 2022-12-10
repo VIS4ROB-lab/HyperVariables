@@ -359,7 +359,7 @@ auto SU2Base<TDerived>::groupInverse(Scalar* raw_J, const bool global) const -> 
   const auto i_q = this->conjugate();
 
   if (raw_J) {
-    auto J = Eigen::Map<Jacobian<Tangent<SU2<Scalar>>>>{raw_J};
+    auto J = Eigen::Map<TJacobianNM<Tangent<SU2<Scalar>>>>{raw_J};
     if (global) {
       J.noalias() = Scalar{-1} * i_q.matrix();
     } else {
@@ -376,7 +376,7 @@ auto SU2Base<TDerived>::groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* 
   auto output = (*this) * other;
 
   if (raw_J_this) {
-    auto J = Eigen::Map<Jacobian<Tangent<SU2<Scalar>>>>{raw_J_this};
+    auto J = Eigen::Map<TJacobianNM<Tangent<SU2<Scalar>>>>{raw_J_this};
     if (global) {
       J.setIdentity();
     } else {
@@ -385,7 +385,7 @@ auto SU2Base<TDerived>::groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* 
   }
 
   if (raw_J_other) {
-    auto J = Eigen::Map<Jacobian<Tangent<SU2<Scalar>>>>{raw_J_other};
+    auto J = Eigen::Map<TJacobianNM<Tangent<SU2<Scalar>>>>{raw_J_other};
     if (global) {
       J.noalias() = this->matrix();
     } else {
@@ -403,7 +403,7 @@ auto SU2Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, S
 
   if (raw_J_this) {
     using Tangent = Tangent<SU2<Scalar>>;
-    auto J = Eigen::Map<Jacobian<Translation, Tangent>>{raw_J_this};
+    auto J = Eigen::Map<TJacobianNM<Translation, Tangent>>{raw_J_this};
     if (global) {
       J.noalias() = Scalar{-1} * output.hat();
     } else {
@@ -412,7 +412,7 @@ auto SU2Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, S
   }
 
   if (raw_J_vector) {
-    Eigen::Map<Jacobian<Translation>>{raw_J_vector}.noalias() = this->matrix();
+    Eigen::Map<TJacobianNM<Translation>>{raw_J_vector}.noalias() = this->matrix();
   }
 
   return output;
@@ -447,7 +447,7 @@ auto SU2Base<TDerived>::toTangent(Scalar* raw_J, const bool global) const -> Tan
   auto output = groupLog().toTangent();
 
   if (raw_J) {
-    using Jacobian = Jacobian<Tangent<SU2<Scalar>>>;
+    using Jacobian = TJacobianNM<Tangent<SU2<Scalar>>>;
     auto J = Eigen::Map<Jacobian>{raw_J};
     const auto nw2 = output.squaredNorm();
     const auto nw = std::sqrt(nw2);
@@ -520,7 +520,7 @@ auto SU2TangentBase<TDerived>::toManifold(Scalar* raw_J, const bool global) cons
   auto output = toAlgebra().groupExp();
 
   if (raw_J) {
-    using Jacobian = Jacobian<Tangent<SU2<Scalar>>>;
+    using Jacobian = TJacobianNM<Tangent<SU2<Scalar>>>;
     auto J = Eigen::Map<Jacobian>{raw_J};
     const auto nw2 = this->squaredNorm();
     const auto nw = std::sqrt(nw2);

@@ -55,11 +55,11 @@ class DistortionTests
 
   auto checkInputJacobian() const -> void {
     for (auto i = 0; i < kNumInnerIterations; ++i) {
-      auto J_a = Jacobian<Pixel<Scalar>>{};
+      auto J_a = TJacobianNM<Pixel<Scalar>>{};
       const Pixel<Scalar> px = Pixel<Scalar>::Random();
       const Pixel<Scalar> d_px = distortion_->distort(px, J_a.data(), nullptr);
 
-      auto J_n = Jacobian<Pixel<Scalar>>{};
+      auto J_n = TJacobianNM<Pixel<Scalar>>{};
       for (auto j = 0; j < Traits<Pixel<Scalar>>::kNumParameters; ++j) {
         const Pixel<Scalar> py_0 = px - kNumericIncrement * Pixel<Scalar>::Unit(j);
         const Pixel<Scalar> d_py_0 = distortion_->distort(py_0, nullptr, nullptr);
@@ -98,8 +98,8 @@ class DistortionTests
     for (auto i = 0; i < kNumInnerIterations; ++i) {
       const Pixel<Scalar> px = Pixel<Scalar>::Random();
 
-      auto J_a = Jacobian<Pixel<Scalar>>{};
-      auto J_b = Jacobian<Pixel<Scalar>>{};
+      auto J_a = TJacobianNM<Pixel<Scalar>>{};
+      auto J_b = TJacobianNM<Pixel<Scalar>>{};
       const Pixel<Scalar> py = distortion_->distort(px, J_a.data(), nullptr);
       const Pixel<Scalar> pz = distortion_->undistort(py, J_b.data(), nullptr);
 
@@ -111,10 +111,10 @@ class DistortionTests
     for (auto i = 0; i < kNumInnerIterations; ++i) {
       const Pixel<Scalar> px = Pixel<Scalar>::Random();
 
-      auto J_a = Jacobian<Pixel<Scalar>>{};
+      auto J_a = TJacobianNM<Pixel<Scalar>>{};
       const Pixel<Scalar> d_px = distortion_->undistort(px, J_a.data(), nullptr);
 
-      auto J_n = Jacobian<Pixel<Scalar>>{};
+      auto J_n = TJacobianNM<Pixel<Scalar>>{};
       for (auto j = 0; j < Traits<Pixel<Scalar>>::kNumParameters; ++j) {
         const Pixel<Scalar> py_0 = px - kNumericIncrement * Pixel<Scalar>::Unit(j);
         const Pixel<Scalar> d_py_0 = distortion_->undistort(py_0, nullptr, nullptr);

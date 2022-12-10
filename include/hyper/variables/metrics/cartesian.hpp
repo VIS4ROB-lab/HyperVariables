@@ -28,7 +28,7 @@ class CartesianMetric final
       Scalar* raw_J_lhs = nullptr,
       Scalar* raw_J_rhs = nullptr)
       -> Output {
-    using Jacobian = Jacobian<Output, Input>;
+    using Jacobian = TJacobianNM<Output, Input>;
 
     if (raw_J_lhs) {
       Eigen::Map<Jacobian>{raw_J_lhs}.setIdentity();
@@ -62,8 +62,8 @@ class CartesianMetric final
   auto distance(
       const Eigen::Ref<const DynamicVector<Scalar>>& lhs,
       const Eigen::Ref<const DynamicVector<Scalar>>& rhs,
-      DynamicJacobian<Scalar>* J_lhs,
-      DynamicJacobian<Scalar>* J_rhs) const
+      TJacobianX<Scalar>* J_lhs,
+      TJacobianX<Scalar>* J_rhs) const
       -> DynamicVector<Scalar> final {
     if (J_lhs || J_rhs) {
       if (J_lhs && J_rhs) {
