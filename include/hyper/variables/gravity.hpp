@@ -35,8 +35,8 @@ class Gravity final
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Gravity)
 
-  /// Deleted default constructor.
-  Gravity() = delete;
+  /// Default constructor.
+  Gravity() = default;
 
   /// Forwarding constructor with norm check.
   /// \tparam TArgs_ Input argument types.
