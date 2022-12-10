@@ -9,14 +9,6 @@
 
 namespace hyper {
 
-using Index = Eigen::Index;
-
-template <typename TScalar, int TRows>
-using Vector = Eigen::Matrix<TScalar, TRows, 1>;
-
-template <typename TScalar>
-using DynamicVector = Vector<TScalar, Eigen::Dynamic>;
-
 template <typename>
 class AbstractVariable;
 

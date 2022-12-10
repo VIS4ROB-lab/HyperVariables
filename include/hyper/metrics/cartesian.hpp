@@ -60,11 +60,11 @@ class CartesianMetric final
   /// \param J_rhs Jacobian w.r.t. right input.
   /// \return Distance between inputs.
   auto distance(
-      const Eigen::Ref<const DynamicVector<Scalar>>& lhs,
-      const Eigen::Ref<const DynamicVector<Scalar>>& rhs,
+      const Eigen::Ref<const TVectorX<Scalar>>& lhs,
+      const Eigen::Ref<const TVectorX<Scalar>>& rhs,
       TJacobianX<Scalar>* J_lhs,
       TJacobianX<Scalar>* J_rhs) const
-      -> DynamicVector<Scalar> final {
+      -> TVectorX<Scalar> final {
     if (J_lhs || J_rhs) {
       if (J_lhs && J_rhs) {
         J_lhs->resize(Traits<Output>::kNumParameters, Traits<Input>::kNumParameters);

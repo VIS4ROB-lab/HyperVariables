@@ -34,7 +34,7 @@ class StampedBase
   // Definitions.
   using Scalar = typename Traits<TDerived>::Scalar;
   using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
-  using DynamicVectorWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const DynamicVector<Scalar>, DynamicVector<Scalar>>;
+  using VectorXWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const TVectorX<Scalar>, TVectorX<Scalar>>;
   using Base = typename Traits<TDerived>::Base;
   using Base::Base;
 
@@ -42,13 +42,13 @@ class StampedBase
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Map<const DynamicVector<Scalar>> final {
+  auto asVector() const -> Eigen::Map<const TVectorX<Scalar>> final {
     return {this->data(), this->size(), 1};
   }
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> final {
+  auto asVector() -> Eigen::Map<VectorXWithConstIfNotLvalue> final {
     return {this->data(), this->size(), 1};
   }
 

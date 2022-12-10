@@ -21,7 +21,7 @@ class QuaternionBase
   // Definitions.
   using Scalar = typename Traits<TDerived>::Scalar;
   using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
-  using DynamicVectorWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const DynamicVector<Scalar>, DynamicVector<Scalar>>;
+  using VectorXWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const TVectorX<Scalar>, TVectorX<Scalar>>;
   using Base = typename Traits<TDerived>::Base;
   using Base::Base;
   using Base::operator*;
@@ -52,11 +52,11 @@ class QuaternionBase
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Map<const DynamicVector<Scalar>> final;
+  auto asVector() const -> Eigen::Map<const TVectorX<Scalar>> final;
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> final;
+  auto asVector() -> Eigen::Map<VectorXWithConstIfNotLvalue> final;
 
   /// Group inverse.
   /// \return Inverse element.
@@ -286,12 +286,12 @@ auto QuaternionBase<TDerived>::data() -> ScalarWithConstIfNotLvalue* {
 }
 
 template <typename TDerived>
-auto QuaternionBase<TDerived>::asVector() const -> Eigen::Map<const DynamicVector<Scalar>> {
+auto QuaternionBase<TDerived>::asVector() const -> Eigen::Map<const TVectorX<Scalar>> {
   return {this->data(), Traits<TDerived>::kNumParameters, 1};
 }
 
 template <typename TDerived>
-auto QuaternionBase<TDerived>::asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> {
+auto QuaternionBase<TDerived>::asVector() -> Eigen::Map<VectorXWithConstIfNotLvalue> {
   return {this->data(), Traits<TDerived>::kNumParameters, 1};
 }
 

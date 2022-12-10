@@ -15,7 +15,7 @@ class DistortionBase<TDerived, true>
   // Definitions.
   using Scalar = typename Traits<TDerived>::Scalar;
   using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
-  using DynamicVectorWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const DynamicVector<Scalar>, DynamicVector<Scalar>>;
+  using VectorXWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const TVectorX<Scalar>, TVectorX<Scalar>>;
   using Base = typename Traits<TDerived>::Base;
   using Base::Base;
 
@@ -23,11 +23,11 @@ class DistortionBase<TDerived, true>
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Map<const DynamicVector<Scalar>> final;
+  auto asVector() const -> Eigen::Map<const TVectorX<Scalar>> final;
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> final;
+  auto asVector() -> Eigen::Map<VectorXWithConstIfNotLvalue> final;
 
   /// Maps a distortion.
   /// \param raw_distortion Raw distortion.
@@ -60,12 +60,12 @@ class DistortionBase<TDerived, false>
 };
 
 template <typename TDerived>
-auto DistortionBase<TDerived, true>::asVector() const -> Eigen::Map<const DynamicVector<Scalar>> {
+auto DistortionBase<TDerived, true>::asVector() const -> Eigen::Map<const TVectorX<Scalar>> {
   return {this->data(), this->size(), 1};
 }
 
 template <typename TDerived>
-auto DistortionBase<TDerived, true>::asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> {
+auto DistortionBase<TDerived, true>::asVector() -> Eigen::Map<VectorXWithConstIfNotLvalue> {
   return {this->data(), this->size(), 1};
 }
 
