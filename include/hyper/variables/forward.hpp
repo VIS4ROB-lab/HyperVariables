@@ -13,9 +13,6 @@ template <typename>
 struct Traits;
 
 template <typename>
-struct NumericVariableTraits;
-
-template <typename>
 class AbstractVariable;
 
 template <typename>
@@ -81,9 +78,13 @@ struct Traits<OrthonormalityAlignment<TScalar, TOrder>>
 
 HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::OrthonormalityAlignment, int)
 
+template <typename TScalar>
+using Stamp = Cartesian<TScalar, 1>;
+
 template <typename TVariable>
 struct Traits<Stamped<TVariable>>
-    : public Traits<Cartesian<typename TVariable::Scalar, TVariable::SizeAtCompileTime + 1>> {
+    : public Traits<Cartesian<typename TVariable::Scalar,
+          Stamp<typename TVariable::Scalar>::SizeAtCompileTime + TVariable::SizeAtCompileTime>> {
   using Variable = TVariable;
 };
 
@@ -107,6 +108,9 @@ using Position = Cartesian<TScalar, TNumParameters>;
 
 template <typename TScalar, int TNumParameters = 3>
 using Translation = Cartesian<TScalar, TNumParameters>;
+
+template <typename>
+struct NumericVariableTraits;
 
 template <>
 struct NumericVariableTraits<float> {

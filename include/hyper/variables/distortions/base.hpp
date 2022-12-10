@@ -71,12 +71,12 @@ auto DistortionBase<TDerived, true>::asVector() -> Eigen::Map<VectorXWithConstIf
 
 template <typename TDerived>
 auto DistortionBase<TDerived, true>::map(const Scalar* raw_distortion) const -> std::unique_ptr<AbstractDistortion<const Scalar>> {
-  return std::make_unique<Eigen::Map<const typename Traits<TDerived>::PlainDerivedType>>(raw_distortion);
+  return std::make_unique<Eigen::Map<const typename Traits<TDerived>::Distortion>>(raw_distortion);
 }
 
 template <typename TDerived>
 auto DistortionBase<TDerived, true>::map(Scalar* raw_distortion) const -> std::unique_ptr<AbstractDistortion<Scalar>> {
-  return std::make_unique<Eigen::Map<typename Traits<TDerived>::PlainDerivedType>>(raw_distortion);
+  return std::make_unique<Eigen::Map<typename Traits<TDerived>::Distortion>>(raw_distortion);
 }
 
 template <typename TDerived>

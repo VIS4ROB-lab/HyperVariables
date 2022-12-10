@@ -11,10 +11,18 @@ template <typename TDerived>
 class RadialTangentialDistortionBase
     : public DistortionBase<TDerived> {
  public:
+  // Definitions.
   using Base = DistortionBase<TDerived>;
   using Scalar = typename Base::Scalar;
   using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using Base::Base;
+
+  // Constants.
+  static constexpr auto kOrder = Traits<TDerived>::kOrder;
+  static constexpr auto kRadialOffset = 0;
+  static constexpr auto kNumRadialParameters = kOrder;
+  static constexpr auto kTangentialOffset = kRadialOffset + kNumRadialParameters;
+  static constexpr auto kNumTangentialParameters = 2;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(RadialTangentialDistortionBase)
 
@@ -33,25 +41,25 @@ class RadialTangentialDistortionBase
   /// Radial parameters accessor.
   /// \return Radial parameters.
   auto radial() const {
-    return this->segment(Traits<TDerived>::kRadialOffset, radialOrder());
+    return this->segment(kRadialOffset, radialOrder());
   }
 
   /// Radial parameters modifier.
   /// \return Radial parameters.
   auto radial() {
-    return this->segment(Traits<TDerived>::kRadialOffset, radialOrder());
+    return this->segment(kRadialOffset, radialOrder());
   }
 
   /// Tangential parameters accessor.
   /// \return Tangential parameters.
   auto tangential() const {
-    return this->segment(Traits<TDerived>::kRadialOffset + radialOrder(), tangentialOrder());
+    return this->segment(kRadialOffset + radialOrder(), tangentialOrder());
   }
 
   /// Tangential parameters modifier.
   /// \return Tangential parameters.
   auto tangential() {
-    return this->segment(Traits<TDerived>::kRadialOffset + radialOrder(), tangentialOrder());
+    return this->segment(kRadialOffset + radialOrder(), tangentialOrder());
   }
 
   /// Sets the default parameters.

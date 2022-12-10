@@ -11,10 +11,16 @@ template <typename TDerived>
 class IterativeRadialDistortionBase
     : public DistortionBase<TDerived> {
  public:
+  // Definitions.
   using Base = DistortionBase<TDerived>;
   using Scalar = typename Base::Scalar;
   using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using Base::Base;
+
+  // Constants.
+  static constexpr auto kOrder = Traits<TDerived>::kOrder;
+  static constexpr auto kRadialOffset = 0;
+  static constexpr auto kNumRadialParameters = kOrder;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(IterativeRadialDistortionBase)
 

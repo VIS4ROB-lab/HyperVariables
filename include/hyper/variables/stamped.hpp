@@ -38,9 +38,7 @@ class StampedBase
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, TVectorX<Scalar>>;
   using Base::Base;
 
-  using Stamp = Cartesian<Scalar, 1>;
   using Variable = Traits<TDerived>::Variable;
-  using StampWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Stamp>;
   using VariableWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Variable>;
 
   // Constants.

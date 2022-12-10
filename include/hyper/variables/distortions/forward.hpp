@@ -19,13 +19,9 @@ class EquidistantDistortion;
 template <typename TScalar, int TOrder>
 struct Traits<EquidistantDistortion<TScalar, TOrder>>
     : public Traits<Cartesian<TScalar, TOrder>> {
-  // Constants.
-  static constexpr auto kRadialOffset = 0;
-  static constexpr auto kNumRadialParameters = TOrder;
-  static constexpr auto kOrder = TOrder;
-
   // Definitions.
-  using PlainDerivedType = EquidistantDistortion<TScalar, TOrder>;
+  static constexpr auto kOrder = TOrder;
+  using Distortion = EquidistantDistortion<TScalar, TOrder>;
 };
 
 HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::EquidistantDistortion, int)
@@ -36,15 +32,8 @@ class RadialTangentialDistortion;
 template <typename TScalar, int TOrder>
 struct Traits<RadialTangentialDistortion<TScalar, TOrder>>
     : public Traits<Cartesian<TScalar, TOrder == Eigen::Dynamic ? TOrder : TOrder + 2>> {
-  // Constants.
-  static constexpr auto kRadialOffset = 0;
-  static constexpr auto kNumRadialParameters = TOrder;
-  static constexpr auto kTangentialOffset = kRadialOffset + kNumRadialParameters;
-  static constexpr auto kNumTangentialParameters = 2;
   static constexpr auto kOrder = TOrder;
-
-  // Definitions.
-  using PlainDerivedType = RadialTangentialDistortion<TScalar, TOrder>;
+  using Distortion = RadialTangentialDistortion<TScalar, TOrder>;
 };
 
 HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::RadialTangentialDistortion, int)
@@ -55,13 +44,8 @@ class IterativeRadialDistortion;
 template <typename TScalar, int TOrder>
 struct Traits<IterativeRadialDistortion<TScalar, TOrder>>
     : public Traits<Cartesian<TScalar, TOrder>> {
-  // Constants.
-  static constexpr auto kRadialOffset = 0;
-  static constexpr auto kNumRadialParameters = TOrder;
   static constexpr auto kOrder = TOrder;
-
-  // Definitions.
-  using PlainDerivedType = IterativeRadialDistortion<TScalar, TOrder>;
+  using Distortion = IterativeRadialDistortion<TScalar, TOrder>;
 };
 
 HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::IterativeRadialDistortion, int)
