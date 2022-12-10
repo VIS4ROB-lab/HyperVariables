@@ -15,8 +15,8 @@ namespace hyper {
 /// \param raw_su2 Raw SU2 input.
 /// \return Jacobian adapter.
 template <typename TScalar>
-auto SU2JacobianAdapter(const TScalar* raw_su2) -> Jacobian<Tangent<SU2<TScalar>>, SU2<TScalar>> {
-  Jacobian<Tangent<SU2<TScalar>>, SU2<TScalar>> J;
+auto SU2JacobianAdapter(const TScalar* raw_su2) -> TJacobianNM<Tangent<SU2<TScalar>>, SU2<TScalar>> {
+  TJacobianNM<Tangent<SU2<TScalar>>, SU2<TScalar>> J;
 
   using Order = QuaternionOrder;
   TScalar tau[Traits<SU2<TScalar>>::kNumParameters];
@@ -51,10 +51,10 @@ auto SU2JacobianAdapter(const TScalar* raw_su2) -> Jacobian<Tangent<SU2<TScalar>
 /// \param raw_se3 Raw SE3 input.
 /// \return Jacobian adapter.
 template <typename TScalar>
-auto SE3JacobianAdapter(const TScalar* raw_se3) -> Jacobian<Tangent<SE3<TScalar>>, SE3<TScalar>> {
+auto SE3JacobianAdapter(const TScalar* raw_se3) -> TJacobianNM<Tangent<SE3<TScalar>>, SE3<TScalar>> {
   using SE3Traits = Traits<SE3<TScalar>>;
   using SE3TangentTraits = Traits<Tangent<SE3<TScalar>>>;
-  Jacobian<Tangent<SE3<TScalar>>, SE3<TScalar>> J;
+  TJacobianNM<Tangent<SE3<TScalar>>, SE3<TScalar>> J;
   SE3<TScalar>::template RotationJacobian<SE3TangentTraits::kNumAngularParameters>(J, SE3TangentTraits::kAngularOffset).noalias() = SU2JacobianAdapter(raw_se3 + SE3Traits::kRotationOffset);
   SE3<TScalar>::template TranslationJacobian<SE3TangentTraits::kNumAngularParameters>(J, SE3TangentTraits::kAngularOffset).setZero();
   SE3<TScalar>::template RotationJacobian<SE3TangentTraits::kNumLinearParameters>(J, SE3TangentTraits::kLinearOffset).setZero();

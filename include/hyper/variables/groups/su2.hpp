@@ -18,6 +18,9 @@ class QuaternionBase
     : public Traits<TDerived>::Base,
       public AbstractVariable<typename Traits<TDerived>::ScalarWithConstIfNotLvalue> {
  public:
+  // Constants.
+  static constexpr auto SizeAtCompileTime = 4;
+
   // Definitions.
   using Scalar = typename Traits<TDerived>::Scalar;
   using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
