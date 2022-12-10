@@ -3,83 +3,82 @@
 
 #pragma once
 
-#include "abstract.hpp"
-#include "hyper/variables/cartesian.hpp"
+#include "hyper/metrics/metric.hpp"
 
 namespace hyper {
 
-template <typename TInput>
-class CartesianMetric final
-    : public AbstractMetric<typename Traits<TInput>::Scalar> {
+template <typename TScalar, int TDim>
+class TCartesianMetric final : public TMetric<TScalar> {
  public:
-  using Input = TInput;
-  using Scalar = typename Traits<Input>::Scalar;
-  using Output = TInput;
+  // Constants.
+  static constexpr auto kInputDim = TDim;
+  static constexpr auto kOutputDim = TDim;
 
-  /// Computes the distance between elements.
-  /// \param lhs Left input element.
-  /// \param raw_rhs Right input element.
-  /// \param raw_J_lhs Jacobian w.r.t. left input.
-  /// \param raw_J_rhs Jacobian w.r.t. right input.
+  // Definitions.
+  using Scalar = TScalar;
+  using Input = TVector<Scalar, kInputDim>;
+  using Output = TVector<Scalar, kOutputDim>;
+  using Jacobian = TJacobian<Scalar, kOutputDim, kInputDim>;
+
+  /// Evaluates the distance between elements.
+  /// \param lhs Left element/input vector.
+  /// \param rhs Right element/input vector.
+  /// \param output Distance between elements.
+  /// \param J_lhs Jacobian w.r.t. left element (optional).
+  /// \param J_rhs Jacobian w.r.t. right element (optional).
+  static auto Distance(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs = nullptr,
+      Scalar* J_rhs = nullptr) -> void {
+    if (J_lhs) {
+      Eigen::Map<Jacobian>{J_lhs}.setIdentity();
+    }
+
+    if (J_rhs) {
+      Eigen::Map<Jacobian>{J_rhs}.noalias() = Scalar{-1} * Jacobian::Identity();
+    }
+
+    Eigen::Map<Output>{output}.noalias() = Eigen::Map<const Input>{lhs} - Eigen::Map<const Input>{rhs};
+  }
+
+  /// Evaluates the distance between elements.
+  /// \param lhs Left element/input vector.
+  /// \param rhs Right element/input vector.
+  /// \param J_lhs Jacobian w.r.t. left element (optional).
+  /// \param J_rhs Jacobian w.r.t. right element (optional).
   /// \return Distance between elements.
-  static auto Distance(
-      const Eigen::Ref<const Input>& lhs,
-      const Eigen::Ref<const Input>& rhs,
-      Scalar* raw_J_lhs = nullptr,
-      Scalar* raw_J_rhs = nullptr)
-      -> Output {
-    using Jacobian = TJacobianNM<Output, Input>;
-
-    if (raw_J_lhs) {
-      Eigen::Map<Jacobian>{raw_J_lhs}.setIdentity();
-    }
-
-    if (raw_J_rhs) {
-      Eigen::Map<Jacobian>{raw_J_rhs}.noalias() = Scalar{-1} * Jacobian::Identity();
-    }
-
-    return lhs - rhs;
+  static auto Distance(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, Scalar* J_lhs = nullptr,
+      Scalar* J_rhs = nullptr) -> Output {
+    Output output;
+    Distance(lhs.data(), rhs.data(), output.data(), J_lhs, J_rhs);
+    return output;
   }
 
-  /// Retrieves the input size.
-  /// \return Input size.
-  [[nodiscard]] constexpr auto inputSize() const -> int final {
-    return Traits<Input>::kNumParameters;
+  /// Retrieves the input dimension.
+  /// \return Input dimension.
+  [[nodiscard]] constexpr auto inputDim() const -> int final { return kInputDim; };
+
+  /// Retrieves the output dimension.
+  /// \return Output dimension.
+  [[nodiscard]] constexpr auto outputDim() const -> int final { return kOutputDim; };
+
+  /// Evaluates the distance between elements.
+  /// \param lhs Left element/input vector.
+  /// \param rhs Right element/input vector.
+  /// \param output Distance between elements.
+  /// \param J_lhs Jacobian w.r.t. left element (optional).
+  /// \param J_rhs Jacobian w.r.t. right element (optional).
+  auto distance(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void final {
+    Distance(lhs, rhs, output, J_lhs, J_rhs);
   }
 
-  /// Retrieves the output size.
-  /// \return Output size.
-  [[nodiscard]] constexpr auto outputSize() const -> int final {
-    return Traits<Output>::kNumParameters;
-  }
-
-  /// Computes the distance between inputs.
-  /// \param lhs Left input.
-  /// \param rhs Right input.
-  /// \param J_lhs Jacobian w.r.t. left input.
-  /// \param J_rhs Jacobian w.r.t. right input.
-  /// \return Distance between inputs.
-  auto distance(
-      const Eigen::Ref<const TVectorX<Scalar>>& lhs,
-      const Eigen::Ref<const TVectorX<Scalar>>& rhs,
-      TJacobianX<Scalar>* J_lhs,
-      TJacobianX<Scalar>* J_rhs) const
-      -> TVectorX<Scalar> final {
-    if (J_lhs || J_rhs) {
-      if (J_lhs && J_rhs) {
-        J_lhs->resize(Traits<Output>::kNumParameters, Traits<Input>::kNumParameters);
-        J_rhs->resize(Traits<Output>::kNumParameters, Traits<Input>::kNumParameters);
-        return Distance(lhs, rhs, J_lhs->data(), J_rhs->data());
-      } else if (J_lhs) {
-        J_lhs->resize(Traits<Output>::kNumParameters, Traits<Input>::kNumParameters);
-        return Distance(lhs, rhs, J_lhs->data(), nullptr);
-      } else {
-        J_rhs->resize(Traits<Output>::kNumParameters, Traits<Input>::kNumParameters);
-        return Distance(lhs, rhs, nullptr, J_rhs->data());
-      }
-    } else {
-      return Distance(lhs, rhs, nullptr, nullptr);
-    }
+  /// Evaluates the distance between elements.
+  /// \param lhs Left element/input vector.
+  /// \param rhs Right element/input vector.
+  /// \param J_lhs Jacobian w.r.t. left element (optional).
+  /// \param J_rhs Jacobian w.r.t. right element (optional).
+  /// \return Distance between elements.
+  auto distance(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, Scalar* J_lhs = nullptr,
+      Scalar* J_rhs = nullptr) const -> Output {
+    return Distance(lhs, rhs, J_lhs, J_rhs);
   }
 };
 
