@@ -13,7 +13,8 @@ if(PROJECT_IS_TOP_LEVEL)
 endif()
 
 # Define libraries and aliases.
-add_library(${PROJECT_NAME} INTERFACE)
+file(GLOB_RECURSE PROJECT_SOURCE_FILES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/include/*.hpp ${PROJECT_SOURCE_DIR}/internal/*.cpp)
+add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCE_FILES})
 add_library(Hyper::Variables ALIAS ${PROJECT_NAME})
 
 # Find Eigen target if not present.
@@ -32,9 +33,9 @@ if (NOT TARGET glog::glog)
 endif ()
 
 # Add includes and link libraries.
-target_compile_definitions(${PROJECT_NAME} INTERFACE EIGEN_MATRIXBASE_PLUGIN="${PROJECT_SOURCE_DIR}/plugins/matrix_base_plugin.hpp")
-target_include_directories(${PROJECT_NAME} INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-target_link_libraries(${PROJECT_NAME} INTERFACE Eigen3::Eigen glog::glog GTest::GTest)
+target_compile_definitions(${PROJECT_NAME} PUBLIC EIGEN_MATRIXBASE_PLUGIN="${PROJECT_SOURCE_DIR}/plugins/matrix_base_plugin.hpp")
+target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen PUBLIC glog::glog PUBLIC GTest::GTest)
 
 # Build tests.
 option(HYPER_BUILD_TESTING "Build tests." TRUE)

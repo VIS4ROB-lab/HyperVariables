@@ -9,4 +9,4 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/main.cpp ${PROJECT_SOURCE_F
 
 # Add includes and link libraries.
 target_include_directories(${PROJECT_NAME} PRIVATE ${PARENT_DIR}/tests/include)
-target_link_libraries(${PROJECT_NAME} Hyper::Variables)
+target_link_libraries(${PROJECT_NAME} PRIVATE Hyper::Variables)
