@@ -5,14 +5,16 @@ enable_language(CXX)
 # Define projects.
 project(HyperVariables VERSION 22.06.14 DESCRIPTION "" HOMEPAGE_URL https://github.com/VIS4ROB-lab/HyperVariables LANGUAGES CXX)
 
+# Set properties.
+if(PROJECT_IS_TOP_LEVEL)
+    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_STANDARD_REQUIRED YES)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -Wall -Wextra -Wnon-virtual-dtor -pedantic")
+endif()
+
 # Define libraries and aliases.
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(Hyper::Variables ALIAS ${PROJECT_NAME})
-
-# Set properties.
-set_target_properties(${PROJECT_NAME} PROPERTIES INTERFACE_CXX_STANDARD 20 INTERFACE_CXX_STANDARD_REQUIRED YES)
-target_compile_options(${PROJECT_NAME} INTERFACE -Wall -Wextra -Wnon-virtual-dtor -pedantic)
-target_compile_options(${PROJECT_NAME} INTERFACE -O3 -march=native)
 
 # Find Eigen target if not present.
 if (NOT TARGET Eigen3::Eigen)

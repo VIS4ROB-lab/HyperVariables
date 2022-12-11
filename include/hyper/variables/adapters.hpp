@@ -19,7 +19,7 @@ auto SU2JacobianAdapter(const TScalar* raw_su2) -> TJacobianNM<Tangent<SU2<TScal
   TJacobianNM<Tangent<SU2<TScalar>>, SU2<TScalar>> J;
 
   using Order = QuaternionOrder;
-  TScalar tau[SU2<TScalar>::SizeAtCompileTime];
+  TScalar tau[SU2<TScalar>::kNumParameters];
   tau[Order::kW] = TScalar{2} * raw_su2[Order::kW];
   tau[Order::kX] = TScalar{2} * raw_su2[Order::kX];
   tau[Order::kY] = TScalar{2} * raw_su2[Order::kY];

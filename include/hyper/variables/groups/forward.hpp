@@ -44,7 +44,7 @@ template <typename>
 class SE3;
 
 template <typename TScalar>
-struct Traits<SE3<TScalar>> : Traits<Cartesian<TScalar, SU2<TScalar>::SizeAtCompileTime + 3>> {};
+struct Traits<SE3<TScalar>> : Traits<Cartesian<TScalar, SU2<TScalar>::kNumParameters + 3>> {};
 
 HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::SE3)
 

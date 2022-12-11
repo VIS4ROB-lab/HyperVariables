@@ -26,9 +26,10 @@ class SE3Base
 
   // Constants.
   static constexpr auto kRotationOffset = 0;
-  static constexpr auto kNumRotationParameters = SU2<Scalar>::SizeAtCompileTime;
+  static constexpr auto kNumRotationParameters = SU2<Scalar>::kNumParameters;
   static constexpr auto kTranslationOffset = kNumRotationParameters;
   static constexpr auto kNumTranslationParameters = 3;
+  static constexpr auto kNumParameters = kNumRotationParameters + kNumTranslationParameters;
 
   static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES;
   static constexpr auto kDefaultDerivativesAreCoupled = HYPER_DEFAULT_TO_COUPLED_LIE_GROUP_DERIVATIVES;
@@ -260,12 +261,12 @@ auto SE3Base<TDerived>::Random() -> SE3<Scalar> {
 
 template <typename TDerived>
 auto SE3Base<TDerived>::asVector() const -> Eigen::Map<const TVectorX<Scalar>> {
-  return {this->data(), TDerived::SizeAtCompileTime, 1};
+  return {this->data(), TDerived::kNumParameters, 1};
 }
 
 template <typename TDerived>
 auto SE3Base<TDerived>::asVector() -> Eigen::Map<VectorXWithConstIfNotLvalue> {
-  return {this->data(), TDerived::SizeAtCompileTime, 1};
+  return {this->data(), TDerived::kNumParameters, 1};
 }
 
 template <typename TDerived>
@@ -419,20 +420,20 @@ auto SE3Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, S
 
     if (coupled) {
       if (global) {
-        Tangent::template AngularJacobian<Translation::SizeAtCompileTime>(J, 0).noalias() = Scalar{-1} * output.hat();
-        Tangent::template LinearJacobian<Translation::SizeAtCompileTime>(J, 0).setIdentity();
+        Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * output.hat();
+        Tangent::template LinearJacobian<Translation::kNumParameters>(J, 0).setIdentity();
 
       } else {
-        Tangent::template AngularJacobian<Translation::SizeAtCompileTime>(J, 0).noalias() = Scalar{-1} * R_this * v.hat();
-        Tangent::template LinearJacobian<Translation::SizeAtCompileTime>(J, 0).noalias() = R_this;
+        Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this * v.hat();
+        Tangent::template LinearJacobian<Translation::kNumParameters>(J, 0).noalias() = R_this;
       }
     } else {
       if (global) {
-        Tangent::template AngularJacobian<Translation::SizeAtCompileTime>(J, 0).noalias() = Scalar{-1} * R_this_v.hat();
-        Tangent::template LinearJacobian<Translation::SizeAtCompileTime>(J, 0).setIdentity();
+        Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this_v.hat();
+        Tangent::template LinearJacobian<Translation::kNumParameters>(J, 0).setIdentity();
       } else {
-        Tangent::template AngularJacobian<Translation::SizeAtCompileTime>(J, 0).noalias() = Scalar{-1} * R_this * v.hat();
-        Tangent::template LinearJacobian<Translation::SizeAtCompileTime>(J, 0).setIdentity();
+        Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this * v.hat();
+        Tangent::template LinearJacobian<Translation::kNumParameters>(J, 0).setIdentity();
       }
     }
   }

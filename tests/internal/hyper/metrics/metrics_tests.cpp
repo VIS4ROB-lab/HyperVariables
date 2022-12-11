@@ -29,7 +29,7 @@ class MetricsTests
 
     Jacobian J_lhs_a, J_rhs_a, J_lhs_n, J_rhs_n;
     const auto f = Metric::Distance(u, v, J_lhs_a.data(), J_rhs_a.data());
-    for (auto i = Eigen::Index{0}; i < Input::SizeAtCompileTime; ++i) {
+    for (auto i = Eigen::Index{0}; i < Input::kNumParameters; ++i) {
       J_lhs_n.col(i) = (Metric::Distance(u + kNumericIncrement * Input::Unit(i), v) - f) / kNumericIncrement;
       J_rhs_n.col(i) = (Metric::Distance(u, v + kNumericIncrement * Input::Unit(i)) - f) / kNumericIncrement;
     }
@@ -49,7 +49,7 @@ class MetricsTests
 
     Jacobian J_lhs_a, J_rhs_a, J_lhs_n, J_rhs_n;
     const auto f = Metric::Distance(u, v, J_lhs_a.data(), J_rhs_a.data());
-    for (auto i = Eigen::Index{0}; i < Input::SizeAtCompileTime; ++i) {
+    for (auto i = Eigen::Index{0}; i < Input::kNumParameters; ++i) {
       J_lhs_n.col(i) = (Metric::Distance(u + kNumericIncrement * Input::Unit(i), v) - f) / kNumericIncrement;
       J_rhs_n.col(i) = (Metric::Distance(u, v + kNumericIncrement * Input::Unit(i)) - f) / kNumericIncrement;
     }
@@ -70,7 +70,7 @@ class MetricsTests
 
     Jacobian J_lhs_a, J_rhs_a, J_lhs_n, J_rhs_n;
     const auto f = Metric::Distance(u, v, J_lhs_a.data(), J_rhs_a.data(), global, coupled);
-    for (auto i = Eigen::Index{0}; i < Tangent<SE3<Scalar>>::SizeAtCompileTime; ++i) {
+    for (auto i = Eigen::Index{0}; i < Tangent<SE3<Scalar>>::kNumParameters; ++i) {
       J_lhs_n.col(i) = (Metric::Distance(SE3NumericGroupPlus(u, global, coupled, i), v) - f) / kNumericIncrement;
       J_rhs_n.col(i) = (Metric::Distance(u, SE3NumericGroupPlus(v, global, coupled, i)) - f) / kNumericIncrement;
     }

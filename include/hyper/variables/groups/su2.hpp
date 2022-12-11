@@ -18,9 +18,6 @@ class QuaternionBase
     : public Traits<TDerived>::Base,
       public ConditionalConstBase_t<TDerived, AbstractVariable<DerivedScalar_t<TDerived>>, ConstAbstractVariable<DerivedScalar_t<TDerived>>> {
  public:
-  // Constants.
-  static constexpr auto SizeAtCompileTime = 4;
-
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
   using Scalar = typename Base::Scalar;
@@ -30,6 +27,10 @@ class QuaternionBase
   using Base::operator*;
 
   using Translation = Cartesian<Scalar, 3>;
+  
+  // Constants.
+  static constexpr auto SizeAtCompileTime = (int)Base::Coefficients::SizeAtCompileTime;
+  static constexpr auto kNumParameters = (int)Base::Coefficients::SizeAtCompileTime;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(QuaternionBase)
 
@@ -292,12 +293,12 @@ auto QuaternionBase<TDerived>::data() -> ScalarWithConstIfNotLvalue* {
 
 template <typename TDerived>
 auto QuaternionBase<TDerived>::asVector() const -> Eigen::Map<const TVectorX<Scalar>> {
-  return {this->data(), TDerived::SizeAtCompileTime, 1};
+  return {this->data(), TDerived::kNumParameters, 1};
 }
 
 template <typename TDerived>
 auto QuaternionBase<TDerived>::asVector() -> Eigen::Map<VectorXWithConstIfNotLvalue> {
-  return {this->data(), TDerived::SizeAtCompileTime, 1};
+  return {this->data(), TDerived::kNumParameters, 1};
 }
 
 template <typename TDerived>

@@ -14,9 +14,12 @@ class CartesianBase
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
-  using Scalar = Base::Scalar;
+  using Scalar = typename Base::Scalar;
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, TVectorX<Scalar>>;
   using Base::Base;
+
+  // Constants.
+  static constexpr auto kNumParameters = (int)Base::SizeAtCompileTime;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(CartesianBase)
 

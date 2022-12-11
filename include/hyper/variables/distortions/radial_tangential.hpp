@@ -155,7 +155,7 @@ auto RadialTangentialDistortionBase<TDerived>::distort(const Eigen::Ref<const Pi
   if (raw_J_p_d) {
     const auto size = this->size();
     const auto tangential_order = this->tangentialOrder();
-    auto J = Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::SizeAtCompileTime, size};
+    auto J = Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::kNumParameters, size};
     for (auto i = 0; i < radial_order; ++i) {
       J.col(i) = rhos[i] * pixel;
     }

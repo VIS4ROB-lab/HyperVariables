@@ -48,7 +48,7 @@ class IntrinsicsTests
     intrinsics_.normalize(py, J_a.data(), nullptr);
 
     auto J_n = TJacobianNM<Pixel<Scalar>>{};
-    for (auto j = 0; j < Pixel<Scalar>::SizeAtCompileTime; ++j) {
+    for (auto j = 0; j < Pixel<Scalar>::kNumParameters; ++j) {
       const Pixel<Scalar> py_0 = py - kNumericIncrement * Pixel<Scalar>::Unit(j);
       const auto d_py_0 = intrinsics_.normalize(py_0, nullptr, nullptr);
       const Pixel<Scalar> py_1 = py + kNumericIncrement * Pixel<Scalar>::Unit(j);
@@ -65,7 +65,7 @@ class IntrinsicsTests
     const Pixel<Scalar> d_px = intrinsics_.normalize(px, nullptr, J_a.data());
 
     auto J_n = TJacobianNM<Pixel<Scalar>, Intrinsics<Scalar>>{};
-    for (auto j = 0; j < Intrinsics<Scalar>::SizeAtCompileTime; ++j) {
+    for (auto j = 0; j < Intrinsics<Scalar>::kNumParameters; ++j) {
       const auto tmp = intrinsics_[j];
       intrinsics_[j] = tmp - kNumericIncrement;
       const Pixel<Scalar> d_py_0 = intrinsics_.normalize(px, nullptr, nullptr);
@@ -95,7 +95,7 @@ class IntrinsicsTests
     intrinsics_.denormalize(px, J_a.data(), nullptr);
 
     auto J_n = TJacobianNM<Pixel<Scalar>>{};
-    for (auto j = 0; j < Pixel<Scalar>::SizeAtCompileTime; ++j) {
+    for (auto j = 0; j < Pixel<Scalar>::kNumParameters; ++j) {
       const Pixel<Scalar> py_0 = px - kNumericIncrement * Pixel<Scalar>::Unit(j);
       const auto d_py_0 = intrinsics_.denormalize(py_0, nullptr, nullptr);
       const Pixel<Scalar> py_1 = px + kNumericIncrement * Pixel<Scalar>::Unit(j);
@@ -113,7 +113,7 @@ class IntrinsicsTests
     intrinsics_.denormalize(px, nullptr, J_a.data());
 
     auto J_n = TJacobianNM<Pixel<Scalar>, Intrinsics<Scalar>>{};
-    for (auto j = 0; j < Intrinsics<Scalar>::SizeAtCompileTime; ++j) {
+    for (auto j = 0; j < Intrinsics<Scalar>::kNumParameters; ++j) {
       const auto tmp = intrinsics_[j];
       intrinsics_[j] = tmp - kNumericIncrement;
       const Pixel<Scalar> d_py_0 = intrinsics_.denormalize(px, nullptr, nullptr);

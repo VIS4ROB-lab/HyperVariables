@@ -123,7 +123,7 @@ auto IterativeRadialDistortionBase<TDerived>::distort(const Eigen::Ref<const Pix
     }
 
     if (raw_J_p_d) {
-      auto J = Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::SizeAtCompileTime, size};
+      auto J = Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::kNumParameters, size};
       J.col(i) = IterativePixelDistortionJacobian(output, rho2, (*this)[i]);
       if (i < last) {
         J.rightCols(last - i) = IterativePixelPixelJacobian(x2, xy, y2, rho2, (*this)[i]) * J.rightCols(last - i);
@@ -158,7 +158,7 @@ auto IterativeRadialDistortionBase<TDerived>::undistort(const Eigen::Ref<const P
     }
 
     if (raw_J_p_d) {
-      auto J = Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::SizeAtCompileTime, size};
+      auto J = Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::kNumParameters, size};
       J.col(i) = InverseIterativePixelDistortionJacobian(output, rho2, (*this)[i]);
       if (i > 0) {
         J.leftCols(i) = InverseIterativePixelPixelJacobian(x2, xy, y2, rho2, (*this)[i]) * J.leftCols(i);

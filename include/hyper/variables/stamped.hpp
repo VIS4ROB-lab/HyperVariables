@@ -42,19 +42,20 @@ class StampedBase
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
-  using Scalar = Base::Scalar;
+  using Scalar = typename Base::Scalar;
   using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, TVectorX<Scalar>>;
   using Base::Base;
 
-  using Variable = Traits<TDerived>::Variable;
+  using Variable = typename Traits<TDerived>::Variable;
   using VariableWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Variable>;
 
   // Constants.
   static constexpr auto kVariableOffset = 0;
-  static constexpr auto kNumVariableParameters = Variable::SizeAtCompileTime;
+  static constexpr auto kNumVariableParameters = Variable::kNumParameters;
   static constexpr auto kStampOffset = kVariableOffset + kNumVariableParameters;
   static constexpr auto kNumStampParameters = 1;
+  static constexpr auto kNumParameters = kNumVariableParameters + kNumStampParameters;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(StampedBase)
 

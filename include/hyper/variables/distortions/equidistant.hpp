@@ -127,7 +127,7 @@ auto EquidistantDistortionBase<TDerived>::distort(const Eigen::Ref<const Pixel<S
   }
 
   if (raw_J_p_d) {
-    auto J = Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::SizeAtCompileTime, size};
+    auto J = Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::kNumParameters, size};
     if (is_small_angle) {
       J.setZero();
     } else {

@@ -36,7 +36,7 @@ jobs:
         run: ./apps/tests/HyperVariablesTests --gtest_output="xml:${{github.workspace}}/test-results/logs/results.xml"
 
       - name: Publish
-        uses: EnricoMi/publish-unit-test-result-action@v1
+        uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
           files: "test-results/**/*.xml"
