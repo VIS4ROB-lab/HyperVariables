@@ -38,12 +38,12 @@ class ConstAbstractStamped : public ConstAbstractVariable<TScalar> {
 template <typename TDerived>
 class StampedBase
     : public Traits<TDerived>::Base,
-      public std::conditional_t<VariableIsLValue_v<TDerived>, AbstractStamped<typename Traits<TDerived>::Base::Scalar>, ConstAbstractStamped<typename Traits<TDerived>::Base::Scalar>> {
+      public ConditionalConstBase_t<TDerived, AbstractStamped<DerivedScalar_t<TDerived>>, ConstAbstractStamped<DerivedScalar_t<TDerived>>> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
   using Scalar = Base::Scalar;
-  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
+  using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, TVectorX<Scalar>>;
   using Base::Base;
 

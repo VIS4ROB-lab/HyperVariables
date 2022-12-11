@@ -132,22 +132,15 @@ struct NumericVariableTraits<double> {
 };
 
 template <typename TDerived>
-struct VariableIsLValue {
-  static constexpr auto kValue = (!bool(std::is_const_v<TDerived>)) && bool(Traits<TDerived>::Base::Flags & Eigen::LvalueBit);
-};
+using DerivedScalar_t = typename Traits<TDerived>::Base::Scalar;
 
 template <typename TDerived>
-inline constexpr bool VariableIsLValue_v = VariableIsLValue<TDerived>::kValue;
+inline constexpr bool VariableIsLValue_v = (!bool(std::is_const_v<TDerived>)) && bool(Traits<TDerived>::Base::Flags & Eigen::LvalueBit);
 
 template <typename TDerived, typename TValue>
-struct ConstValueIfVariableIsNotLValue {
-  using Type = std::conditional_t<VariableIsLValue_v<TDerived>, TValue, const TValue>;
-};
+using ConstValueIfVariableIsNotLValue_t = std::conditional_t<VariableIsLValue_v<TDerived>, TValue, const TValue>;
 
-template <typename TDerived, typename TValue>
-using ConstValueIfVariableIsNotLValue_t = ConstValueIfVariableIsNotLValue<TDerived, TValue>::Type;
-
-template <typename TDerived>
-using ConstScalarIfVariableIsNotLValue_t = ConstValueIfVariableIsNotLValue_t<TDerived, typename Traits<TDerived>::Base::Scalar>;
+template <typename TDerived, typename TBase, typename TConstBase>
+using ConditionalConstBase_t = std::conditional_t<VariableIsLValue_v<TDerived>, TBase, TConstBase>;
 
 } // namespace hyper

@@ -11,12 +11,11 @@ namespace hyper {
 template <typename TDerived>
 class SE3Base
     : public Traits<TDerived>::Base,
-      public std::conditional_t<VariableIsLValue_v<TDerived>, AbstractVariable<typename Traits<TDerived>::Base::Scalar>, ConstAbstractVariable<typename Traits<TDerived>::Base::Scalar>> {
+      public ConditionalConstBase_t<TDerived, AbstractVariable<DerivedScalar_t<TDerived>>, ConstAbstractVariable<DerivedScalar_t<TDerived>>> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
   using Scalar = typename Base::Scalar;
-  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, TVectorX<Scalar>>;
   using Base::Base;
 
@@ -170,7 +169,6 @@ class SE3TangentBase
   // Definitions.
   using Base = CartesianBase<TDerived>;
   using Scalar = typename Base::Scalar;
-  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using Base::Base;
 
   using Angular = Tangent<typename SE3<Scalar>::Rotation>;

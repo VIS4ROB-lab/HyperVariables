@@ -31,7 +31,6 @@ class EquidistantDistortion;
 template <typename TScalar, int TOrder>
 struct Traits<EquidistantDistortion<TScalar, TOrder>>
     : public Traits<Cartesian<TScalar, TOrder>> {
-  // Definitions.
   static constexpr auto kOrder = TOrder;
   using Distortion = EquidistantDistortion<TScalar, TOrder>;
 };

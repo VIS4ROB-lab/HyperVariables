@@ -20,7 +20,7 @@ class PitchYawBase
   // Definitions.
   using Base = CartesianBase<TDerived>;
   using Scalar = typename Base::Scalar;
-  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
+  using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(PitchYawBase)

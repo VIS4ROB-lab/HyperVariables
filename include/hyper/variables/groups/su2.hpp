@@ -16,7 +16,7 @@ namespace hyper {
 template <typename TDerived>
 class QuaternionBase
     : public Traits<TDerived>::Base,
-      public std::conditional_t<VariableIsLValue_v<TDerived>, AbstractVariable<typename Traits<TDerived>::Base::Scalar>, ConstAbstractVariable<typename Traits<TDerived>::Base::Scalar>> {
+      public ConditionalConstBase_t<TDerived, AbstractVariable<DerivedScalar_t<TDerived>>, ConstAbstractVariable<DerivedScalar_t<TDerived>>> {
  public:
   // Constants.
   static constexpr auto SizeAtCompileTime = 4;
@@ -24,7 +24,7 @@ class QuaternionBase
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
   using Scalar = typename Base::Scalar;
-  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
+  using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, TVectorX<Scalar>>;
   using Base::Base;
   using Base::operator*;
@@ -94,7 +94,6 @@ class SU2Base
  public:
   using Base = QuaternionBase<TDerived>;
   using Scalar = typename Base::Scalar;
-  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using Base::Base;
   using Base::operator*;
 
@@ -169,7 +168,6 @@ class SU2AlgebraBase
  public:
   using Base = QuaternionBase<TDerived>;
   using Scalar = typename Base::Scalar;
-  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using Base::Base;
   using Base::operator*;
 
@@ -218,7 +216,7 @@ class SU2 final
   /// Perfect forwarding constructor.
   template <typename... TArgs>
   SU2(TArgs&&... args) // NOLINT
-  : Base{std::forward<TArgs>(args)...} {
+      : Base{std::forward<TArgs>(args)...} {
     // DCHECK(Eigen::internal::isApprox(this->norm(), TScalar{1}));
   }
 
@@ -251,7 +249,6 @@ class SU2TangentBase
   // Definitions.
   using Base = CartesianBase<TDerived>;
   using Scalar = typename Base::Scalar;
-  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using Base::Base;
 
   // Constants.
