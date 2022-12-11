@@ -10,13 +10,11 @@
 namespace hyper {
 
 template <typename TDerived>
-class GravityBase
-    : public CartesianBase<TDerived> {
+class GravityBase : public CartesianBase<TDerived> {
  public:
   // Definitions.
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Base = CartesianBase<TDerived>;
+  using Scalar = typename Base::Scalar;
   using Base::Base;
 
   // Constants.

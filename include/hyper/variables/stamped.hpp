@@ -8,14 +8,9 @@
 namespace hyper {
 
 template <typename TScalar>
-class AbstractStamped
-    : public AbstractVariable<TScalar> {
+class AbstractStamped : public AbstractVariable<TScalar> {
  public:
   using Scalar = std::remove_const_t<TScalar>;
-  using ScalarWithConstIfNotLvalue = TScalar;
-
-  /// Virtual default destructor.
-  ~AbstractStamped() override = default;
 
   /// Stamp accessor.
   /// \return Stamp.
@@ -23,13 +18,27 @@ class AbstractStamped
 
   /// Stamp modifier.
   /// \return Stamp.
-  [[nodiscard]] virtual auto stamp() -> ScalarWithConstIfNotLvalue& = 0;
+  [[nodiscard]] virtual auto stamp() -> Scalar& = 0;
+};
+
+template <typename TScalar>
+class ConstAbstractStamped : public ConstAbstractVariable<TScalar> {
+ public:
+  using Scalar = std::remove_const_t<TScalar>;
+
+  /// Stamp accessor.
+  /// \return Stamp.
+  [[nodiscard]] virtual auto stamp() const -> const Scalar& = 0;
+
+  /// Stamp modifier.
+  /// \return Stamp.
+  [[nodiscard]] virtual auto stamp() -> const Scalar& = 0;
 };
 
 template <typename TDerived>
 class StampedBase
     : public Traits<TDerived>::Base,
-      public AbstractStamped<ConstScalarIfVariableIsNotLValue_t<TDerived>> {
+      public std::conditional_t<VariableIsLValue_v<TDerived>, AbstractStamped<typename Traits<TDerived>::Base::Scalar>, ConstAbstractStamped<typename Traits<TDerived>::Base::Scalar>> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;

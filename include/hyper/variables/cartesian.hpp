@@ -15,7 +15,6 @@ class CartesianBase
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
   using Scalar = Base::Scalar;
-  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, TVectorX<Scalar>>;
   using Base::Base;
 
@@ -56,7 +55,6 @@ class CartesianTangentBase
  public:
   using Base = CartesianBase<TDerived>;
   using Scalar = typename Base::Scalar;
-  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(CartesianTangentBase)

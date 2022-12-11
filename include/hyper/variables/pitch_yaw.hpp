@@ -18,9 +18,9 @@ class PitchYawBase
   static constexpr auto kNumYawParameters = 1;
 
   // Definitions.
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Base = CartesianBase<TDerived>;
+  using Scalar = typename Base::Scalar;
+  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(PitchYawBase)
@@ -28,25 +28,25 @@ class PitchYawBase
   /// Pitch accessor.
   /// \return Pitch.
   [[nodiscard]] auto pitch() const -> const Scalar& {
-    return this->data()[Traits<TDerived>::kPitchOffset];
+    return this->data()[kPitchOffset];
   }
 
   /// Pitch modifier.
   /// \return Pitch.
   auto pitch() -> ScalarWithConstIfNotLvalue& {
-    return this->data()[Traits<TDerived>::kPitchOffset];
+    return this->data()[kPitchOffset];
   }
 
   /// Yaw accessor.
   /// \return Yaw.
   [[nodiscard]] auto yaw() const -> const Scalar& {
-    return this->data()[Traits<TDerived>::kYawOffset];
+    return this->data()[kYawOffset];
   }
 
   /// Yaw modifier.
   /// \return Yaw.
   auto yaw() -> ScalarWithConstIfNotLvalue& {
-    return this->data()[Traits<TDerived>::kYawOffset];
+    return this->data()[kYawOffset];
   }
 };
 

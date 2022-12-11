@@ -20,7 +20,6 @@ class OrthonormalityAlignmentBase
   // Definitions.
   using Base = CartesianBase<TDerived>;
   using Scalar = typename Base::Scalar;
-  using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using Base::Base;
 
   using AlignmentMatrix = Eigen::Matrix<Scalar, kOrder, kOrder>;
