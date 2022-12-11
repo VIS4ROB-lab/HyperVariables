@@ -16,6 +16,9 @@ template <typename>
 class AbstractVariable;
 
 template <typename>
+class ConstAbstractVariable;
+
+template <typename>
 class AbstractStamped;
 
 template <typename>

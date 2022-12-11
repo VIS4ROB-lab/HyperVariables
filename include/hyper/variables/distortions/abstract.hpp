@@ -15,12 +15,11 @@
 
 namespace hyper {
 
-template <typename TScalar>
-class AbstractDistortion<TScalar, true>
-    : public AbstractVariable<TScalar> {
+template <typename TScalar, typename TBase>
+class AbstractDistortionBase : public TBase {
  public:
   // Definitions.
-  using Scalar = std::remove_const_t<TScalar>;
+  using Scalar = TScalar;
 
   /// Allocates a Jacobian.
   /// \return Allocated Jacobian.
@@ -43,7 +42,7 @@ class AbstractDistortion<TScalar, true>
   /// Maps a distortion.
   /// \param raw_distortion Raw distortion.
   /// \return Mapped distortion.
-  virtual auto map(const Scalar* raw_distortion) const -> std::unique_ptr<AbstractDistortion<const Scalar>> = 0;
+  virtual auto map(const Scalar* raw_distortion) const -> std::unique_ptr<ConstAbstractDistortion<Scalar>> = 0;
 
   /// Maps a distortion.
   /// \param raw_distortion Raw distortion.
@@ -52,10 +51,13 @@ class AbstractDistortion<TScalar, true>
 };
 
 template <typename TScalar>
-class AbstractDistortion<TScalar, false>
-    : public AbstractDistortion<TScalar, true> {
+class ConstAbstractDistortion : public AbstractDistortionBase<TScalar, ConstAbstractVariable<TScalar>> {};
+
+template <typename TScalar>
+class AbstractDistortion : public AbstractDistortionBase<TScalar, AbstractVariable<TScalar>> {
  public:
-  using Scalar = std::remove_const_t<TScalar>;
+  // Definitions.
+  using Scalar = TScalar;
 
   /// Sets the default parameters.
   virtual auto setDefault() -> AbstractDistortion& = 0;
@@ -65,14 +67,14 @@ class AbstractDistortion<TScalar, false>
   virtual auto perturb(const Scalar& scale) -> AbstractDistortion& = 0;
 };
 
-template <typename TScalar>
-auto AbstractDistortion<TScalar, true>::allocatePixelDistortionJacobian() const -> TJacobianNX<Pixel<Scalar>> {
+template <typename TScalar, typename TBase>
+auto AbstractDistortionBase<TScalar, TBase>::allocatePixelDistortionJacobian() const -> TJacobianNX<Pixel<Scalar>> {
   const auto size = this->asVector().size();
   return {Pixel<Scalar>::SizeAtCompileTime, size};
 }
 
-template <typename TScalar>
-auto AbstractDistortion<TScalar, true>::undistort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> {
+template <typename TScalar, typename TBase>
+auto AbstractDistortionBase<TScalar, TBase>::undistort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> {
   Pixel<Scalar> output = pixel;
   TJacobianNM<Pixel<Scalar>> J_p_p, J_p_p_i;
 

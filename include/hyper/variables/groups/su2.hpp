@@ -16,7 +16,7 @@ namespace hyper {
 template <typename TDerived>
 class QuaternionBase
     : public Traits<TDerived>::Base,
-      public AbstractVariable<ConstScalarIfVariableIsNotLValue_t<TDerived>> {
+      public std::conditional_t<VariableIsLValue_v<TDerived>, AbstractVariable<typename Traits<TDerived>::Base::Scalar>, ConstAbstractVariable<typename Traits<TDerived>::Base::Scalar>> {
  public:
   // Constants.
   static constexpr auto SizeAtCompileTime = 4;

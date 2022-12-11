@@ -10,7 +10,7 @@ namespace hyper {
 template <typename TDerived>
 class CartesianBase
     : public Traits<TDerived>::Base,
-      public AbstractVariable<ConstScalarIfVariableIsNotLValue_t<TDerived>> {
+      public std::conditional_t<VariableIsLValue_v<TDerived>, AbstractVariable<typename Traits<TDerived>::Base::Scalar>, ConstAbstractVariable<typename Traits<TDerived>::Base::Scalar>> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;

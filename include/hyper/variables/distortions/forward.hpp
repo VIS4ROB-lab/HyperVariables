@@ -7,11 +7,23 @@
 
 namespace hyper {
 
-template <typename TScalar, bool = std::is_const_v<TScalar>>
+template <typename TScalar, typename TBase>
+class AbstractDistortionBase;
+
+template <typename TScalar>
 class AbstractDistortion;
 
-template <typename TDerived, bool = !VariableIsLValue_v<TDerived>>
+template <typename TScalar>
+class ConstAbstractDistortion;
+
+template <typename TDerived, typename TBase>
 class DistortionBase;
+
+template <typename TDerived>
+class Distortion;
+
+template <typename TDerived>
+class ConstDistortion;
 
 template <typename, int>
 class EquidistantDistortion;

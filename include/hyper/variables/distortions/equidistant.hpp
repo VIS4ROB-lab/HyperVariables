@@ -9,10 +9,10 @@ namespace hyper {
 
 template <typename TDerived>
 class EquidistantDistortionBase
-    : public DistortionBase<TDerived> {
+    : public std::conditional_t<VariableIsLValue_v<TDerived>, Distortion<TDerived>, ConstDistortion<TDerived>> {
  public:
   // Definitions.
-  using Base = DistortionBase<TDerived>;
+  using Base = std::conditional_t<VariableIsLValue_v<TDerived>, Distortion<TDerived>, ConstDistortion<TDerived>>;
   using Scalar = typename Base::Scalar;
   using ScalarWithConstIfNotLvalue = ConstScalarIfVariableIsNotLValue_t<TDerived>;
   using Base::Base;
