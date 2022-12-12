@@ -8,15 +8,15 @@
 namespace hyper {
 
 template <typename TScalar>
-class TMetric;
+class Metric;
 
 template <typename TScalar, int TDim>
-class TAngularMetric;
+class AngularMetric;
 
 template <typename TScalar, int TDim>
-class TCartesianMetric;
+class CartesianMetric;
 
 template <typename TScalar, ManifoldEnum TManifoldEnum>
-class TManifoldMetric;
+class ManifoldMetric;
 
 } // namespace hyper

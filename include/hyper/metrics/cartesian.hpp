@@ -8,7 +8,7 @@
 namespace hyper {
 
 template <typename TScalar, int TDim>
-class TCartesianMetric final : public TMetric<TScalar> {
+class CartesianMetric final : public Metric<TScalar> {
  public:
   // Constants.
   static constexpr auto kInputDim = TDim;

@@ -11,13 +11,13 @@
 namespace hyper {
 
 template <typename TScalar>
-class TMetric {
+class Metric {
  public:
   // Definitions.
   using Scalar = TScalar;
 
   /// Default destructor.
-  virtual ~TMetric() = default;
+  virtual ~Metric() = default;
 
   /// Retrieves the input dimension.
   /// \return Input dimension.

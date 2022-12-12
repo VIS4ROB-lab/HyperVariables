@@ -20,7 +20,7 @@ class MetricsTests
 
   [[nodiscard]] static auto CheckCartesianMetric() -> bool {
     using Input = Cartesian<Scalar, 3>;
-    using Metric = TCartesianMetric<Scalar, 3>;
+    using Metric = CartesianMetric<Scalar, 3>;
     using Output = Metric::Output;
     using Jacobian = JacobianNM<Output, Input>;
 
@@ -40,7 +40,7 @@ class MetricsTests
 
   [[nodiscard]] static auto CheckAngularMetric() -> bool {
     using Input = Cartesian<Scalar, 3>;
-    using Metric = TAngularMetric<Scalar, 3>;
+    using Metric = AngularMetric<Scalar, 3>;
     using Output = Metric::Output;
     using Jacobian = JacobianNM<Output, Input>;
 
@@ -61,7 +61,7 @@ class MetricsTests
 
   [[nodiscard]] static auto CheckManifoldMetric(const bool global, const bool coupled) -> bool {
     using Input = SE3<Scalar>;
-    using Metric = TManifoldMetric<Scalar, ManifoldEnum::SE3>;
+    using Metric = ManifoldMetric<Scalar, ManifoldEnum::SE3>;
     using Output = Metric::Output;
     using Jacobian = JacobianNM<Output, Tangent<SE3<Scalar>>>;
 

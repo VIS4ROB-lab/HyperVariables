@@ -10,7 +10,7 @@
 namespace hyper {
 
 template <typename TScalar>
-class TManifoldMetric<TScalar, ManifoldEnum::SE3> final : public TMetric<TScalar> {
+class ManifoldMetric<TScalar, ManifoldEnum::SE3> final : public Metric<TScalar> {
  public:
   // Definitions.
   using Scalar = TScalar;
@@ -28,7 +28,7 @@ class TManifoldMetric<TScalar, ManifoldEnum::SE3> final : public TMetric<TScalar
   /// Default constructor.
   /// \param global Request global Jacobians flag.
   /// \param coupled Compute SE3 instead of SU2 x R3 Jacobians.
-  explicit TManifoldMetric(const bool global = kGlobal, const bool coupled = kCoupled)
+  explicit ManifoldMetric(const bool global = kGlobal, const bool coupled = kCoupled)
       : global_{global}, coupled_{coupled} {}
 
   /// Evaluates the distance between elements.
@@ -49,20 +49,20 @@ class TManifoldMetric<TScalar, ManifoldEnum::SE3> final : public TMetric<TScalar
         const auto i_rhs = rhs_.groupInverse(J_ir_r.data(), global, coupled);
         const auto lhs_plus_i_rhs = lhs_.groupPlus(i_rhs, J_p_l.data(), J_p_ir.data(), global, coupled);
         output_ = lhs_plus_i_rhs.toTangent(J_t_p.data(), global, coupled);
-        Eigen::Map<Jacobian>{J_lhs}.noalias() = J_t_p * J_p_l;
-        Eigen::Map<Jacobian>{J_rhs}.noalias() = J_t_p * J_p_ir * J_ir_r;
+        Eigen::Map<Jacobian>{J_lhs}.noalias() = J_t_p.lazyProduct(J_p_l);
+        Eigen::Map<Jacobian>{J_rhs}.noalias() = J_t_p.lazyProduct(J_p_ir.lazyProduct(J_ir_r));
       } else if (J_lhs) {
         Jacobian J_t_p, J_p_l;
         const auto i_rhs = rhs_.groupInverse(nullptr, global, coupled);
         const auto lhs_plus_i_rhs = lhs_.groupPlus(i_rhs, J_p_l.data(), nullptr, global, coupled);
         output_ = lhs_plus_i_rhs.toTangent(J_t_p.data(), global, coupled);
-        Eigen::Map<Jacobian>{J_lhs}.noalias() = J_t_p * J_p_l;
+        Eigen::Map<Jacobian>{J_lhs}.noalias() = J_t_p.lazyProduct(J_p_l);
       } else {
         Jacobian J_t_p, J_p_ir, J_ir_r;
         const auto i_rhs = rhs_.groupInverse(J_ir_r.data(), global, coupled);
         const auto lhs_plus_i_rhs = lhs_.groupPlus(i_rhs, nullptr, J_p_ir.data(), global, coupled);
         output_ = lhs_plus_i_rhs.toTangent(J_t_p.data(), global, coupled);
-        Eigen::Map<Jacobian>{J_rhs}.noalias() = J_t_p * J_p_ir * J_ir_r;
+        Eigen::Map<Jacobian>{J_rhs}.noalias() = J_t_p.lazyProduct(J_p_ir.lazyProduct(J_ir_r));
       }
     } else {
       output_ = lhs_.groupPlus(rhs_.groupInverse()).toTangent();

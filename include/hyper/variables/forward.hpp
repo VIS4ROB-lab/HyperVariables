@@ -81,9 +81,12 @@ struct Traits<OrthonormalityAlignment<TScalar, TOrder>>
 
 HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::OrthonormalityAlignment, int)
 
+template <typename TScalar>
+using Stamp = Cartesian<TScalar, 1>;
+
 template <typename TVariable>
 struct Traits<Stamped<TVariable>>
-    : public Traits<Cartesian<typename TVariable::Scalar, TVariable::kNumParameters + 1>> {
+    : public Traits<Cartesian<typename TVariable::Scalar, Stamp<typename TVariable::Scalar>::kNumParameters + TVariable::kNumParameters>> {
   using Variable = TVariable;
 };
 
