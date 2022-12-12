@@ -22,7 +22,7 @@ class MetricsTests
     using Input = Cartesian<Scalar, 3>;
     using Metric = TCartesianMetric<Scalar, 3>;
     using Output = Metric::Output;
-    using Jacobian = TJacobianNM<Output, Input>;
+    using Jacobian = JacobianNM<Output, Input>;
 
     Input u = Input::Random();
     Input v = Input::Random();
@@ -42,7 +42,7 @@ class MetricsTests
     using Input = Cartesian<Scalar, 3>;
     using Metric = TAngularMetric<Scalar, 3>;
     using Output = Metric::Output;
-    using Jacobian = TJacobianNM<Output, Input>;
+    using Jacobian = JacobianNM<Output, Input>;
 
     Input u = Input::Random();
     Input v = Input::Random();
@@ -63,7 +63,7 @@ class MetricsTests
     using Input = SE3<Scalar>;
     using Metric = TManifoldMetric<Scalar, ManifoldEnum::SE3>;
     using Output = Metric::Output;
-    using Jacobian = TJacobianNM<Output, Tangent<SE3<Scalar>>>;
+    using Jacobian = JacobianNM<Output, Tangent<SE3<Scalar>>>;
 
     Input u = Input::Random();
     Input v = Input::Random();

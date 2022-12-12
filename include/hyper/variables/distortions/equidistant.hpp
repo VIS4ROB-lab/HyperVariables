@@ -49,7 +49,7 @@ class EquidistantDistortionBase
   auto distort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> final;
 
  private:
-  using ThetaJacobian = TJacobian<Scalar, 1, Eigen::Dynamic>;
+  using ThetaJacobian = Jacobian<Scalar, 1, Eigen::Dynamic>;
 
   /// Computes the theta distortion.
   /// \param theta Input theta.
@@ -117,7 +117,7 @@ auto EquidistantDistortionBase<TDerived>::distort(const Eigen::Ref<const Pixel<S
   const auto a = is_small_angle ? Scalar{1} : (d_theta / rho);
 
   if (raw_J_p_p) {
-    using Jacobian = TJacobianNM<Pixel<Scalar>>;
+    using Jacobian = JacobianNM<Pixel<Scalar>>;
     auto J = Eigen::Map<Jacobian>{raw_J_p_p};
     if (is_small_angle) {
       J.setZero();
@@ -127,7 +127,7 @@ auto EquidistantDistortionBase<TDerived>::distort(const Eigen::Ref<const Pixel<S
   }
 
   if (raw_J_p_d) {
-    auto J = Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::kNumParameters, size};
+    auto J = Eigen::Map<JacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::kNumParameters, size};
     if (is_small_angle) {
       J.setZero();
     } else {

@@ -16,12 +16,12 @@ constexpr auto DefaultVectorStorageOption(const int rows, const int cols) -> int
 // clang-format on
 
 template <typename TScalar, int TNumRows, int TOptions = DefaultVectorStorageOption(TNumRows, 1)>
-using TVector = Eigen::Matrix<TScalar, TNumRows, 1, TOptions>;
+using Vector = Eigen::Matrix<TScalar, TNumRows, 1, TOptions>;
 
 template <typename TDerived, int TOptions = DefaultVectorStorageOption(TDerived::SizeAtCompileTime, 1)>
-using TVectorN = TVector<typename TDerived::Scalar, TDerived::SizeAtCompileTime, TOptions>;
+using VectorN = Vector<typename TDerived::Scalar, TDerived::SizeAtCompileTime, TOptions>;
 
 template <typename TScalar, int TOptions = DefaultVectorStorageOption(Eigen::Dynamic, 1)>
-using TVectorX = TVector<TScalar, Eigen::Dynamic, TOptions>;
+using VectorX = Vector<TScalar, Eigen::Dynamic, TOptions>;
 
 } // namespace hyper

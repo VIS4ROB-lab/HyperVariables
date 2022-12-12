@@ -19,7 +19,7 @@ class DistortionBase : public Traits<TDerived>::Base, public TBase {
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Map<const TVectorX<Scalar>> final;
+  auto asVector() const -> Eigen::Map<const VectorX<Scalar>> final;
 
   /// Maps a distortion.
   /// \param raw_distortion Raw distortion.
@@ -44,7 +44,7 @@ class ConstDistortion : public DistortionBase<TDerived, ConstAbstractDistortion<
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() -> Eigen::Map<const TVectorX<Scalar>> final;
+  auto asVector() -> Eigen::Map<const VectorX<Scalar>> final;
 };
 
 template <typename TDerived>
@@ -59,7 +59,7 @@ class Distortion : public DistortionBase<TDerived, AbstractDistortion<typename T
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() -> Eigen::Map<TVectorX<Scalar>> final;
+  auto asVector() -> Eigen::Map<VectorX<Scalar>> final;
 
   /// Sets the default parameters.
   auto setDefault() -> Distortion& final;
@@ -70,7 +70,7 @@ class Distortion : public DistortionBase<TDerived, AbstractDistortion<typename T
 };
 
 template <typename TDerived, typename TBase>
-auto DistortionBase<TDerived, TBase>::asVector() const -> Eigen::Map<const TVectorX<Scalar>> {
+auto DistortionBase<TDerived, TBase>::asVector() const -> Eigen::Map<const VectorX<Scalar>> {
   return {this->data(), this->size(), 1};
 }
 
@@ -85,12 +85,12 @@ auto DistortionBase<TDerived, TBase>::map(Scalar* raw_distortion) const -> std::
 }
 
 template <typename TDerived>
-auto ConstDistortion<TDerived>::asVector() -> Eigen::Map<const TVectorX<Scalar>> {
+auto ConstDistortion<TDerived>::asVector() -> Eigen::Map<const VectorX<Scalar>> {
   return {this->data(), this->size(), 1};
 }
 
 template <typename TDerived>
-auto Distortion<TDerived>::asVector() -> Eigen::Map<TVectorX<Scalar>> {
+auto Distortion<TDerived>::asVector() -> Eigen::Map<VectorX<Scalar>> {
   return {this->data(), this->size(), 1};
 }
 

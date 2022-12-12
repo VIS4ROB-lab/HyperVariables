@@ -23,7 +23,7 @@ class AbstractDistortionBase : public TBase {
 
   /// Allocates a Jacobian.
   /// \return Allocated Jacobian.
-  auto allocatePixelDistortionJacobian() const -> TJacobianNX<Pixel<Scalar>>;
+  auto allocatePixelDistortionJacobian() const -> JacobianNX<Pixel<Scalar>>;
 
   /// Distorts a pixel.
   /// \param pixel Pixel to distort.
@@ -71,7 +71,7 @@ class AbstractDistortion : public AbstractDistortionBase<TScalar, AbstractVariab
 };
 
 template <typename TScalar, typename TBase>
-auto AbstractDistortionBase<TScalar, TBase>::allocatePixelDistortionJacobian() const -> TJacobianNX<Pixel<Scalar>> {
+auto AbstractDistortionBase<TScalar, TBase>::allocatePixelDistortionJacobian() const -> JacobianNX<Pixel<Scalar>> {
   const auto size = this->asVector().size();
   return {Pixel<Scalar>::kNumParameters, size};
 }
@@ -79,7 +79,7 @@ auto AbstractDistortionBase<TScalar, TBase>::allocatePixelDistortionJacobian() c
 template <typename TScalar, typename TBase>
 auto AbstractDistortionBase<TScalar, TBase>::undistort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> {
   Pixel<Scalar> output = pixel;
-  TJacobianNM<Pixel<Scalar>> J_p_p, J_p_p_i;
+  JacobianNM<Pixel<Scalar>> J_p_p, J_p_p_i;
 
   for (auto i = 0; i <= NumericVariableTraits<Scalar>::kMaxNumDistortionSteps; ++i) {
     const auto b = (distort(output, J_p_p_i.data(), nullptr) - pixel).eval();
@@ -95,14 +95,14 @@ auto AbstractDistortionBase<TScalar, TBase>::undistort(const Eigen::Ref<const Pi
   }
 
   if (raw_J_p_p) {
-    Eigen::Map<TJacobianNM<Pixel<Scalar>>>{raw_J_p_p}.noalias() = J_p_p;
+    Eigen::Map<JacobianNM<Pixel<Scalar>>>{raw_J_p_p}.noalias() = J_p_p;
   }
 
   if (raw_J_p_d) {
     const auto size = this->asVector().size();
-    auto J_p_d_i = TJacobianNX<Pixel<Scalar>>{Pixel<Scalar>::kNumParameters, size};
+    auto J_p_d_i = JacobianNX<Pixel<Scalar>>{Pixel<Scalar>::kNumParameters, size};
     distort(output, nullptr, J_p_d_i.data());
-    Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::kNumParameters, size}.noalias() = Scalar{-1} * J_p_p * J_p_d_i;
+    Eigen::Map<JacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::kNumParameters, size}.noalias() = Scalar{-1} * J_p_p * J_p_d_i;
   }
 
   return output;

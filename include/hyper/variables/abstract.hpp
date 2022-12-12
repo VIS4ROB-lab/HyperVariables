@@ -20,11 +20,11 @@ class ConstAbstractVariable {
 
   /// Map as Eigen vector.
   /// \return Vector.
-  virtual auto asVector() const -> Eigen::Map<const TVectorX<Scalar>> = 0;
+  virtual auto asVector() const -> Eigen::Map<const VectorX<Scalar>> = 0;
 
   /// Map as Eigen vector.
   /// \return Vector.
-  virtual auto asVector() -> Eigen::Map<const TVectorX<TScalar>> = 0;
+  virtual auto asVector() -> Eigen::Map<const VectorX<TScalar>> = 0;
 };
 
 template <typename TScalar>
@@ -38,11 +38,11 @@ class AbstractVariable {
 
   /// Map as Eigen vector.
   /// \return Vector.
-  virtual auto asVector() const -> Eigen::Map<const TVectorX<Scalar>> = 0;
+  virtual auto asVector() const -> Eigen::Map<const VectorX<Scalar>> = 0;
 
   /// Map as Eigen vector.
   /// \return Vector.
-  virtual auto asVector() -> Eigen::Map<TVectorX<TScalar>> = 0;
+  virtual auto asVector() -> Eigen::Map<VectorX<TScalar>> = 0;
 };
 
 } // namespace hyper

@@ -44,7 +44,7 @@ class StampedBase
   using Base = typename Traits<TDerived>::Base;
   using Scalar = typename Base::Scalar;
   using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
-  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, TVectorX<Scalar>>;
+  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
   using Base::Base;
 
   using Variable = typename Traits<TDerived>::Variable;
@@ -61,7 +61,7 @@ class StampedBase
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Map<const TVectorX<Scalar>> final {
+  auto asVector() const -> Eigen::Map<const VectorX<Scalar>> final {
     return {this->data(), this->size(), 1};
   }
 

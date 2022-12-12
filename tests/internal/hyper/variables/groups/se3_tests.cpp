@@ -23,7 +23,7 @@ class SE3Tests
   }
 
   [[nodiscard]] auto checkGroupInverseJacobian(const bool global, const bool coupled) const -> bool {
-    TJacobianNM<Tangent<SE3<Scalar>>> J_a, J_n;
+    JacobianNM<Tangent<SE3<Scalar>>> J_a, J_n;
     const auto i_se3 = se3_.groupInverse(J_a.data(), global, coupled);
     for (auto j = 0; j < Tangent<SE3<Scalar>>::kNumParameters; ++j) {
       J_n.col(j) = NumericGroupMinus(NumericGroupPlus(se3_, global, coupled, j).groupInverse(), i_se3, global, coupled);
@@ -35,7 +35,7 @@ class SE3Tests
   [[nodiscard]] auto checkGroupPlusJacobian(const bool global, const bool coupled) const -> bool {
     const auto other_se3 = SE3<Scalar>::Random();
 
-    TJacobianNM<Tangent<SE3<Scalar>>> J_lhs_a, J_lhs_n, J_rhs_a, J_rhs_n;
+    JacobianNM<Tangent<SE3<Scalar>>> J_lhs_a, J_lhs_n, J_rhs_a, J_rhs_n;
     const auto se3 = se3_.groupPlus(other_se3, J_lhs_a.data(), J_rhs_a.data(), global, coupled);
     for (auto j = 0; j < Tangent<SE3<Scalar>>::kNumParameters; ++j) {
       J_lhs_n.col(j) = NumericGroupMinus(NumericGroupPlus(se3_, global, coupled, j).groupPlus(other_se3), se3, global, coupled);
@@ -49,8 +49,8 @@ class SE3Tests
     using Vector = SE3<Scalar>::Translation;
     const Vector input = Vector::Random();
 
-    TJacobianNM<Vector, Tangent<SE3<Scalar>>> J_l_a, J_r_a, J_l_n, J_r_n;
-    TJacobianNM<Vector> J_l_p_a, J_r_p_a, J_p_n;
+    JacobianNM<Vector, Tangent<SE3<Scalar>>> J_l_a, J_r_a, J_l_n, J_r_n;
+    JacobianNM<Vector> J_l_p_a, J_r_p_a, J_p_n;
     const auto output = se3_.vectorPlus(input);
     se3_.vectorPlus(input, J_l_a.data(), J_l_p_a.data(), coupled, true);
     se3_.vectorPlus(input, J_r_a.data(), J_r_p_a.data(), coupled, false);
@@ -75,11 +75,11 @@ class SE3Tests
   }
 
   [[nodiscard]] auto checkGroupExponentialsJacobians(const bool global, const bool coupled) const -> bool {
-    TJacobianNM<Tangent<SE3<Scalar>>> J_l_a, J_e_a;
+    JacobianNM<Tangent<SE3<Scalar>>> J_l_a, J_e_a;
     const auto tangent = se3_.toTangent(J_l_a.data(), global, coupled);
     const auto se3 = tangent.toManifold(J_e_a.data(), global, coupled);
 
-    TJacobianNM<Tangent<SE3<Scalar>>> J_l_n, J_e_n;
+    JacobianNM<Tangent<SE3<Scalar>>> J_l_n, J_e_n;
     for (auto j = 0; j < Tangent<SE3<Scalar>>::kNumParameters; ++j) {
       const auto d_tangent = Tangent<SE3<Scalar>>{tangent + kNumericIncrement * Tangent<SE3<Scalar>>::Unit(j)};
       J_l_n.col(j) = (NumericGroupPlus(se3_, global, coupled, j).toTangent() - tangent) / kNumericIncrement;

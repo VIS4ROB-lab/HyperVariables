@@ -115,11 +115,11 @@ class OrthonormalityAlignmentBase
     const auto A = asMatrix();
 
     if (raw_J_i) {
-      Eigen::Map<TJacobianNM<Output, Input>>{raw_J_i}.noalias() = A;
+      Eigen::Map<JacobianNM<Output, Input>>{raw_J_i}.noalias() = A;
     }
 
     if (raw_J_p) {
-      auto J = Eigen::Map<TJacobianNM<Output, TDerived>>{raw_J_p};
+      auto J = Eigen::Map<JacobianNM<Output, TDerived>>{raw_J_p};
       J.setZero();
 
       for (auto i = 0; i < kOrder; ++i) {

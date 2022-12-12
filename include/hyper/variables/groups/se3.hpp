@@ -16,7 +16,7 @@ class SE3Base
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
   using Scalar = typename Base::Scalar;
-  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, TVectorX<Scalar>>;
+  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
   using Base::Base;
 
   using Rotation = SU2<Scalar>;
@@ -58,7 +58,7 @@ class SE3Base
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Map<const TVectorX<Scalar>> final;
+  auto asVector() const -> Eigen::Map<const VectorX<Scalar>> final;
 
   /// Map as Eigen vector.
   /// \return Vector.
@@ -260,7 +260,7 @@ auto SE3Base<TDerived>::Random() -> SE3<Scalar> {
 }
 
 template <typename TDerived>
-auto SE3Base<TDerived>::asVector() const -> Eigen::Map<const TVectorX<Scalar>> {
+auto SE3Base<TDerived>::asVector() const -> Eigen::Map<const VectorX<Scalar>> {
   return {this->data(), TDerived::kNumParameters, 1};
 }
 
@@ -297,7 +297,7 @@ auto SE3Base<TDerived>::groupInverse(Scalar* raw_J, const bool global, const boo
 
   if (raw_J) {
     using Tangent = Tangent<SE3<Scalar>>;
-    auto J = Eigen::Map<TJacobianNM<Tangent>>{raw_J};
+    auto J = Eigen::Map<JacobianNM<Tangent>>{raw_J};
 
     if (coupled) {
       if (global) {
@@ -342,7 +342,7 @@ auto SE3Base<TDerived>::groupPlus(const SE3Base<TOtherDerived_>& other, Scalar* 
 
   if (raw_J_this) {
     using Tangent = Tangent<SE3<Scalar>>;
-    auto J = Eigen::Map<TJacobianNM<Tangent>>{raw_J_this};
+    auto J = Eigen::Map<JacobianNM<Tangent>>{raw_J_this};
 
     if (coupled) {
       if (global) {
@@ -373,7 +373,7 @@ auto SE3Base<TDerived>::groupPlus(const SE3Base<TOtherDerived_>& other, Scalar* 
 
   if (raw_J_other) {
     using Tangent = Tangent<SE3<Scalar>>;
-    auto J = Eigen::Map<TJacobianNM<Tangent>>{raw_J_other};
+    auto J = Eigen::Map<JacobianNM<Tangent>>{raw_J_other};
 
     if (coupled) {
       if (global) {
@@ -416,7 +416,7 @@ auto SE3Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, S
 
   if (raw_J_this) {
     using Tangent = Tangent<SE3<Scalar>>;
-    auto J = Eigen::Map<TJacobianNM<Translation, Tangent>>{raw_J_this};
+    auto J = Eigen::Map<JacobianNM<Translation, Tangent>>{raw_J_this};
 
     if (coupled) {
       if (global) {
@@ -439,7 +439,7 @@ auto SE3Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, S
   }
 
   if (raw_J_v) {
-    Eigen::Map<TJacobianNM<Translation>>{raw_J_v}.noalias() = R_this;
+    Eigen::Map<JacobianNM<Translation>>{raw_J_v}.noalias() = R_this;
   }
 
   return output;
@@ -450,12 +450,12 @@ auto SE3Base<TDerived>::toTangent(Scalar* raw_J, const bool global, const bool c
   Tangent<SE3<Scalar>> output;
 
   if (raw_J) {
-    TJacobianNM<Tangent<SU2<Scalar>>> J_r;
+    JacobianNM<Tangent<SU2<Scalar>>> J_r;
     output.angular().noalias() = rotation().toTangent(J_r.data(), global);
     output.linear().noalias() = translation();
 
     using Tangent = Tangent<SE3<Scalar>>;
-    auto J = Eigen::Map<TJacobianNM<Tangent>>{raw_J};
+    auto J = Eigen::Map<JacobianNM<Tangent>>{raw_J};
 
     if (coupled) {
       if (global) {
@@ -488,12 +488,12 @@ auto SE3TangentBase<TDerived>::toManifold(Scalar* raw_J, const bool global, cons
   SE3<Scalar> output;
 
   if (raw_J) {
-    TJacobianNM<Tangent<SU2<Scalar>>> J_r;
+    JacobianNM<Tangent<SU2<Scalar>>> J_r;
     output.rotation() = angular().toManifold(J_r.data(), global);
     output.translation().noalias() = linear();
 
     using Tangent = Tangent<SE3<Scalar>>;
-    auto J = Eigen::Map<TJacobianNM<Tangent>>{raw_J};
+    auto J = Eigen::Map<JacobianNM<Tangent>>{raw_J};
 
     if (coupled) {
       if (global) {

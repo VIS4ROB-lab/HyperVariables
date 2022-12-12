@@ -15,8 +15,6 @@ class TMetric {
  public:
   // Definitions.
   using Scalar = TScalar;
-  using Input = TVectorX<Scalar>;
-  using Output = TVectorX<Scalar>;
 
   /// Default destructor.
   virtual ~TMetric() = default;

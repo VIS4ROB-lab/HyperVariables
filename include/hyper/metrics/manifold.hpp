@@ -16,7 +16,7 @@ class TManifoldMetric<TScalar, ManifoldEnum::SE3> final : public TMetric<TScalar
   using Scalar = TScalar;
   using Input = SE3<Scalar>;
   using Output = Tangent<Input>;
-  using Jacobian = TJacobianNM<Output>;
+  using Jacobian = JacobianNM<Output>;
 
   // Constants.
   static constexpr auto kInputDim = Input::kNumParameters;

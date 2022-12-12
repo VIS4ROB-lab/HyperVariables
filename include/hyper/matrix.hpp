@@ -14,19 +14,19 @@ constexpr auto DefaultMatrixStorageOption(const int rows, const int cols) -> int
 }
 
 template <typename TScalar, int TNumRows, int TNumCols = TNumRows, int TOptions = DefaultMatrixStorageOption(TNumRows, TNumCols)>
-using TMatrix = Eigen::Matrix<TScalar, TNumRows, TNumCols, TOptions>;
+using Matrix = Eigen::Matrix<TScalar, TNumRows, TNumCols, TOptions>;
 
 template <typename TDerived, typename TOtherDerived = TDerived, int TOptions = DefaultMatrixStorageOption(TDerived::SizeAtCompileTime, TOtherDerived::SizeAtCompileTime)>
-using TMatrixNN = TMatrix<typename TDerived::Scalar, TDerived::SizeAtCompileTime, TOtherDerived::SizeAtCompileTime, TOptions>;
+using MatrixNN = Matrix<typename TDerived::Scalar, TDerived::SizeAtCompileTime, TOtherDerived::SizeAtCompileTime, TOptions>;
 
 template <typename TDerived, int TOptions = DefaultMatrixStorageOption(TDerived::SizeAtCompileTime, Eigen::Dynamic)>
-using TMatrixNX = TMatrix<typename TDerived::Scalar, TDerived::SizeAtCompileTime, Eigen::Dynamic, TOptions>;
+using MatrixNX = Matrix<typename TDerived::Scalar, TDerived::SizeAtCompileTime, Eigen::Dynamic, TOptions>;
 
 template <typename TOtherDerived, int TOptions = DefaultMatrixStorageOption(Eigen::Dynamic, TOtherDerived::SizeAtCompileTime)>
-using TMatrixXN = TMatrix<typename TOtherDerived::Scalar, Eigen::Dynamic, TOtherDerived::SizeAtCompileTime, TOptions>;
+using MatrixXN = Matrix<typename TOtherDerived::Scalar, Eigen::Dynamic, TOtherDerived::SizeAtCompileTime, TOptions>;
 
 template <typename TScalar, int TOptions = DefaultMatrixStorageOption(Eigen::Dynamic, Eigen::Dynamic)>
-using TMatrixX = TMatrix<TScalar, Eigen::Dynamic, Eigen::Dynamic, TOptions>;
+using MatrixX = Matrix<TScalar, Eigen::Dynamic, Eigen::Dynamic, TOptions>;
 
 // clang-format on
 

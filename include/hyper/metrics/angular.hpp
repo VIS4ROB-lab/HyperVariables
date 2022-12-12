@@ -18,9 +18,9 @@ class TAngularMetric final : public TMetric<TScalar> {
 
   // Definitions.
   using Scalar = TScalar;
-  using Input = Cartesian<Scalar, kInputDim>;
-  using Output = Cartesian<Scalar, kOutputDim>;
-  using Jacobian = TJacobian<Scalar, kOutputDim, kInputDim>;
+  using Input = hyper::Cartesian<Scalar, kInputDim>;
+  using Output = hyper::Cartesian<Scalar, kOutputDim>;
+  using Jacobian = hyper::Jacobian<Scalar, kOutputDim, kInputDim>;
 
   /// Evaluates the distance between elements.
   /// \param lhs Left element/input vector.

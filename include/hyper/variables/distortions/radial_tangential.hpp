@@ -147,7 +147,7 @@ auto RadialTangentialDistortionBase<TDerived>::distort(const Eigen::Ref<const Pi
     const auto d_radial = (Scalar{2} * d_radial_sum * pixel.transpose()).eval();
     const auto d_tangential = (Scalar{2} * P.transpose()).eval();
 
-    using Jacobian = TJacobianNM<Pixel<Scalar>>;
+    using Jacobian = JacobianNM<Pixel<Scalar>>;
     auto J = Eigen::Map<Jacobian>{raw_J_p_p};
     J = a * Jacobian::Identity() + pixel * (d_radial + d_tangential) + Scalar{2} * P * pixel.transpose();
   }
@@ -155,11 +155,11 @@ auto RadialTangentialDistortionBase<TDerived>::distort(const Eigen::Ref<const Pi
   if (raw_J_p_d) {
     const auto size = this->size();
     const auto tangential_order = this->tangentialOrder();
-    auto J = Eigen::Map<TJacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::kNumParameters, size};
+    auto J = Eigen::Map<JacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::kNumParameters, size};
     for (auto i = 0; i < radial_order; ++i) {
       J.col(i) = rhos[i] * pixel;
     }
-    J.middleCols(radial_order, tangential_order) = Scalar{2} * pixel * pixel.transpose() + rho2 * TJacobianNM<Pixel<Scalar>>::Identity();
+    J.middleCols(radial_order, tangential_order) = Scalar{2} * pixel * pixel.transpose() + rho2 * JacobianNM<Pixel<Scalar>>::Identity();
   }
 
   return a * pixel + rho2 * P;

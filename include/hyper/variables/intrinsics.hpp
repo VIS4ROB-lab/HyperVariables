@@ -116,7 +116,7 @@ class IntrinsicsBase
     const auto dy_ify = dy * ify;
 
     if (raw_J_p_p) {
-      auto J = Eigen::Map<TJacobianNM<Pixel<Scalar>>>{raw_J_p_p};
+      auto J = Eigen::Map<JacobianNM<Pixel<Scalar>>>{raw_J_p_p};
       J(0, 0) = ifx;
       J(1, 0) = Scalar{0};
       J(0, 1) = Scalar{0};
@@ -124,7 +124,7 @@ class IntrinsicsBase
     }
 
     if (raw_J_p_i) {
-      auto J = Eigen::Map<TJacobianNM<Pixel<Scalar>, Intrinsics<Scalar>>>{raw_J_p_i};
+      auto J = Eigen::Map<JacobianNM<Pixel<Scalar>, Intrinsics<Scalar>>>{raw_J_p_i};
       J(0, kPrincipalOffsetX) = Scalar{-1} * ifx;
       J(1, kPrincipalOffsetX) = Scalar{0};
       J(0, kPrincipalOffsetY) = Scalar{0};
@@ -145,7 +145,7 @@ class IntrinsicsBase
   /// \return Denormalized pixel coordinates.
   auto denormalize(const Eigen::Ref<const typename Traits<Pixel<Scalar>>::Base>& input, Scalar* raw_J_p_p = nullptr, Scalar* raw_J_p_i = nullptr) const -> Pixel<Scalar> { // NOLINT
     if (raw_J_p_p) {
-      auto J = Eigen::Map<TJacobianNM<Pixel<Scalar>>>{raw_J_p_p};
+      auto J = Eigen::Map<JacobianNM<Pixel<Scalar>>>{raw_J_p_p};
       J(0, 0) = fx();
       J(1, 0) = Scalar{0};
       J(0, 1) = Scalar{0};
@@ -153,7 +153,7 @@ class IntrinsicsBase
     }
 
     if (raw_J_p_i) {
-      auto J = Eigen::Map<TJacobianNM<Pixel<Scalar>, Intrinsics<Scalar>>>{raw_J_p_i};
+      auto J = Eigen::Map<JacobianNM<Pixel<Scalar>, Intrinsics<Scalar>>>{raw_J_p_i};
       J(0, kPrincipalOffsetX) = Scalar{1};
       J(1, kPrincipalOffsetX) = Scalar{0};
       J(0, kPrincipalOffsetY) = Scalar{0};

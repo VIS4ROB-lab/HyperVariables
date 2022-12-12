@@ -16,12 +16,12 @@ constexpr auto DefaultResidualStorageOption(const int rows, const int cols) -> i
 // clang-format on
 
 template <typename TScalar, int TNumRows, int TOptions = DefaultResidualStorageOption(TNumRows, 1)>
-using TResidual = TVector<TScalar, TNumRows, TOptions>;
+using Residual = Vector<TScalar, TNumRows, TOptions>;
 
 template <typename TDerived, int TOptions = DefaultResidualStorageOption(TDerived::SizeAtCompileTime, 1)>
-using TResidualN = TVectorN<TDerived, TOptions>;
+using ResidualN = VectorN<TDerived, TOptions>;
 
 template <typename TScalar, int TOptions = DefaultResidualStorageOption(Eigen::Dynamic, 1)>
-using TResidualX = TVectorX<TScalar, TOptions>;
+using ResidualX = VectorX<TScalar, TOptions>;
 
 } // namespace hyper
