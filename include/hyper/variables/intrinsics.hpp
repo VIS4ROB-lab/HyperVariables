@@ -6,7 +6,7 @@
 #include "hyper/variables/cartesian.hpp"
 #include "hyper/variables/jacobian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
 class IntrinsicsBase
@@ -178,6 +178,6 @@ class Intrinsics final
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Intrinsics)
 };
 
-} // namespace hyper
+} // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::Intrinsics)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Intrinsics)

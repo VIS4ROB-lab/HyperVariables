@@ -8,7 +8,7 @@
 
 #include "hyper/variables/cartesian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
 class BearingBase : public CartesianBase<TDerived> {
@@ -94,6 +94,6 @@ class Bearing final
   }
 };
 
-} // namespace hyper
+} // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::Bearing)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Bearing)

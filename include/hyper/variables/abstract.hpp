@@ -7,7 +7,7 @@
 
 #include "hyper/vector.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TScalar>
 class ConstAbstractVariable {
@@ -45,4 +45,4 @@ class AbstractVariable {
   virtual auto asVector() -> Eigen::Map<TVectorX<TScalar>> = 0;
 };
 
-} // namespace hyper
+} // namespace hyper::variables

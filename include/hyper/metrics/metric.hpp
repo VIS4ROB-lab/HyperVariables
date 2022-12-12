@@ -8,7 +8,7 @@
 #include "hyper/variables/jacobian.hpp"
 #include "hyper/vector.hpp"
 
-namespace hyper {
+namespace hyper::metrics {
 
 template <typename TScalar>
 class TMetric {
@@ -38,4 +38,4 @@ class TMetric {
   virtual auto distance(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void = 0;
 };
 
-} // namespace hyper
+} // namespace hyper::metrics

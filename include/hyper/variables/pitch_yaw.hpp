@@ -5,7 +5,7 @@
 
 #include "hyper/variables/cartesian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
 class PitchYawBase
@@ -60,6 +60,6 @@ class PitchYaw final
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(PitchYaw)
 };
 
-} // namespace hyper
+} // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::PitchYaw)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::PitchYaw)

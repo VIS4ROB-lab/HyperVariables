@@ -13,7 +13,7 @@
 #include "hyper/variables/cartesian.hpp"
 #include "hyper/variables/jacobian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TScalar, typename TBase>
 class AbstractDistortionBase : public TBase {
@@ -108,4 +108,4 @@ auto AbstractDistortionBase<TScalar, TBase>::undistort(const Eigen::Ref<const Pi
   return output;
 }
 
-} // namespace hyper
+} // namespace hyper::variables

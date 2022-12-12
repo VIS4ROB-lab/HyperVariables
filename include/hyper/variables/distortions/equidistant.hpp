@@ -5,7 +5,7 @@
 
 #include "hyper/variables/distortions/base.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
 class EquidistantDistortionBase
@@ -170,6 +170,6 @@ auto EquidistantDistortionBase<TDerived>::distortTheta(const Scalar& theta, Scal
   return this->dot(thetas);
 }
 
-} // namespace hyper
+} // namespace hyper::variables
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::EquidistantDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::EquidistantDistortion, int)

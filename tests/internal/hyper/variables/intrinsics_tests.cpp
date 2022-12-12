@@ -5,7 +5,7 @@
 
 #include "hyper/variables/intrinsics.hpp"
 
-namespace hyper::tests {
+namespace hyper::variables::tests {
 
 using Scalar = double;
 
@@ -184,4 +184,4 @@ TEST_F(IntrinsicsTests, InverseParameterJacobian) {
   }
 }
 
-} // namespace hyper::tests
+} // namespace hyper::variables::tests

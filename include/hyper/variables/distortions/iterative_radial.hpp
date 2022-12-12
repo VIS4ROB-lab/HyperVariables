@@ -5,7 +5,7 @@
 
 #include "hyper/variables/distortions/base.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
 class IterativeRadialDistortionBase
@@ -217,6 +217,6 @@ auto IterativeRadialDistortionBase<TDerived>::InverseIterativePixelDistortionJac
   return b * pixel;
 }
 
-} // namespace hyper
+} // namespace hyper::variables
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::IterativeRadialDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::IterativeRadialDistortion, int)

@@ -5,7 +5,7 @@
 
 #include "hyper/variables/groups/se3.hpp"
 
-namespace hyper::tests {
+namespace hyper::variables::tests {
 
 using Scalar = double;
 
@@ -176,4 +176,4 @@ TEST_F(SE3Tests, GroupExponentials) {
   }
 }
 
-} // namespace hyper::tests
+} // namespace hyper::variables::tests

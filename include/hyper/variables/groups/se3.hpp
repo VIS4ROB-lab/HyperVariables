@@ -6,7 +6,7 @@
 #include "hyper/variables/groups/su2.hpp"
 #include "hyper/variables/jacobian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
 class SE3Base
@@ -242,12 +242,12 @@ class Tangent<SE3<TScalar>> final
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Tangent)
 };
 
-} // namespace hyper
+} // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::SE3)
-HYPER_DECLARE_TANGENT_MAP(hyper::SE3)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::SE3)
+HYPER_DECLARE_TANGENT_MAP(hyper::variables::SE3)
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
 auto SE3Base<TDerived>::Identity() -> SE3<Scalar> {
@@ -521,4 +521,4 @@ auto SE3TangentBase<TDerived>::toManifold(Scalar* raw_J, const bool global, cons
   return output;
 }
 
-} // namespace hyper
+} // namespace hyper::variables

@@ -11,7 +11,7 @@
 #include "hyper/variables/cartesian.hpp"
 #include "hyper/variables/jacobian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
 class QuaternionBase
@@ -27,7 +27,7 @@ class QuaternionBase
   using Base::operator*;
 
   using Translation = Cartesian<Scalar, 3>;
-  
+
   // Constants.
   static constexpr auto SizeAtCompileTime = (int)Base::Coefficients::SizeAtCompileTime;
   static constexpr auto kNumParameters = (int)Base::Coefficients::SizeAtCompileTime;
@@ -546,9 +546,9 @@ auto SU2TangentBase<TDerived>::toManifold(Scalar* raw_J, const bool global) cons
   return output;
 }
 
-} // namespace hyper
+} // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::Quaternion)
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::SU2)
-HYPER_DECLARE_ALGEBRA_MAP(hyper::SU2)
-HYPER_DECLARE_TANGENT_MAP(hyper::SU2)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Quaternion)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::SU2)
+HYPER_DECLARE_ALGEBRA_MAP(hyper::variables::SU2)
+HYPER_DECLARE_TANGENT_MAP(hyper::variables::SU2)

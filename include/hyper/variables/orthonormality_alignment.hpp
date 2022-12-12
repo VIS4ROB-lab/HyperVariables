@@ -6,7 +6,7 @@
 #include "hyper/variables/cartesian.hpp"
 #include "hyper/variables/jacobian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
 class OrthonormalityAlignmentBase
@@ -150,6 +150,6 @@ class OrthonormalityAlignment final
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(OrthonormalityAlignment)
 };
 
-} // namespace hyper
+} // namespace hyper::variables
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::OrthonormalityAlignment, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::OrthonormalityAlignment, int)

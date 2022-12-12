@@ -5,7 +5,7 @@
 
 #include "hyper/variables/distortions/base.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
 class RadialTangentialDistortionBase
@@ -165,6 +165,6 @@ auto RadialTangentialDistortionBase<TDerived>::distort(const Eigen::Ref<const Pi
   return a * pixel + rho2 * P;
 }
 
-} // namespace hyper
+} // namespace hyper::variables
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::RadialTangentialDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::RadialTangentialDistortion, int)

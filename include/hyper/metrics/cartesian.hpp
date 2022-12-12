@@ -5,7 +5,7 @@
 
 #include "hyper/metrics/metric.hpp"
 
-namespace hyper {
+namespace hyper::metrics {
 
 template <typename TScalar, int TDim>
 class TCartesianMetric final : public TMetric<TScalar> {
@@ -16,9 +16,9 @@ class TCartesianMetric final : public TMetric<TScalar> {
 
   // Definitions.
   using Scalar = TScalar;
-  using Input = TVector<Scalar, kInputDim>;
-  using Output = TVector<Scalar, kOutputDim>;
-  using Jacobian = TJacobian<Scalar, kOutputDim, kInputDim>;
+  using Input = variables::Cartesian<Scalar, kInputDim>;
+  using Output = variables::Cartesian<Scalar, kOutputDim>;
+  using Jacobian = variables::TJacobian<Scalar, kOutputDim, kInputDim>;
 
   /// Evaluates the distance between elements.
   /// \param lhs Left element/input vector.
@@ -82,4 +82,4 @@ class TCartesianMetric final : public TMetric<TScalar> {
   }
 };
 
-} // namespace hyper
+} // namespace hyper::metrics
