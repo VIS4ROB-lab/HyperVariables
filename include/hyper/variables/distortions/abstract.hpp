@@ -11,7 +11,7 @@
 #include "hyper/variables/distortions/forward.hpp"
 
 #include "hyper/variables/cartesian.hpp"
-#include "hyper/variables/jacobian.hpp"
+#include "hyper/variables/definitions/jacobian.hpp"
 
 namespace hyper::variables {
 

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "hyper/variables/cartesian.hpp"
-#include "hyper/variables/jacobian.hpp"
+#include "hyper/variables/definitions/jacobian.hpp"
 
 namespace hyper::variables {
 

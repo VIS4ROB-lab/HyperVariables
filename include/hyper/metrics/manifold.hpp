@@ -4,8 +4,8 @@
 #pragma once
 
 #include "hyper/metrics/metric.hpp"
+#include "hyper/variables/definitions/jacobian.hpp"
 #include "hyper/variables/groups/se3.hpp"
-#include "hyper/variables/jacobian.hpp"
 
 namespace hyper::metrics {
 
