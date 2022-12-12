@@ -9,7 +9,7 @@
 #include "hyper/variables/distortions/iterative_radial.hpp"
 #include "hyper/variables/distortions/radial_tangential.hpp"
 
-namespace hyper::variables::tests {
+namespace hyper::tests {
 
 using Scalar = double;
 
@@ -210,4 +210,4 @@ INSTANTIATE_TEST_SUITE_P(, DistortionTests,
         createDefaultDistortion<IterativeRadialDistortion<Scalar, 2>>(),
         createDefaultDistortion<IterativeRadialDistortion<Scalar, 4>>()));
 
-} // namespace hyper::variables::tests
+} // namespace hyper::tests

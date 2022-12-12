@@ -7,9 +7,7 @@
 #include "hyper/metrics/cartesian.hpp"
 #include "hyper/metrics/manifold.hpp"
 
-namespace hyper::metrics::tests {
-
-using namespace variables;
+namespace hyper::tests {
 
 using Scalar = double;
 
@@ -122,4 +120,4 @@ TEST_F(MetricsTests, Manifold) {
   }
 }
 
-} // namespace hyper::metrics::tests
+} // namespace hyper::tests

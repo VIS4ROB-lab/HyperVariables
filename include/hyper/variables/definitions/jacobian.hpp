@@ -5,7 +5,7 @@
 
 #include "hyper/matrix.hpp"
 
-namespace hyper::variables {
+namespace hyper {
 
 // clang-format off
 
@@ -26,4 +26,4 @@ using TJacobianX = TMatrixX<TScalar, TOptions>;
 
 // clang-format on
 
-} // namespace hyper::variables
+} // namespace hyper

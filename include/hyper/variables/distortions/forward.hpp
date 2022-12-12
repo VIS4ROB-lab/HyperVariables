@@ -5,7 +5,7 @@
 
 #include "hyper/variables/forward.hpp"
 
-namespace hyper::variables {
+namespace hyper {
 
 template <typename TScalar, typename TBase>
 class AbstractDistortionBase;
@@ -35,7 +35,7 @@ struct Traits<EquidistantDistortion<TScalar, TOrder>>
   using Distortion = EquidistantDistortion<TScalar, TOrder>;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::EquidistantDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::EquidistantDistortion, int)
 
 template <typename, int>
 class RadialTangentialDistortion;
@@ -47,7 +47,7 @@ struct Traits<RadialTangentialDistortion<TScalar, TOrder>>
   using Distortion = RadialTangentialDistortion<TScalar, TOrder>;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::RadialTangentialDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::RadialTangentialDistortion, int)
 
 template <typename, int>
 class IterativeRadialDistortion;
@@ -59,6 +59,6 @@ struct Traits<IterativeRadialDistortion<TScalar, TOrder>>
   using Distortion = IterativeRadialDistortion<TScalar, TOrder>;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::IterativeRadialDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::IterativeRadialDistortion, int)
 
-} // namespace hyper::variables
+} // namespace hyper

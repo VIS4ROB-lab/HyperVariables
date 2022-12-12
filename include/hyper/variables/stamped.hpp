@@ -5,7 +5,7 @@
 
 #include "hyper/variables/cartesian.hpp"
 
-namespace hyper::variables {
+namespace hyper {
 
 template <typename TScalar>
 class AbstractStamped : public AbstractVariable<TScalar> {
@@ -106,6 +106,6 @@ class Stamped final
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Stamped)
 };
 
-} // namespace hyper::variables
+} // namespace hyper
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Stamped)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::Stamped)

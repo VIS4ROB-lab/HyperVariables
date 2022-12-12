@@ -5,7 +5,7 @@
 
 #include "hyper/vector.hpp"
 
-namespace hyper::variables {
+namespace hyper {
 
 // clang-format off
 
@@ -24,4 +24,4 @@ using TResidualN = TVectorN<TDerived, TOptions>;
 template <typename TScalar, int TOptions = DefaultResidualStorageOption(Eigen::Dynamic, 1)>
 using TResidualX = TVectorX<TScalar, TOptions>;
 
-} // namespace hyper::variables
+} // namespace hyper

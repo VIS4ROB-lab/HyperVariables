@@ -7,7 +7,7 @@
 
 #include "hyper/variables/cartesian.hpp"
 
-namespace hyper::variables {
+namespace hyper {
 
 template <typename TDerived>
 class GravityBase : public CartesianBase<TDerived> {
@@ -50,6 +50,6 @@ class Gravity final
   }
 };
 
-} // namespace hyper::variables
+} // namespace hyper
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Gravity)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::Gravity)

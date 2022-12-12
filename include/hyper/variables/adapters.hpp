@@ -6,7 +6,7 @@
 #include "hyper/variables/definitions/jacobian.hpp"
 #include "hyper/variables/groups/se3.hpp"
 
-namespace hyper::variables {
+namespace hyper {
 
 /// SU2 Jacobian adapter making
 /// internal SU2 Jacobians compatible
@@ -60,4 +60,4 @@ auto SE3JacobianAdapter(const TScalar* raw_se3) -> TJacobianNM<Tangent<SE3<TScal
   return J;
 }
 
-} // namespace hyper::variables
+} // namespace hyper

@@ -3,7 +3,7 @@
 
 #pragma once
 
-namespace hyper::variables {
+namespace hyper {
 
 #define HYPER_INHERIT_ASSIGNMENT_OPERATORS(DERIVED) \
   using Base::operator=;                            \
@@ -148,4 +148,4 @@ namespace hyper::variables {
   };                                                                                \
   }
 
-} // namespace hyper::variables
+} // namespace hyper

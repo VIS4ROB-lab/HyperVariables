@@ -11,7 +11,7 @@
 #include "hyper/variables/cartesian.hpp"
 #include "hyper/variables/definitions/jacobian.hpp"
 
-namespace hyper::variables {
+namespace hyper {
 
 template <typename TDerived>
 class QuaternionBase
@@ -546,9 +546,9 @@ auto SU2TangentBase<TDerived>::toManifold(Scalar* raw_J, const bool global) cons
   return output;
 }
 
-} // namespace hyper::variables
+} // namespace hyper
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Quaternion)
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::SU2)
-HYPER_DECLARE_ALGEBRA_MAP(hyper::variables::SU2)
-HYPER_DECLARE_TANGENT_MAP(hyper::variables::SU2)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::Quaternion)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::SU2)
+HYPER_DECLARE_ALGEBRA_MAP(hyper::SU2)
+HYPER_DECLARE_TANGENT_MAP(hyper::SU2)

@@ -5,7 +5,7 @@
 
 #include "hyper/variables/orthonormality_alignment.hpp"
 
-namespace hyper::variables::tests {
+namespace hyper::tests {
 
 using Scalar = double;
 
@@ -96,4 +96,4 @@ TEST_F(OrthonormalityAlignmentTests, ParameterJacobian) {
   }
 }
 
-} // namespace hyper::variables::tests
+} // namespace hyper::tests

@@ -7,16 +7,16 @@
 #include "hyper/variables/definitions/jacobian.hpp"
 #include "hyper/variables/groups/se3.hpp"
 
-namespace hyper::metrics {
+namespace hyper {
 
 template <typename TScalar>
-class TManifoldMetric<TScalar, variables::ManifoldEnum::SE3> final : public TMetric<TScalar> {
+class TManifoldMetric<TScalar, ManifoldEnum::SE3> final : public TMetric<TScalar> {
  public:
   // Definitions.
   using Scalar = TScalar;
-  using Input = variables::SE3<Scalar>;
-  using Output = variables::Tangent<Input>;
-  using Jacobian = variables::TJacobianNM<Output>;
+  using Input = SE3<Scalar>;
+  using Output = Tangent<Input>;
+  using Jacobian = TJacobianNM<Output>;
 
   // Constants.
   static constexpr auto kInputDim = Input::kNumParameters;
@@ -116,4 +116,4 @@ class TManifoldMetric<TScalar, variables::ManifoldEnum::SE3> final : public TMet
   bool coupled_;
 };
 
-} // namespace hyper::metrics
+} // namespace hyper

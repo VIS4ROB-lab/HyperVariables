@@ -5,7 +5,7 @@
 
 #include "hyper/variables/abstract.hpp"
 
-namespace hyper::variables {
+namespace hyper {
 
 template <typename TDerived>
 class CartesianBase
@@ -46,11 +46,11 @@ class Cartesian final
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Cartesian)
 };
 
-} // namespace hyper::variables
+} // namespace hyper
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::Cartesian, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::Cartesian, int)
 
-namespace hyper::variables {
+namespace hyper {
 
 template <typename TDerived>
 class CartesianTangentBase
@@ -73,11 +73,11 @@ class Tangent final
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Tangent)
 };
 
-} // namespace hyper::variables
+} // namespace hyper
 
 namespace Eigen {
 
-using namespace hyper::variables;
+using namespace hyper;
 
 template <typename TDerived, int TMapOptions>
 class Map<Tangent<TDerived>, TMapOptions> final
