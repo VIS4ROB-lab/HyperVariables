@@ -25,14 +25,14 @@ class CartesianBase
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Map<const VectorX<Scalar>> final {
-    return {this->data(), this->size(), 1};
+  auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final {
+    return *this;
   }
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() -> Eigen::Map<VectorXWithConstIfNotLvalue> final {
-    return {this->data(), this->size(), 1};
+  auto asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> final {
+    return *this;
   }
 };
 

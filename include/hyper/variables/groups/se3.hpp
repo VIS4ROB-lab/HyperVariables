@@ -58,11 +58,11 @@ class SE3Base
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Map<const VectorX<Scalar>> final;
+  auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final;
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() -> Eigen::Map<VectorXWithConstIfNotLvalue> final;
+  auto asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> final;
 
   /// Rotation accessor.
   /// \return Rotation.
@@ -260,13 +260,13 @@ auto SE3Base<TDerived>::Random() -> SE3<Scalar> {
 }
 
 template <typename TDerived>
-auto SE3Base<TDerived>::asVector() const -> Eigen::Map<const VectorX<Scalar>> {
-  return {this->data(), TDerived::kNumParameters, 1};
+auto SE3Base<TDerived>::asVector() const -> Eigen::Ref<const VectorX<Scalar>> {
+  return *this;
 }
 
 template <typename TDerived>
-auto SE3Base<TDerived>::asVector() -> Eigen::Map<VectorXWithConstIfNotLvalue> {
-  return {this->data(), TDerived::kNumParameters, 1};
+auto SE3Base<TDerived>::asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> {
+  return *this;
 }
 
 template <typename TDerived>

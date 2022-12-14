@@ -56,11 +56,11 @@ class QuaternionBase
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Map<const VectorX<Scalar>> final;
+  auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final;
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() -> Eigen::Map<VectorXWithConstIfNotLvalue> final;
+  auto asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> final;
 
   /// Group inverse.
   /// \return Inverse element.
@@ -292,13 +292,13 @@ auto QuaternionBase<TDerived>::data() -> ScalarWithConstIfNotLvalue* {
 }
 
 template <typename TDerived>
-auto QuaternionBase<TDerived>::asVector() const -> Eigen::Map<const VectorX<Scalar>> {
-  return {this->data(), TDerived::kNumParameters, 1};
+auto QuaternionBase<TDerived>::asVector() const -> Eigen::Ref<const VectorX<Scalar>> {
+  return this->coeffs();
 }
 
 template <typename TDerived>
-auto QuaternionBase<TDerived>::asVector() -> Eigen::Map<VectorXWithConstIfNotLvalue> {
-  return {this->data(), TDerived::kNumParameters, 1};
+auto QuaternionBase<TDerived>::asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> {
+  return this->coeffs();
 }
 
 template <typename TDerived>
