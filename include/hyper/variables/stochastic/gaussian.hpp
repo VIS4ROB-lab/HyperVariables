@@ -3,11 +3,10 @@
 
 #pragma once
 
-#include <Eigen/Cholesky>
-
 #include "hyper/variables/stochastic/forward.hpp"
 
 #include "hyper/variables/cartesian.hpp"
+#include "hyper/variables/stochastic/invert_psd_matrix.hpp"
 
 namespace hyper {
 
@@ -57,8 +56,7 @@ class GaussianBase : public Traits<TDerived>::Base {
   /// Inverse covariance.
   /// \return Inverse covariance.
   inline auto inverseSigma() const {
-    const auto order = this->order();
-    return sigma().llt().solve(Eigen::Matrix<Scalar, kOrder, kOrder>::Identity(order, order));
+    return invertPSDMatrix<Scalar, kOrder>(sigma(), true);
   }
 
   /// Converts this.
@@ -167,8 +165,7 @@ class CanonicalGaussianBase : public Traits<TDerived>::Base {
   /// Inverse precision.
   /// \return Inverse precision.
   inline auto inverseLambda() const {
-    const auto order = this->order();
-    return lambda().llt().solve(Eigen::Matrix<Scalar, kOrder, kOrder>::Identity(order, order));
+    return invertPSDMatrix<Scalar, kOrder>(lambda(), true);
   }
 
   /// Converts this.
