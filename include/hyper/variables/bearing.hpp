@@ -11,20 +11,22 @@
 namespace hyper {
 
 template <typename TDerived>
-class BearingBase
-    : public CartesianBase<TDerived> {
+class BearingBase : public CartesianBase<TDerived> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
+  // Definitions.
   using Base = CartesianBase<TDerived>;
+  using Scalar = typename Base::Scalar;
   using Base::Base;
+
+  // Constants.
+  static constexpr auto kNorm = Scalar{1};
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(BearingBase)
 
   /// Checks the norm.
   /// \return True if correct.
   [[nodiscard]] auto checkNorm() const -> bool {
-    return Eigen::internal::isApprox(this->norm(), Traits<TDerived>::kNorm);
+    return Eigen::internal::isApprox(this->norm(), kNorm);
   }
 
   /// Finds an orthonormal basis where the first unit
@@ -79,8 +81,8 @@ class Bearing final
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Bearing)
 
-  /// Deleted default constructor.
-  Bearing() = delete;
+  /// Default constructor.
+  Bearing() = default;
 
   /// Forwarding constructor with norm check.
   /// \tparam TArgs_ Input argument types.

@@ -16,17 +16,21 @@ namespace hyper {
 template <typename TDerived>
 class QuaternionBase
     : public Traits<TDerived>::Base,
-      public AbstractVariable<typename Traits<TDerived>::ScalarWithConstIfNotLvalue> {
+      public ConditionalConstBase_t<TDerived, AbstractVariable<DerivedScalar_t<TDerived>>, ConstAbstractVariable<DerivedScalar_t<TDerived>>> {
  public:
   // Definitions.
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
-  using DynamicVectorWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const DynamicVector<Scalar>, DynamicVector<Scalar>>;
   using Base = typename Traits<TDerived>::Base;
+  using Scalar = typename Base::Scalar;
+  using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
+  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
   using Base::Base;
   using Base::operator*;
 
   using Translation = Cartesian<Scalar, 3>;
+
+  // Constants.
+  static constexpr auto SizeAtCompileTime = (int)Base::Coefficients::SizeAtCompileTime;
+  static constexpr auto kNumParameters = (int)Base::Coefficients::SizeAtCompileTime;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(QuaternionBase)
 
@@ -52,11 +56,11 @@ class QuaternionBase
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Map<const DynamicVector<Scalar>> final;
+  auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final;
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> final;
+  auto asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> final;
 
   /// Group inverse.
   /// \return Inverse element.
@@ -89,9 +93,8 @@ template <typename TDerived>
 class SU2Base
     : public QuaternionBase<TDerived> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Base = QuaternionBase<TDerived>;
+  using Scalar = typename Base::Scalar;
   using Base::Base;
   using Base::operator*;
 
@@ -164,9 +167,8 @@ template <typename TDerived>
 class SU2AlgebraBase
     : public QuaternionBase<TDerived> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Base = QuaternionBase<TDerived>;
+  using Scalar = typename Base::Scalar;
   using Base::Base;
   using Base::operator*;
 
@@ -215,7 +217,7 @@ class SU2 final
   /// Perfect forwarding constructor.
   template <typename... TArgs>
   SU2(TArgs&&... args) // NOLINT
-  : Base{std::forward<TArgs>(args)...} {
+      : Base{std::forward<TArgs>(args)...} {
     // DCHECK(Eigen::internal::isApprox(this->norm(), TScalar{1}));
   }
 
@@ -245,10 +247,14 @@ template <typename TDerived>
 class SU2TangentBase
     : public CartesianBase<TDerived> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
+  // Definitions.
   using Base = CartesianBase<TDerived>;
+  using Scalar = typename Base::Scalar;
   using Base::Base;
+
+  // Constants.
+  static constexpr auto kAngularOffset = 0;
+  static constexpr auto kNumAngularParameters = 3;
 
   static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES;
 
@@ -286,13 +292,13 @@ auto QuaternionBase<TDerived>::data() -> ScalarWithConstIfNotLvalue* {
 }
 
 template <typename TDerived>
-auto QuaternionBase<TDerived>::asVector() const -> Eigen::Map<const DynamicVector<Scalar>> {
-  return {this->data(), Traits<TDerived>::kNumParameters, 1};
+auto QuaternionBase<TDerived>::asVector() const -> Eigen::Ref<const VectorX<Scalar>> {
+  return this->coeffs();
 }
 
 template <typename TDerived>
-auto QuaternionBase<TDerived>::asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> {
-  return {this->data(), Traits<TDerived>::kNumParameters, 1};
+auto QuaternionBase<TDerived>::asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> {
+  return this->coeffs();
 }
 
 template <typename TDerived>
@@ -359,7 +365,7 @@ auto SU2Base<TDerived>::groupInverse(Scalar* raw_J, const bool global) const -> 
   const auto i_q = this->conjugate();
 
   if (raw_J) {
-    auto J = Eigen::Map<Jacobian<Tangent<SU2<Scalar>>>>{raw_J};
+    auto J = Eigen::Map<JacobianNM<Tangent<SU2<Scalar>>>>{raw_J};
     if (global) {
       J.noalias() = Scalar{-1} * i_q.matrix();
     } else {
@@ -376,7 +382,7 @@ auto SU2Base<TDerived>::groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* 
   auto output = (*this) * other;
 
   if (raw_J_this) {
-    auto J = Eigen::Map<Jacobian<Tangent<SU2<Scalar>>>>{raw_J_this};
+    auto J = Eigen::Map<JacobianNM<Tangent<SU2<Scalar>>>>{raw_J_this};
     if (global) {
       J.setIdentity();
     } else {
@@ -385,7 +391,7 @@ auto SU2Base<TDerived>::groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* 
   }
 
   if (raw_J_other) {
-    auto J = Eigen::Map<Jacobian<Tangent<SU2<Scalar>>>>{raw_J_other};
+    auto J = Eigen::Map<JacobianNM<Tangent<SU2<Scalar>>>>{raw_J_other};
     if (global) {
       J.noalias() = this->matrix();
     } else {
@@ -403,7 +409,7 @@ auto SU2Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, S
 
   if (raw_J_this) {
     using Tangent = Tangent<SU2<Scalar>>;
-    auto J = Eigen::Map<Jacobian<Translation, Tangent>>{raw_J_this};
+    auto J = Eigen::Map<JacobianNM<Translation, Tangent>>{raw_J_this};
     if (global) {
       J.noalias() = Scalar{-1} * output.hat();
     } else {
@@ -412,7 +418,7 @@ auto SU2Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, S
   }
 
   if (raw_J_vector) {
-    Eigen::Map<Jacobian<Translation>>{raw_J_vector}.noalias() = this->matrix();
+    Eigen::Map<JacobianNM<Translation>>{raw_J_vector}.noalias() = this->matrix();
   }
 
   return output;
@@ -447,7 +453,7 @@ auto SU2Base<TDerived>::toTangent(Scalar* raw_J, const bool global) const -> Tan
   auto output = groupLog().toTangent();
 
   if (raw_J) {
-    using Jacobian = Jacobian<Tangent<SU2<Scalar>>>;
+    using Jacobian = JacobianNM<Tangent<SU2<Scalar>>>;
     auto J = Eigen::Map<Jacobian>{raw_J};
     const auto nw2 = output.squaredNorm();
     const auto nw = std::sqrt(nw2);
@@ -520,7 +526,7 @@ auto SU2TangentBase<TDerived>::toManifold(Scalar* raw_J, const bool global) cons
   auto output = toAlgebra().groupExp();
 
   if (raw_J) {
-    using Jacobian = Jacobian<Tangent<SU2<Scalar>>>;
+    using Jacobian = JacobianNM<Tangent<SU2<Scalar>>>;
     auto J = Eigen::Map<Jacobian>{raw_J};
     const auto nw2 = this->squaredNorm();
     const auto nw = std::sqrt(nw2);

@@ -43,9 +43,9 @@ class SU2Tests
   static constexpr auto kNumericTolerance = 1e-7;
 
   [[nodiscard]] auto checkGroupInverseJacobian(const bool global) const -> bool {
-    Jacobian<Tangent<SU2<Scalar>>> J_a, J_n;
+    JacobianNM<Tangent<SU2<Scalar>>> J_a, J_n;
     const auto i_q = su2_.groupInverse(J_a.data(), global);
-    for (auto j = 0; j < Traits<Tangent<SU2<Scalar>>>::kNumParameters; ++j) {
+    for (auto j = 0; j < Tangent<SU2<Scalar>>::kNumParameters; ++j) {
       J_n.col(j) = NumericGroupMinus(NumericGroupPlus(su2_, global, j).groupInverse(), i_q, global);
     }
 
@@ -56,9 +56,9 @@ class SU2Tests
     const auto other_su2 = SU2<Scalar>::Random();
     const auto su2 = su2_ * other_su2;
 
-    Jacobian<Tangent<SU2<Scalar>>> J_lhs_a, J_lhs_n, J_rhs_a, J_rhs_n;
+    JacobianNM<Tangent<SU2<Scalar>>> J_lhs_a, J_lhs_n, J_rhs_a, J_rhs_n;
     su2_.groupPlus(other_su2, J_lhs_a.data(), J_rhs_a.data(), global);
-    for (auto j = 0; j < Traits<Tangent<SU2<Scalar>>>::kNumParameters; ++j) {
+    for (auto j = 0; j < Tangent<SU2<Scalar>>::kNumParameters; ++j) {
       J_lhs_n.col(j) = NumericGroupMinus(NumericGroupPlus(su2_, global, j).groupPlus(other_su2), su2, global);
       J_rhs_n.col(j) = NumericGroupMinus(su2_.groupPlus(NumericGroupPlus(other_su2, global, j)), su2, global);
     }
@@ -70,14 +70,14 @@ class SU2Tests
     using Vector = Cartesian<Scalar, 3>;
     const Vector input = Vector::Random();
 
-    Jacobian<Vector, Tangent<SU2<Scalar>>> J_a, J_n;
-    Jacobian<Vector> J_v_a, J_v_n;
+    JacobianNM<Vector, Tangent<SU2<Scalar>>> J_a, J_n;
+    JacobianNM<Vector> J_v_a, J_v_n;
     const auto output = su2_.vectorPlus(input);
     su2_.vectorPlus(input, J_a.data(), J_v_a.data(), global);
-    for (auto j = 0; j < Traits<Tangent<SU2<Scalar>>>::kNumParameters; ++j) {
+    for (auto j = 0; j < Tangent<SU2<Scalar>>::kNumParameters; ++j) {
       J_n.col(j) = (NumericGroupPlus(su2_, global, j).vectorPlus(input) - output) / kNumericIncrement;
     }
-    for (auto j = 0; j < Traits<Vector>::kNumParameters; ++j) {
+    for (auto j = 0; j < Vector::kNumParameters; ++j) {
       J_v_n.col(j) = (su2_.vectorPlus(input + kNumericIncrement * Vector::Unit(j)) - output) / kNumericIncrement;
     }
 
@@ -94,12 +94,12 @@ class SU2Tests
   [[nodiscard]] auto checkGroupExponentialsJacobians(const bool global) const -> bool {
     using Tangent = Tangent<SU2<Scalar>>;
 
-    Jacobian<Tangent> J_l_a, J_e_a;
+    JacobianNM<Tangent> J_l_a, J_e_a;
     const auto tangent = su2_.toTangent(J_l_a.data(), global);
     const auto su2 = tangent.toManifold(J_e_a.data(), global);
 
-    Jacobian<Tangent> J_l_n, J_e_n;
-    for (auto j = 0; j < Traits<Tangent>::kNumParameters; ++j) {
+    JacobianNM<Tangent> J_l_n, J_e_n;
+    for (auto j = 0; j < Tangent::kNumParameters; ++j) {
       const auto d_tangent = Tangent{tangent + kNumericIncrement * Tangent::Unit(j)};
       J_l_n.col(j) = (NumericGroupPlus(su2_, global, j).toTangent() - tangent) / kNumericIncrement;
       J_e_n.col(j) = NumericGroupMinus(d_tangent.toManifold(), su2_, global);

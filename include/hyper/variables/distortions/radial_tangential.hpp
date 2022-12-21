@@ -9,12 +9,20 @@ namespace hyper {
 
 template <typename TDerived>
 class RadialTangentialDistortionBase
-    : public DistortionBase<TDerived> {
+    : public ConditionalConstBase_t<TDerived, Distortion<TDerived>, ConstDistortion<TDerived>> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
-  using Base = DistortionBase<TDerived>;
+  // Definitions.
+  using Base = ConditionalConstBase_t<TDerived, Distortion<TDerived>, ConstDistortion<TDerived>>;
+  using Scalar = typename Base::Scalar;
+  using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
   using Base::Base;
+
+  // Constants.
+  static constexpr auto kOrder = Traits<TDerived>::kOrder;
+  static constexpr auto kRadialOffset = 0;
+  static constexpr auto kNumRadialParameters = kOrder;
+  static constexpr auto kTangentialOffset = kRadialOffset + kNumRadialParameters;
+  static constexpr auto kNumTangentialParameters = 2;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(RadialTangentialDistortionBase)
 
@@ -33,25 +41,25 @@ class RadialTangentialDistortionBase
   /// Radial parameters accessor.
   /// \return Radial parameters.
   auto radial() const {
-    return this->segment(Traits<TDerived>::kRadialOffset, radialOrder());
+    return this->segment(kRadialOffset, radialOrder());
   }
 
   /// Radial parameters modifier.
   /// \return Radial parameters.
   auto radial() {
-    return this->segment(Traits<TDerived>::kRadialOffset, radialOrder());
+    return this->segment(kRadialOffset, radialOrder());
   }
 
   /// Tangential parameters accessor.
   /// \return Tangential parameters.
   auto tangential() const {
-    return this->segment(Traits<TDerived>::kRadialOffset + radialOrder(), tangentialOrder());
+    return this->segment(kRadialOffset + radialOrder(), tangentialOrder());
   }
 
   /// Tangential parameters modifier.
   /// \return Tangential parameters.
   auto tangential() {
-    return this->segment(Traits<TDerived>::kRadialOffset + radialOrder(), tangentialOrder());
+    return this->segment(kRadialOffset + radialOrder(), tangentialOrder());
   }
 
   /// Sets the default parameters.
@@ -139,7 +147,7 @@ auto RadialTangentialDistortionBase<TDerived>::distort(const Eigen::Ref<const Pi
     const auto d_radial = (Scalar{2} * d_radial_sum * pixel.transpose()).eval();
     const auto d_tangential = (Scalar{2} * P.transpose()).eval();
 
-    using Jacobian = Jacobian<Pixel<Scalar>>;
+    using Jacobian = JacobianNM<Pixel<Scalar>>;
     auto J = Eigen::Map<Jacobian>{raw_J_p_p};
     J = a * Jacobian::Identity() + pixel * (d_radial + d_tangential) + Scalar{2} * P * pixel.transpose();
   }
@@ -147,11 +155,11 @@ auto RadialTangentialDistortionBase<TDerived>::distort(const Eigen::Ref<const Pi
   if (raw_J_p_d) {
     const auto size = this->size();
     const auto tangential_order = this->tangentialOrder();
-    auto J = Eigen::Map<DynamicInputJacobian<Pixel<Scalar>>>{raw_J_p_d, Traits<Pixel<Scalar>>::kNumParameters, size};
+    auto J = Eigen::Map<JacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::kNumParameters, size};
     for (auto i = 0; i < radial_order; ++i) {
       J.col(i) = rhos[i] * pixel;
     }
-    J.middleCols(radial_order, tangential_order) = Scalar{2} * pixel * pixel.transpose() + rho2 * Jacobian<Pixel<Scalar>>::Identity();
+    J.middleCols(radial_order, tangential_order) = Scalar{2} * pixel * pixel.transpose() + rho2 * JacobianNM<Pixel<Scalar>>::Identity();
   }
 
   return a * pixel + rho2 * P;

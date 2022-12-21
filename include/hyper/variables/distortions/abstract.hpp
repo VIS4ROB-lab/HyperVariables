@@ -15,16 +15,15 @@
 
 namespace hyper {
 
-template <typename TScalar>
-class AbstractDistortion<TScalar, true>
-    : public AbstractVariable<TScalar> {
+template <typename TScalar, typename TBase>
+class AbstractDistortionBase : public TBase {
  public:
   // Definitions.
-  using Scalar = std::remove_const_t<TScalar>;
+  using Scalar = TScalar;
 
   /// Allocates a Jacobian.
   /// \return Allocated Jacobian.
-  auto allocatePixelDistortionJacobian() const -> DynamicInputJacobian<Pixel<Scalar>>;
+  auto allocatePixelDistortionJacobian() const -> JacobianNX<Pixel<Scalar>>;
 
   /// Distorts a pixel.
   /// \param pixel Pixel to distort.
@@ -43,7 +42,7 @@ class AbstractDistortion<TScalar, true>
   /// Maps a distortion.
   /// \param raw_distortion Raw distortion.
   /// \return Mapped distortion.
-  virtual auto map(const Scalar* raw_distortion) const -> std::unique_ptr<AbstractDistortion<const Scalar>> = 0;
+  virtual auto map(const Scalar* raw_distortion) const -> std::unique_ptr<ConstAbstractDistortion<Scalar>> = 0;
 
   /// Maps a distortion.
   /// \param raw_distortion Raw distortion.
@@ -52,10 +51,16 @@ class AbstractDistortion<TScalar, true>
 };
 
 template <typename TScalar>
-class AbstractDistortion<TScalar, false>
-    : public AbstractDistortion<TScalar, true> {
+class ConstAbstractDistortion : public AbstractDistortionBase<TScalar, ConstAbstractVariable<TScalar>> {
+  // Definitions.
+  using Scalar = TScalar;
+};
+
+template <typename TScalar>
+class AbstractDistortion : public AbstractDistortionBase<TScalar, AbstractVariable<TScalar>> {
  public:
-  using Scalar = std::remove_const_t<TScalar>;
+  // Definitions.
+  using Scalar = TScalar;
 
   /// Sets the default parameters.
   virtual auto setDefault() -> AbstractDistortion& = 0;
@@ -65,16 +70,16 @@ class AbstractDistortion<TScalar, false>
   virtual auto perturb(const Scalar& scale) -> AbstractDistortion& = 0;
 };
 
-template <typename TScalar>
-auto AbstractDistortion<TScalar, true>::allocatePixelDistortionJacobian() const -> DynamicInputJacobian<Pixel<Scalar>> {
+template <typename TScalar, typename TBase>
+auto AbstractDistortionBase<TScalar, TBase>::allocatePixelDistortionJacobian() const -> JacobianNX<Pixel<Scalar>> {
   const auto size = this->asVector().size();
-  return {Traits<Pixel<Scalar>>::kNumParameters, size};
+  return {Pixel<Scalar>::kNumParameters, size};
 }
 
-template <typename TScalar>
-auto AbstractDistortion<TScalar, true>::undistort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> {
+template <typename TScalar, typename TBase>
+auto AbstractDistortionBase<TScalar, TBase>::undistort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> {
   Pixel<Scalar> output = pixel;
-  Jacobian<Pixel<Scalar>> J_p_p, J_p_p_i;
+  JacobianNM<Pixel<Scalar>> J_p_p, J_p_p_i;
 
   for (auto i = 0; i <= NumericVariableTraits<Scalar>::kMaxNumDistortionSteps; ++i) {
     const auto b = (distort(output, J_p_p_i.data(), nullptr) - pixel).eval();
@@ -90,14 +95,14 @@ auto AbstractDistortion<TScalar, true>::undistort(const Eigen::Ref<const Pixel<S
   }
 
   if (raw_J_p_p) {
-    Eigen::Map<Jacobian<Pixel<Scalar>>>{raw_J_p_p}.noalias() = J_p_p;
+    Eigen::Map<JacobianNM<Pixel<Scalar>>>{raw_J_p_p}.noalias() = J_p_p;
   }
 
   if (raw_J_p_d) {
     const auto size = this->asVector().size();
-    auto J_p_d_i = DynamicInputJacobian<Pixel<Scalar>>{Traits<Pixel<Scalar>>::kNumParameters, size};
+    auto J_p_d_i = JacobianNX<Pixel<Scalar>>{Pixel<Scalar>::kNumParameters, size};
     distort(output, nullptr, J_p_d_i.data());
-    Eigen::Map<DynamicInputJacobian<Pixel<Scalar>>>{raw_J_p_d, Traits<Pixel<Scalar>>::kNumParameters, size}.noalias() = Scalar{-1} * J_p_p * J_p_d_i;
+    Eigen::Map<JacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::kNumParameters, size}.noalias() = Scalar{-1} * J_p_p * J_p_d_i;
   }
 
   return output;

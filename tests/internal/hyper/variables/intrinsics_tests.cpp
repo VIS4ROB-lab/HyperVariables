@@ -42,13 +42,13 @@ class IntrinsicsTests
   }
 
   [[nodiscard]] auto checkInputJacobian() const -> bool {
-    auto J_a = Jacobian<Pixel<Scalar>>{};
+    auto J_a = JacobianNM<Pixel<Scalar>>{};
     const auto px = randomPixel();
     const auto py = intrinsics_.denormalize(px, nullptr, nullptr);
     intrinsics_.normalize(py, J_a.data(), nullptr);
 
-    auto J_n = Jacobian<Pixel<Scalar>>{};
-    for (auto j = 0; j < Traits<Pixel<Scalar>>::kNumParameters; ++j) {
+    auto J_n = JacobianNM<Pixel<Scalar>>{};
+    for (auto j = 0; j < Pixel<Scalar>::kNumParameters; ++j) {
       const Pixel<Scalar> py_0 = py - kNumericIncrement * Pixel<Scalar>::Unit(j);
       const auto d_py_0 = intrinsics_.normalize(py_0, nullptr, nullptr);
       const Pixel<Scalar> py_1 = py + kNumericIncrement * Pixel<Scalar>::Unit(j);
@@ -60,12 +60,12 @@ class IntrinsicsTests
   }
 
   auto checkParameterJacobian() -> bool {
-    auto J_a = Jacobian<Pixel<Scalar>, Intrinsics<Scalar>>{};
+    auto J_a = JacobianNM<Pixel<Scalar>, Intrinsics<Scalar>>{};
     const Pixel<Scalar> px = Pixel<Scalar>::Random();
     const Pixel<Scalar> d_px = intrinsics_.normalize(px, nullptr, J_a.data());
 
-    auto J_n = Jacobian<Pixel<Scalar>, Intrinsics<Scalar>>{};
-    for (auto j = 0; j < Traits<Intrinsics<Scalar>>::kNumParameters; ++j) {
+    auto J_n = JacobianNM<Pixel<Scalar>, Intrinsics<Scalar>>{};
+    for (auto j = 0; j < Intrinsics<Scalar>::kNumParameters; ++j) {
       const auto tmp = intrinsics_[j];
       intrinsics_[j] = tmp - kNumericIncrement;
       const Pixel<Scalar> d_py_0 = intrinsics_.normalize(px, nullptr, nullptr);
@@ -81,8 +81,8 @@ class IntrinsicsTests
   [[nodiscard]] auto checkInverseTheorem() const -> bool {
     const auto px = randomPixel();
 
-    auto J_a = Jacobian<Pixel<Scalar>>{};
-    auto J_b = Jacobian<Pixel<Scalar>>{};
+    auto J_a = JacobianNM<Pixel<Scalar>>{};
+    auto J_b = JacobianNM<Pixel<Scalar>>{};
     const auto py = intrinsics_.denormalize(px, J_a.data(), nullptr);
     const auto pz = intrinsics_.normalize(py, J_b.data(), nullptr);
 
@@ -90,12 +90,12 @@ class IntrinsicsTests
   }
 
   [[nodiscard]] auto checkInverseInputJacobian() const -> bool {
-    auto J_a = Jacobian<Pixel<Scalar>>{};
+    auto J_a = JacobianNM<Pixel<Scalar>>{};
     const auto px = randomPixel();
     intrinsics_.denormalize(px, J_a.data(), nullptr);
 
-    auto J_n = Jacobian<Pixel<Scalar>>{};
-    for (auto j = 0; j < Traits<Pixel<Scalar>>::kNumParameters; ++j) {
+    auto J_n = JacobianNM<Pixel<Scalar>>{};
+    for (auto j = 0; j < Pixel<Scalar>::kNumParameters; ++j) {
       const Pixel<Scalar> py_0 = px - kNumericIncrement * Pixel<Scalar>::Unit(j);
       const auto d_py_0 = intrinsics_.denormalize(py_0, nullptr, nullptr);
       const Pixel<Scalar> py_1 = px + kNumericIncrement * Pixel<Scalar>::Unit(j);
@@ -109,11 +109,11 @@ class IntrinsicsTests
   auto checkInverseParameterJacobian() -> bool {
     const auto px = randomPixel();
 
-    auto J_a = Jacobian<Pixel<Scalar>, Intrinsics<Scalar>>{};
+    auto J_a = JacobianNM<Pixel<Scalar>, Intrinsics<Scalar>>{};
     intrinsics_.denormalize(px, nullptr, J_a.data());
 
-    auto J_n = Jacobian<Pixel<Scalar>, Intrinsics<Scalar>>{};
-    for (auto j = 0; j < Traits<Intrinsics<Scalar>>::kNumParameters; ++j) {
+    auto J_n = JacobianNM<Pixel<Scalar>, Intrinsics<Scalar>>{};
+    for (auto j = 0; j < Intrinsics<Scalar>::kNumParameters; ++j) {
       const auto tmp = intrinsics_[j];
       intrinsics_[j] = tmp - kNumericIncrement;
       const Pixel<Scalar> d_py_0 = intrinsics_.denormalize(px, nullptr, nullptr);

@@ -23,7 +23,6 @@ namespace hyper {
   template <typename TScalar, int TMapOptions>                                         \
   struct Traits<Eigen::BASE<const NAME<TScalar>, TMapOptions>> final                   \
       : public Traits<NAME<TScalar>> {                                                 \
-    using ScalarWithConstIfNotLvalue = const typename Traits<NAME<TScalar>>::Scalar;   \
     using Base = Eigen::BASE<const typename Traits<NAME<TScalar>>::Base, TMapOptions>; \
   };
 
@@ -41,7 +40,6 @@ namespace hyper {
   template <typename TScalar, TYPE TArg, int TMapOptions>                                    \
   struct Traits<Eigen::BASE<const NAME<TScalar, TArg>, TMapOptions>> final                   \
       : public Traits<NAME<TScalar, TArg>> {                                                 \
-    using ScalarWithConstIfNotLvalue = const typename Traits<NAME<TScalar, TArg>>::Scalar;   \
     using Base = Eigen::BASE<const typename Traits<NAME<TScalar, TArg>>::Base, TMapOptions>; \
   };
 
@@ -49,53 +47,63 @@ namespace hyper {
   HYPER_DECLARE_TEMPLATED_EIGEN_CLASS_TRAITS(Map, NAME, TYPE)      \
   HYPER_DECLARE_TEMPLATED_EIGEN_CLASS_TRAITS(Ref, NAME, TYPE)
 
-#define HYPER_DECLARE_EIGEN_CLASS(BASE, NAME)                        \
+#define HYPER_DECLARE_EIGEN_CLASS(BASE, NAME, PLUGIN)          \
+  namespace Eigen {                                            \
+  template <typename TScalar, int TMapOptions>                 \
+  class BASE<NAME<TScalar>, TMapOptions> final                 \
+      : public NAME##Base<BASE<NAME<TScalar>, TMapOptions>> {  \
+   public:                                                     \
+    using Base = NAME##Base<BASE<NAME<TScalar>, TMapOptions>>; \
+    HYPER_INHERIT_ASSIGNMENT_OPERATORS(BASE)                   \
+    PLUGIN                                                     \
+  };                                                           \
+  }
+
+#define HYPER_DECLARE_CONST_EIGEN_CLASS(BASE, NAME, PLUGIN)          \
   namespace Eigen {                                                  \
-  template <typename TScalar, int TMapOptions>                       \
-  class BASE<NAME<TScalar>, TMapOptions> final                       \
-      : public NAME##Base<BASE<NAME<TScalar>, TMapOptions>> {        \
-   public:                                                           \
-    using Base = NAME##Base<BASE<NAME<TScalar>, TMapOptions>>;       \
-    using Base::Base;                                                \
-    HYPER_INHERIT_ASSIGNMENT_OPERATORS(BASE)                         \
-  };                                                                 \
-                                                                     \
   template <typename TScalar, int TMapOptions>                       \
   class BASE<const NAME<TScalar>, TMapOptions> final                 \
       : public NAME##Base<BASE<const NAME<TScalar>, TMapOptions>> {  \
    public:                                                           \
     using Base = NAME##Base<BASE<const NAME<TScalar>, TMapOptions>>; \
-    using Base::Base;                                                \
+    PLUGIN                                                           \
   };                                                                 \
   }
 
-#define HYPER_DECLARE_EIGEN_INTERFACE(NAME) \
-  HYPER_DECLARE_EIGEN_CLASS(Map, NAME)      \
-  HYPER_DECLARE_EIGEN_CLASS(Ref, NAME)
+#define HYPER_DECLARE_EIGEN_INTERFACE(NAME)                     \
+  HYPER_DECLARE_EIGEN_CLASS(Map, NAME, using Base::Base;)       \
+  HYPER_DECLARE_CONST_EIGEN_CLASS(Map, NAME, using Base::Base;) \
+  HYPER_DECLARE_EIGEN_CLASS(Ref, NAME, using Base::Base;)       \
+  HYPER_DECLARE_CONST_EIGEN_CLASS(Ref, NAME, using Base::Base;)
 
-#define HYPER_DECLARE_TEMPLATED_EIGEN_CLASS(BASE, NAME, TYPE)              \
-  namespace Eigen {                                                        \
-  template <typename TScalar, TYPE TArg, int TMapOptions>                  \
-  class BASE<NAME<TScalar, TArg>, TMapOptions> final                       \
-      : public NAME##Base<BASE<NAME<TScalar, TArg>, TMapOptions>> {        \
-   public:                                                                 \
-    using Base = NAME##Base<BASE<NAME<TScalar, TArg>, TMapOptions>>;       \
-    using Base::Base;                                                      \
-    HYPER_INHERIT_ASSIGNMENT_OPERATORS(BASE)                               \
-  };                                                                       \
-                                                                           \
-  template <typename TScalar, TYPE TArg, int TMapOptions>                  \
-  class BASE<const NAME<TScalar, TArg>, TMapOptions> final                 \
-      : public NAME##Base<BASE<const NAME<TScalar, TArg>, TMapOptions>> {  \
-   public:                                                                 \
-    using Base = NAME##Base<BASE<const NAME<TScalar, TArg>, TMapOptions>>; \
-    using Base::Base;                                                      \
-  };                                                                       \
+#define HYPER_DECLARE_TEMPLATED_EIGEN_CLASS(BASE, NAME, TYPE, PLUGIN) \
+  namespace Eigen {                                                   \
+  template <typename TScalar, TYPE TArg, int TMapOptions>             \
+  class BASE<NAME<TScalar, TArg>, TMapOptions> final                  \
+      : public NAME##Base<BASE<NAME<TScalar, TArg>, TMapOptions>> {   \
+   public:                                                            \
+    using Base = NAME##Base<BASE<NAME<TScalar, TArg>, TMapOptions>>;  \
+    HYPER_INHERIT_ASSIGNMENT_OPERATORS(BASE)                          \
+    PLUGIN                                                            \
+  };                                                                  \
   }
 
-#define HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(NAME, TYPE) \
-  HYPER_DECLARE_TEMPLATED_EIGEN_CLASS(Map, NAME, TYPE)      \
-  HYPER_DECLARE_TEMPLATED_EIGEN_CLASS(Ref, NAME, TYPE)
+#define HYPER_DECLARE_TEMPLATED_CONST_EIGEN_CLASS(BASE, NAME, TYPE, PLUGIN) \
+  namespace Eigen {                                                         \
+  template <typename TScalar, TYPE TArg, int TMapOptions>                   \
+  class BASE<const NAME<TScalar, TArg>, TMapOptions> final                  \
+      : public NAME##Base<BASE<const NAME<TScalar, TArg>, TMapOptions>> {   \
+   public:                                                                  \
+    using Base = NAME##Base<BASE<const NAME<TScalar, TArg>, TMapOptions>>;  \
+    PLUGIN                                                                  \
+  };                                                                        \
+  }
+
+#define HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(NAME, TYPE)                     \
+  HYPER_DECLARE_TEMPLATED_EIGEN_CLASS(Map, NAME, TYPE, using Base::Base;)       \
+  HYPER_DECLARE_TEMPLATED_CONST_EIGEN_CLASS(Map, NAME, TYPE, using Base::Base;) \
+  HYPER_DECLARE_TEMPLATED_EIGEN_CLASS(Ref, NAME, TYPE, using Base::Base;)       \
+  HYPER_DECLARE_TEMPLATED_CONST_EIGEN_CLASS(Ref, NAME, TYPE, using Base::Base;)
 
 #define HYPER_DECLARE_TANGENT_MAP_TRAITS(NAME)                                                          \
   template <typename TScalar, int TMapOptions>                                                          \
@@ -107,7 +115,6 @@ namespace hyper {
   template <typename TScalar, int TMapOptions>                                                          \
   struct Traits<Eigen::Map<const Tangent<NAME<TScalar>>, TMapOptions>>                                  \
       : Traits<Tangent<NAME<TScalar>>> {                                                                \
-    using ScalarWithConstIfNotLvalue = const typename Traits<Tangent<NAME<TScalar>>>::Scalar;           \
     using Base = typename Eigen::Map<const typename Traits<Tangent<NAME<TScalar>>>::Base, TMapOptions>; \
   };
 

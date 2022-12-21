@@ -9,16 +9,14 @@
 
 namespace hyper {
 
-using Index = Eigen::Index;
-
-template <typename TScalar, int TRows>
-using Vector = Eigen::Matrix<TScalar, TRows, 1>;
-
-template <typename TScalar>
-using DynamicVector = Vector<TScalar, Eigen::Dynamic>;
+template <typename>
+struct Traits;
 
 template <typename>
 class AbstractVariable;
+
+template <typename>
+class ConstAbstractVariable;
 
 template <typename>
 class AbstractStamped;
@@ -26,26 +24,11 @@ class AbstractStamped;
 template <typename>
 class Stamped;
 
-template <typename>
-class CompositeVariable;
-
-template <typename>
-struct Traits;
-
-template <typename>
-struct NumericVariableTraits;
-
 template <typename, int>
 class Cartesian;
 
 template <typename TScalar, int TNumParameters>
 struct Traits<Cartesian<TScalar, TNumParameters>> {
-  // Constants.
-  static constexpr auto kNumParameters = TNumParameters;
-
-  // Definitions.
-  using Scalar = TScalar;
-  using ScalarWithConstIfNotLvalue = TScalar;
   using Base = Eigen::Matrix<TScalar, TNumParameters, 1>;
 };
 
@@ -56,14 +39,7 @@ class PitchYaw;
 
 template <typename TScalar>
 struct Traits<PitchYaw<TScalar>>
-    : public Traits<Cartesian<TScalar, 2>> {
-  // Constants.
-  static constexpr auto kPitchOffset = 0;
-  static constexpr auto kNumPitchParameters = 1;
-  static constexpr auto kYawOffset = kPitchOffset + kNumPitchParameters;
-  static constexpr auto kNumYawParameters = 1;
-  static constexpr auto kNumParameters = kNumPitchParameters + kNumYawParameters;
-};
+    : public Traits<Cartesian<TScalar, 2>> {};
 
 HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::PitchYaw)
 
@@ -72,10 +48,7 @@ class Bearing;
 
 template <typename TScalar>
 struct Traits<Bearing<TScalar>>
-    : public Traits<Cartesian<TScalar, 3>> {
-  // Constants.
-  static constexpr auto kNorm = TScalar{1};
-};
+    : public Traits<Cartesian<TScalar, 3>> {};
 
 HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::Bearing)
 
@@ -84,10 +57,7 @@ class Gravity;
 
 template <typename TScalar>
 struct Traits<Gravity<TScalar>>
-    : public Traits<Cartesian<TScalar, 3>> {
-  // Constants.
-  static constexpr auto kNorm = TScalar{9.80741}; // Magnitude of local gravity for Zurich in [m/s²].
-};
+    : public Traits<Cartesian<TScalar, 3>> {};
 
 HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::Gravity)
 
@@ -96,17 +66,7 @@ class Intrinsics;
 
 template <typename TScalar>
 struct Traits<Intrinsics<TScalar>>
-    : public Traits<Cartesian<TScalar, 4>> {
-  // Constants.
-  static constexpr auto kPrincipalOffset = 0;
-  static constexpr auto kPrincipalOffsetX = kPrincipalOffset;
-  static constexpr auto kPrincipalOffsetY = kPrincipalOffset + 1;
-  static constexpr auto kNumPrincipalParameters = 2;
-  static constexpr auto kFocalOffset = kPrincipalOffset + kNumPrincipalParameters;
-  static constexpr auto kFocalOffsetX = kFocalOffset;
-  static constexpr auto kFocalOffsetY = kFocalOffset + 1;
-  static constexpr auto kNumFocalParameters = 2;
-};
+    : public Traits<Cartesian<TScalar, 4>> {};
 
 HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::Intrinsics)
 
@@ -116,29 +76,18 @@ class OrthonormalityAlignment;
 template <typename TScalar, int TOrder>
 struct Traits<OrthonormalityAlignment<TScalar, TOrder>>
     : public Traits<Cartesian<TScalar, TOrder + ((TOrder - 1) * TOrder) / 2>> {
-  // Constants.
   static constexpr auto kOrder = TOrder;
-  static constexpr auto kNumDiagonalParameters = TOrder;
-  static constexpr auto kNumOffDiagonalParameters = ((TOrder - 1) * TOrder) / 2;
-  static constexpr auto kNumParameters = kNumDiagonalParameters + kNumOffDiagonalParameters;
 };
 
 HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::OrthonormalityAlignment, int)
 
+template <typename TScalar>
+using Stamp = Cartesian<TScalar, 1>;
+
 template <typename TVariable>
 struct Traits<Stamped<TVariable>>
-    : public Traits<Cartesian<typename Traits<TVariable>::Scalar, Traits<TVariable>::kNumParameters + 1>> {
-  // Constants.
-  static constexpr auto kVariableOffset = 0;
-  static constexpr auto kNumVariableParameters = Traits<TVariable>::kNumParameters;
-  static constexpr auto kStampOffset = kVariableOffset + kNumVariableParameters;
-  static constexpr auto kNumStampParameters = 1;
-
-  // Definitions.
-  using Stamp = Cartesian<typename Traits<TVariable>::Scalar, kNumStampParameters>;
-  using StampWithConstIfNotLvalue = Stamp;
+    : public Traits<Cartesian<typename TVariable::Scalar, Stamp<typename TVariable::Scalar>::kNumParameters + TVariable::kNumParameters>> {
   using Variable = TVariable;
-  using VariableWithConstIfNotLvalue = TVariable;
 };
 
 template <typename TVariable, int TMapOptions>
@@ -150,9 +99,6 @@ struct Traits<Eigen::Map<Stamped<TVariable>, TMapOptions>> final
 template <typename TVariable, int TMapOptions>
 struct Traits<Eigen::Map<const Stamped<TVariable>, TMapOptions>> final
     : public Traits<Stamped<TVariable>> {
-  using ScalarWithConstIfNotLvalue = const typename Traits<Stamped<TVariable>>::Scalar;
-  using StampWithConstIfNotLvalue = const typename Traits<Stamped<TVariable>>::Stamp;
-  using VariableWithConstIfNotLvalue = const typename Traits<Stamped<TVariable>>::Variable;
   using Base = Eigen::Map<const typename Traits<Stamped<TVariable>>::Base, TMapOptions>;
 };
 
@@ -164,6 +110,9 @@ using Position = Cartesian<TScalar, TNumParameters>;
 
 template <typename TScalar, int TNumParameters = 3>
 using Translation = Cartesian<TScalar, TNumParameters>;
+
+template <typename>
+struct NumericVariableTraits;
 
 template <>
 struct NumericVariableTraits<float> {
@@ -180,5 +129,17 @@ struct NumericVariableTraits<double> {
   static constexpr double kDistortionTolerance2 = kDistortionTolerance * kDistortionTolerance;
   static constexpr auto kMaxNumDistortionSteps = 20;
 };
+
+template <typename TDerived>
+using DerivedScalar_t = typename Traits<TDerived>::Base::Scalar;
+
+template <typename TDerived>
+inline constexpr bool VariableIsLValue_v = (!bool(std::is_const_v<TDerived>)) && bool(Traits<TDerived>::Base::Flags & Eigen::LvalueBit);
+
+template <typename TDerived, typename TValue>
+using ConstValueIfVariableIsNotLValue_t = std::conditional_t<VariableIsLValue_v<TDerived>, TValue, const TValue>;
+
+template <typename TDerived, typename TBase, typename TConstBase>
+using ConditionalConstBase_t = std::conditional_t<VariableIsLValue_v<TDerived>, TBase, TConstBase>;
 
 } // namespace hyper

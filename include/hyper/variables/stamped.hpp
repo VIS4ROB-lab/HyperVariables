@@ -8,14 +8,9 @@
 namespace hyper {
 
 template <typename TScalar>
-class AbstractStamped
-    : public AbstractVariable<TScalar> {
+class AbstractStamped : public AbstractVariable<TScalar> {
  public:
   using Scalar = std::remove_const_t<TScalar>;
-  using ScalarWithConstIfNotLvalue = TScalar;
-
-  /// Virtual default destructor.
-  ~AbstractStamped() override = default;
 
   /// Stamp accessor.
   /// \return Stamp.
@@ -23,57 +18,81 @@ class AbstractStamped
 
   /// Stamp modifier.
   /// \return Stamp.
-  [[nodiscard]] virtual auto stamp() -> ScalarWithConstIfNotLvalue& = 0;
+  [[nodiscard]] virtual auto stamp() -> Scalar& = 0;
+};
+
+template <typename TScalar>
+class ConstAbstractStamped : public ConstAbstractVariable<TScalar> {
+ public:
+  using Scalar = std::remove_const_t<TScalar>;
+
+  /// Stamp accessor.
+  /// \return Stamp.
+  [[nodiscard]] virtual auto stamp() const -> const Scalar& = 0;
+
+  /// Stamp modifier.
+  /// \return Stamp.
+  [[nodiscard]] virtual auto stamp() -> const Scalar& = 0;
 };
 
 template <typename TDerived>
 class StampedBase
     : public Traits<TDerived>::Base,
-      public AbstractStamped<typename Traits<TDerived>::ScalarWithConstIfNotLvalue> {
+      public ConditionalConstBase_t<TDerived, AbstractStamped<DerivedScalar_t<TDerived>>, ConstAbstractStamped<DerivedScalar_t<TDerived>>> {
  public:
   // Definitions.
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
-  using DynamicVectorWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const DynamicVector<Scalar>, DynamicVector<Scalar>>;
   using Base = typename Traits<TDerived>::Base;
+  using Scalar = typename Base::Scalar;
+  using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
+  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
   using Base::Base;
+
+  using Variable = typename Traits<TDerived>::Variable;
+  using VariableWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Variable>;
+
+  // Constants.
+  static constexpr auto kVariableOffset = 0;
+  static constexpr auto kNumVariableParameters = Variable::kNumParameters;
+  static constexpr auto kStampOffset = kVariableOffset + kNumVariableParameters;
+  static constexpr auto kNumStampParameters = 1;
+  static constexpr auto kNumParameters = kNumVariableParameters + kNumStampParameters;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(StampedBase)
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Map<const DynamicVector<Scalar>> final {
-    return {this->data(), this->size(), 1};
+  auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final {
+    return *this;
   }
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> final {
-    return {this->data(), this->size(), 1};
+  auto asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> final {
+    return *this;
   }
 
   /// Stamp accessor.
   /// \return Stamp.
   [[nodiscard]] auto stamp() const -> const Scalar& final {
-    return this->data()[Traits<TDerived>::kStampOffset];
+    return this->data()[kStampOffset];
   }
 
   /// Stamp modifier.
   /// \return Stamp.
   auto stamp() -> ScalarWithConstIfNotLvalue& {
-    return this->data()[Traits<TDerived>::kStampOffset];
+    return this->data()[kStampOffset];
   }
 
   /// Variable accessor.
   /// \return Variable.
-  [[nodiscard]] auto variable() const -> Eigen::Map<const typename Traits<TDerived>::Variable> {
-    return Eigen::Map<const typename Traits<TDerived>::Variable>{this->data() + Traits<TDerived>::kVariableOffset};
+  [[nodiscard]] auto variable() const -> Eigen::Map<const Variable> {
+    return Eigen::Map<const Variable>{this->data() + kVariableOffset};
   }
 
   /// Variable modifier.
   /// \return Variable.
-  auto variable() -> Eigen::Map<typename Traits<TDerived>::VariableWithConstIfNotLvalue> {
-    return Eigen::Map<typename Traits<TDerived>::VariableWithConstIfNotLvalue>{this->data() + Traits<TDerived>::kVariableOffset};
+  auto variable() -> Eigen::Map<VariableWithConstIfNotLvalue> {
+    return Eigen::Map<VariableWithConstIfNotLvalue>{this->data() + kVariableOffset};
   }
 };
 

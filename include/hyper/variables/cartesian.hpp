@@ -10,27 +10,29 @@ namespace hyper {
 template <typename TDerived>
 class CartesianBase
     : public Traits<TDerived>::Base,
-      public AbstractVariable<typename Traits<TDerived>::ScalarWithConstIfNotLvalue> {
+      public ConditionalConstBase_t<TDerived, AbstractVariable<DerivedScalar_t<TDerived>>, ConstAbstractVariable<DerivedScalar_t<TDerived>>> {
  public:
   // Definitions.
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
-  using DynamicVectorWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const DynamicVector<Scalar>, DynamicVector<Scalar>>;
   using Base = typename Traits<TDerived>::Base;
+  using Scalar = typename Base::Scalar;
+  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
   using Base::Base;
+
+  // Constants.
+  static constexpr auto kNumParameters = (int)Base::SizeAtCompileTime;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(CartesianBase)
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Map<const DynamicVector<Scalar>> final {
-    return {this->data(), this->size(), 1};
+  auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final {
+    return *this;
   }
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> final {
-    return {this->data(), this->size(), 1};
+  auto asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> final {
+    return *this;
   }
 };
 
@@ -54,9 +56,8 @@ template <typename TDerived>
 class CartesianTangentBase
     : public CartesianBase<TDerived> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
   using Base = CartesianBase<TDerived>;
+  using Scalar = typename Base::Scalar;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(CartesianTangentBase)

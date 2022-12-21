@@ -3,9 +3,9 @@
 
 #include <gtest/gtest.h>
 
-#include "hyper/variables/metrics/angular.hpp"
-#include "hyper/variables/metrics/cartesian.hpp"
-#include "hyper/variables/metrics/manifold.hpp"
+#include "hyper/metrics/angular.hpp"
+#include "hyper/metrics/cartesian.hpp"
+#include "hyper/metrics/manifold.hpp"
 
 namespace hyper::tests {
 
@@ -20,16 +20,16 @@ class MetricsTests
 
   [[nodiscard]] static auto CheckCartesianMetric() -> bool {
     using Input = Cartesian<Scalar, 3>;
-    using Metric = CartesianMetric<Input>;
+    using Metric = CartesianMetric<Scalar, 3>;
     using Output = Metric::Output;
-    using Jacobian = Jacobian<Output, Input>;
+    using Jacobian = JacobianNM<Output, Input>;
 
     Input u = Input::Random();
     Input v = Input::Random();
 
     Jacobian J_lhs_a, J_rhs_a, J_lhs_n, J_rhs_n;
     const auto f = Metric::Distance(u, v, J_lhs_a.data(), J_rhs_a.data());
-    for (auto i = Eigen::Index{0}; i < Traits<Input>::kNumParameters; ++i) {
+    for (auto i = Eigen::Index{0}; i < Input::kNumParameters; ++i) {
       J_lhs_n.col(i) = (Metric::Distance(u + kNumericIncrement * Input::Unit(i), v) - f) / kNumericIncrement;
       J_rhs_n.col(i) = (Metric::Distance(u, v + kNumericIncrement * Input::Unit(i)) - f) / kNumericIncrement;
     }
@@ -40,16 +40,16 @@ class MetricsTests
 
   [[nodiscard]] static auto CheckAngularMetric() -> bool {
     using Input = Cartesian<Scalar, 3>;
-    using Metric = AngularMetric<Input>;
+    using Metric = AngularMetric<Scalar, 3>;
     using Output = Metric::Output;
-    using Jacobian = Jacobian<Output, Input>;
+    using Jacobian = JacobianNM<Output, Input>;
 
     Input u = Input::Random();
     Input v = Input::Random();
 
     Jacobian J_lhs_a, J_rhs_a, J_lhs_n, J_rhs_n;
     const auto f = Metric::Distance(u, v, J_lhs_a.data(), J_rhs_a.data());
-    for (auto i = Eigen::Index{0}; i < Traits<Input>::kNumParameters; ++i) {
+    for (auto i = Eigen::Index{0}; i < Input::kNumParameters; ++i) {
       J_lhs_n.col(i) = (Metric::Distance(u + kNumericIncrement * Input::Unit(i), v) - f) / kNumericIncrement;
       J_rhs_n.col(i) = (Metric::Distance(u, v + kNumericIncrement * Input::Unit(i)) - f) / kNumericIncrement;
     }
@@ -61,16 +61,16 @@ class MetricsTests
 
   [[nodiscard]] static auto CheckManifoldMetric(const bool global, const bool coupled) -> bool {
     using Input = SE3<Scalar>;
-    using Metric = ManifoldMetric<Input>;
+    using Metric = ManifoldMetric<Scalar, ManifoldEnum::SE3>;
     using Output = Metric::Output;
-    using Jacobian = Jacobian<Output, Tangent<SE3<Scalar>>>;
+    using Jacobian = JacobianNM<Output, Tangent<SE3<Scalar>>>;
 
     Input u = Input::Random();
     Input v = Input::Random();
 
     Jacobian J_lhs_a, J_rhs_a, J_lhs_n, J_rhs_n;
     const auto f = Metric::Distance(u, v, J_lhs_a.data(), J_rhs_a.data(), global, coupled);
-    for (auto i = Eigen::Index{0}; i < Traits<Tangent<SE3<Scalar>>>::kNumParameters; ++i) {
+    for (auto i = Eigen::Index{0}; i < Tangent<SE3<Scalar>>::kNumParameters; ++i) {
       J_lhs_n.col(i) = (Metric::Distance(SE3NumericGroupPlus(u, global, coupled, i), v) - f) / kNumericIncrement;
       J_rhs_n.col(i) = (Metric::Distance(u, SE3NumericGroupPlus(v, global, coupled, i)) - f) / kNumericIncrement;
     }

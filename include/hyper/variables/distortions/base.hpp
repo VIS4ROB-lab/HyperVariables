@@ -7,32 +7,24 @@
 
 namespace hyper {
 
-template <typename TDerived>
-class DistortionBase<TDerived, true>
-    : public Traits<TDerived>::Base,
-      public AbstractDistortion<typename Traits<TDerived>::ScalarWithConstIfNotLvalue> {
+template <typename TDerived, typename TBase>
+class DistortionBase : public Traits<TDerived>::Base, public TBase {
  public:
   // Definitions.
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
-  using DynamicVectorWithConstIfNotLvalue = std::conditional_t<std::is_const_v<ScalarWithConstIfNotLvalue>, const DynamicVector<Scalar>, DynamicVector<Scalar>>;
   using Base = typename Traits<TDerived>::Base;
+  using Scalar = typename Base::Scalar;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(DistortionBase)
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Map<const DynamicVector<Scalar>> final;
-
-  /// Map as Eigen vector.
-  /// \return Vector.
-  auto asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> final;
+  auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final;
 
   /// Maps a distortion.
   /// \param raw_distortion Raw distortion.
   /// \return Mapped distortion.
-  auto map(const Scalar* raw_distortion) const -> std::unique_ptr<AbstractDistortion<const Scalar>> final;
+  auto map(const Scalar* raw_distortion) const -> std::unique_ptr<ConstAbstractDistortion<Scalar>> final;
 
   /// Maps a distortion.
   /// \param raw_distortion Raw distortion.
@@ -41,51 +33,74 @@ class DistortionBase<TDerived, true>
 };
 
 template <typename TDerived>
-class DistortionBase<TDerived, false>
-    : public DistortionBase<TDerived, true> {
+class ConstDistortion : public DistortionBase<TDerived, ConstAbstractDistortion<typename Traits<TDerived>::Base::Scalar>> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
-  using Base = DistortionBase<TDerived, true>;
+  // Definitions.
+  using Scalar = typename Traits<TDerived>::Base::Scalar;
+  using Base = DistortionBase<TDerived, ConstAbstractDistortion<Scalar>>;
   using Base::Base;
 
-  HYPER_INHERIT_ASSIGNMENT_OPERATORS(DistortionBase)
+  HYPER_INHERIT_ASSIGNMENT_OPERATORS(ConstDistortion)
 
-  /// Sets the default parameters.
-  auto setDefault() -> DistortionBase& final;
-
-  /// Perturbs this.
-  /// \param scale Perturbation scale.
-  auto perturb(const Scalar& scale) -> DistortionBase& final;
+  /// Map as Eigen vector.
+  /// \return Vector.
+  auto asVector() -> Eigen::Ref<const VectorX<Scalar>> final;
 };
 
 template <typename TDerived>
-auto DistortionBase<TDerived, true>::asVector() const -> Eigen::Map<const DynamicVector<Scalar>> {
-  return {this->data(), this->size(), 1};
+class Distortion : public DistortionBase<TDerived, AbstractDistortion<typename Traits<TDerived>::Base::Scalar>> {
+ public:
+  // Definitions.
+  using Scalar = typename Traits<TDerived>::Base::Scalar;
+  using Base = DistortionBase<TDerived, AbstractDistortion<Scalar>>;
+  using Base::Base;
+
+  HYPER_INHERIT_ASSIGNMENT_OPERATORS(Distortion)
+
+  /// Map as Eigen vector.
+  /// \return Vector.
+  auto asVector() -> Eigen::Ref<VectorX<Scalar>> final;
+
+  /// Sets the default parameters.
+  auto setDefault() -> Distortion& final;
+
+  /// Perturbs this.
+  /// \param scale Perturbation scale.
+  auto perturb(const Scalar& scale) -> Distortion& final;
+};
+
+template <typename TDerived, typename TBase>
+auto DistortionBase<TDerived, TBase>::asVector() const -> Eigen::Ref<const VectorX<Scalar>> {
+  return *this;
+}
+
+template <typename TDerived, typename TBase>
+auto DistortionBase<TDerived, TBase>::map(const Scalar* raw_distortion) const -> std::unique_ptr<ConstAbstractDistortion<Scalar>> {
+  return std::make_unique<Eigen::Map<const typename Traits<TDerived>::Distortion>>(raw_distortion);
+}
+
+template <typename TDerived, typename TBase>
+auto DistortionBase<TDerived, TBase>::map(Scalar* raw_distortion) const -> std::unique_ptr<AbstractDistortion<Scalar>> {
+  return std::make_unique<Eigen::Map<typename Traits<TDerived>::Distortion>>(raw_distortion);
 }
 
 template <typename TDerived>
-auto DistortionBase<TDerived, true>::asVector() -> Eigen::Map<DynamicVectorWithConstIfNotLvalue> {
-  return {this->data(), this->size(), 1};
+auto ConstDistortion<TDerived>::asVector() -> Eigen::Ref<const VectorX<Scalar>> {
+  return *this;
 }
 
 template <typename TDerived>
-auto DistortionBase<TDerived, true>::map(const Scalar* raw_distortion) const -> std::unique_ptr<AbstractDistortion<const Scalar>> {
-  return std::make_unique<Eigen::Map<const typename Traits<TDerived>::PlainDerivedType>>(raw_distortion);
+auto Distortion<TDerived>::asVector() -> Eigen::Ref<VectorX<Scalar>> {
+  return *this;
 }
 
 template <typename TDerived>
-auto DistortionBase<TDerived, true>::map(Scalar* raw_distortion) const -> std::unique_ptr<AbstractDistortion<Scalar>> {
-  return std::make_unique<Eigen::Map<typename Traits<TDerived>::PlainDerivedType>>(raw_distortion);
-}
-
-template <typename TDerived>
-auto DistortionBase<TDerived, false>::setDefault() -> DistortionBase& {
+auto Distortion<TDerived>::setDefault() -> Distortion& {
   return static_cast<TDerived&>(*this).setDefault();
 }
 
 template <typename TDerived>
-auto DistortionBase<TDerived, false>::perturb(const Scalar& scale) -> DistortionBase& {
+auto Distortion<TDerived>::perturb(const Scalar& scale) -> Distortion& {
   return static_cast<TDerived&>(*this).perturb(scale);
 }
 

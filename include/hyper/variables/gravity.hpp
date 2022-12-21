@@ -10,20 +10,22 @@
 namespace hyper {
 
 template <typename TDerived>
-class GravityBase
-    : public CartesianBase<TDerived> {
+class GravityBase : public CartesianBase<TDerived> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
+  // Definitions.
   using Base = CartesianBase<TDerived>;
+  using Scalar = typename Base::Scalar;
   using Base::Base;
+
+  // Constants.
+  static constexpr auto kNorm = Scalar{9.80741}; // Magnitude of local gravity for Zurich in [m/s²].
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(GravityBase)
 
   /// Checks the norm.
   /// \return True if correct.
   [[nodiscard]] auto checkNorm() const -> bool {
-    return Eigen::internal::isApprox(this->norm(), Traits<Gravity<Scalar>>::kNorm);
+    return Eigen::internal::isApprox(this->norm(), kNorm);
   }
 };
 
@@ -35,8 +37,8 @@ class Gravity final
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Gravity)
 
-  /// Deleted default constructor.
-  Gravity() = delete;
+  /// Default constructor.
+  Gravity() = default;
 
   /// Forwarding constructor with norm check.
   /// \tparam TArgs_ Input argument types.

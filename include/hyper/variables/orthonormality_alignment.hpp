@@ -12,46 +12,51 @@ template <typename TDerived>
 class OrthonormalityAlignmentBase
     : public CartesianBase<TDerived> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
+  // Constants.
+  static constexpr auto kOrder = Traits<TDerived>::kOrder;
+  static constexpr auto kNumDiagonalParameters = kOrder;
+  static constexpr auto kNumOffDiagonalParameters = ((kOrder - 1) * kOrder) / 2;
+
+  // Definitions.
   using Base = CartesianBase<TDerived>;
+  using Scalar = typename Base::Scalar;
   using Base::Base;
 
-  using AlignmentMatrix = Eigen::Matrix<Scalar, Traits<TDerived>::kOrder, Traits<TDerived>::kOrder>;
-  using Input = Cartesian<Scalar, Traits<TDerived>::kOrder>;
-  using Output = Cartesian<Scalar, Traits<TDerived>::kOrder>;
+  using AlignmentMatrix = Eigen::Matrix<Scalar, kOrder, kOrder>;
+  using Input = Cartesian<Scalar, kOrder>;
+  using Output = Cartesian<Scalar, kOrder>;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(OrthonormalityAlignmentBase)
 
   /// Creates and identity orthonormality alignment.
   /// \return Identity orthonormality alignment.
-  static auto Identity() -> OrthonormalityAlignment<Scalar, Traits<TDerived>::kOrder> {
-    OrthonormalityAlignment<Scalar, Traits<TDerived>::kOrder> orthonormality_alignment;
+  static auto Identity() -> OrthonormalityAlignment<Scalar, kOrder> {
+    OrthonormalityAlignment<Scalar, kOrder> orthonormality_alignment;
     return orthonormality_alignment.setIdentity();
   }
 
   /// Accessor to the diagonal parameters.
   /// \return Scaling parameters.
   [[nodiscard]] auto diagonalParameters() const {
-    return this->template head<Traits<TDerived>::kNumDiagonalParameters>();
+    return this->template head<kNumDiagonalParameters>();
   }
 
   /// Modifier of the diagonal parameters.
   /// \return Scaling parameters.
   auto diagonalParameters() {
-    return this->template head<Traits<TDerived>::kNumDiagonalParameters>();
+    return this->template head<kNumDiagonalParameters>();
   }
 
   /// Accessor to the off-diagonal parameters.
   /// \return Orthogonality parameters.
   [[nodiscard]] auto offDiagonalParameters() const {
-    return this->template tail<Traits<TDerived>::kNumOffDiagonalParameters>();
+    return this->template tail<kNumOffDiagonalParameters>();
   }
 
   /// Modifier of the off-diagonal parameters.
   /// \return Orthogonality parameters.
   auto offDiagonalParameters() {
-    return this->template tail<Traits<TDerived>::kNumOffDiagonalParameters>();
+    return this->template tail<kNumOffDiagonalParameters>();
   }
 
   /// Sets the underlying parameters to
@@ -69,8 +74,8 @@ class OrthonormalityAlignmentBase
 
     Eigen::Index i = 0;
     const auto off_diagonal_parameters = offDiagonalParameters();
-    for (Eigen::Index j = 0; j < Traits<TDerived>::kOrder - 1; ++j) {
-      for (Eigen::Index k = j + 1; k < Traits<TDerived>::kOrder; ++k) {
+    for (Eigen::Index j = 0; j < kOrder - 1; ++j) {
+      for (Eigen::Index k = j + 1; k < kOrder; ++k) {
         A(k, j) = off_diagonal_parameters[i];
         ++i;
       }
@@ -92,8 +97,8 @@ class OrthonormalityAlignmentBase
     Eigen::Index i = 0;
     const auto i_diagonal_parameters = diagonalParameters().cwiseInverse().eval();
     const auto off_diagonal_parameters = offDiagonalParameters();
-    for (Eigen::Index j = 0; j < Traits<TDerived>::kOrder - 1; ++j) {
-      for (Eigen::Index k = j + 1; k < Traits<TDerived>::kOrder; ++k) {
+    for (Eigen::Index j = 0; j < kOrder - 1; ++j) {
+      for (Eigen::Index k = j + 1; k < kOrder; ++k) {
         A(k, j) = i_diagonal_parameters[k] * off_diagonal_parameters[i];
         ++i;
       }
@@ -110,20 +115,20 @@ class OrthonormalityAlignmentBase
     const auto A = asMatrix();
 
     if (raw_J_i) {
-      Eigen::Map<Jacobian<Output, Input>>{raw_J_i}.noalias() = A;
+      Eigen::Map<JacobianNM<Output, Input>>{raw_J_i}.noalias() = A;
     }
 
     if (raw_J_p) {
-      auto J = Eigen::Map<Jacobian<Output, TDerived>>{raw_J_p};
+      auto J = Eigen::Map<JacobianNM<Output, TDerived>>{raw_J_p};
       J.setZero();
 
-      for (auto i = 0; i < Traits<TDerived>::kOrder; ++i) {
+      for (auto i = 0; i < kOrder; ++i) {
         J(i, i) = input[i];
       }
 
-      auto j = Traits<TDerived>::kOrder;
-      for (auto i = 1; i < Traits<TDerived>::kOrder; ++i) {
-        const auto bound = Traits<TDerived>::kOrder - i;
+      auto j = kOrder;
+      for (auto i = 1; i < kOrder; ++i) {
+        const auto bound = kOrder - i;
         for (auto k = 0; k < bound; ++k) {
           J(i + k, j + k) = input[i - 1];
         }

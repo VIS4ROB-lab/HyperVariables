@@ -9,12 +9,18 @@ namespace hyper {
 
 template <typename TDerived>
 class EquidistantDistortionBase
-    : public DistortionBase<TDerived> {
+    : public ConditionalConstBase_t<TDerived, Distortion<TDerived>, ConstDistortion<TDerived>> {
  public:
-  using Scalar = typename Traits<TDerived>::Scalar;
-  using ScalarWithConstIfNotLvalue = typename Traits<TDerived>::ScalarWithConstIfNotLvalue;
-  using Base = DistortionBase<TDerived>;
+  // Definitions.
+  using Base = ConditionalConstBase_t<TDerived, Distortion<TDerived>, ConstDistortion<TDerived>>;
+  using Scalar = typename Base::Scalar;
+  using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
   using Base::Base;
+
+  // Constants.
+  static constexpr auto kOrder = Traits<TDerived>::kOrder;
+  static constexpr auto kRadialOffset = 0;
+  static constexpr auto kNumRadialParameters = kOrder;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(EquidistantDistortionBase)
 
@@ -43,7 +49,7 @@ class EquidistantDistortionBase
   auto distort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> final;
 
  private:
-  using ThetaJacobian = SizedJacobian<Scalar, 1, Eigen::Dynamic>;
+  using ThetaJacobian = Jacobian<Scalar, 1, Eigen::Dynamic>;
 
   /// Computes the theta distortion.
   /// \param theta Input theta.
@@ -111,7 +117,7 @@ auto EquidistantDistortionBase<TDerived>::distort(const Eigen::Ref<const Pixel<S
   const auto a = is_small_angle ? Scalar{1} : (d_theta / rho);
 
   if (raw_J_p_p) {
-    using Jacobian = Jacobian<Pixel<Scalar>>;
+    using Jacobian = JacobianNM<Pixel<Scalar>>;
     auto J = Eigen::Map<Jacobian>{raw_J_p_p};
     if (is_small_angle) {
       J.setZero();
@@ -121,7 +127,7 @@ auto EquidistantDistortionBase<TDerived>::distort(const Eigen::Ref<const Pixel<S
   }
 
   if (raw_J_p_d) {
-    auto J = Eigen::Map<DynamicInputJacobian<Pixel<Scalar>>>{raw_J_p_d, Traits<Pixel<Scalar>>::kNumParameters, size};
+    auto J = Eigen::Map<JacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::kNumParameters, size};
     if (is_small_angle) {
       J.setZero();
     } else {
