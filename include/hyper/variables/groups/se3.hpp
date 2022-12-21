@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "hyper/variables/definitions/jacobian.hpp"
 #include "hyper/variables/groups/su2.hpp"
+#include "hyper/variables/jacobian.hpp"
 
 namespace hyper {
 

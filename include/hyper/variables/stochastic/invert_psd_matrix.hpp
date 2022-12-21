@@ -27,7 +27,7 @@ auto invertPSDMatrix(const Eigen::Ref<const Matrix<TScalar, TSize, TSize>>& matr
     if (size > 0 && size < 5) {
       return matrix.inverse();
     }
-    return matrix.template selfadjointView<Eigen::Lower>().llt().solve(TMatrix::Identity(size, size));
+    return matrix.template selfadjointView<Eigen::Upper>().llt().solve(TMatrix::Identity(size, size));
   }
 
   Eigen::JacobiSVD<TSVDMatrix> svd(matrix, Eigen::ComputeThinU | Eigen::ComputeThinV);
