@@ -5,7 +5,7 @@
 
 #include "hyper/variables/groups/forward.hpp"
 
-namespace hyper {
+namespace hyper::metrics {
 
 template <typename TScalar>
 class Metric;
@@ -16,7 +16,7 @@ class AngularMetric;
 template <typename TScalar, int TDim>
 class CartesianMetric;
 
-template <typename TScalar, ManifoldEnum TManifoldEnum>
+template <typename TManifold>
 class ManifoldMetric;
 
-} // namespace hyper
+}  // namespace hyper::metrics

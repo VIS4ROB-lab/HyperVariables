@@ -7,14 +7,13 @@
 #include "hyper/variables/groups/se3.hpp"
 #include "hyper/variables/jacobian.hpp"
 
-namespace hyper {
+namespace hyper::metrics {
 
 template <typename TScalar>
-class ManifoldMetric<TScalar, ManifoldEnum::SE3> final : public Metric<TScalar> {
+class ManifoldMetric<SE3<TScalar>> final : public Metric<TScalar> {
  public:
   // Definitions.
-  using Scalar = TScalar;
-  using Input = SE3<Scalar>;
+  using Input = SE3<TScalar>;
   using Output = Tangent<Input>;
   using Jacobian = JacobianNM<Output>;
 
@@ -28,8 +27,7 @@ class ManifoldMetric<TScalar, ManifoldEnum::SE3> final : public Metric<TScalar> 
   /// Default constructor.
   /// \param global Request global Jacobians flag.
   /// \param coupled Compute SE3 instead of SU2 x R3 Jacobians.
-  explicit ManifoldMetric(const bool global = kGlobal, const bool coupled = kCoupled)
-      : global_{global}, coupled_{coupled} {}
+  explicit ManifoldMetric(const bool global = kGlobal, const bool coupled = kCoupled) : global_{global}, coupled_{coupled} {}
 
   /// Evaluates the distance between elements.
   /// \param lhs Left element/input vector.
@@ -37,8 +35,8 @@ class ManifoldMetric<TScalar, ManifoldEnum::SE3> final : public Metric<TScalar> 
   /// \param output Distance between elements.
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
-  static auto Distance(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs = nullptr,
-      Scalar* J_rhs = nullptr, const bool global = kGlobal, const bool coupled = kCoupled) -> void {
+  static auto Distance(const TScalar* lhs, const TScalar* rhs, TScalar* output, TScalar* J_lhs = nullptr, TScalar* J_rhs = nullptr, const bool global = kGlobal,
+                       const bool coupled = kCoupled) -> void {
     const auto lhs_ = Eigen::Map<const Input>{lhs};
     const auto rhs_ = Eigen::Map<const Input>{rhs};
     auto output_ = Eigen::Map<Output>{output};
@@ -75,8 +73,8 @@ class ManifoldMetric<TScalar, ManifoldEnum::SE3> final : public Metric<TScalar> 
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
   /// \return Distance between elements.
-  static auto Distance(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, Scalar* J_lhs = nullptr,
-      Scalar* J_rhs = nullptr, const bool global = kGlobal, const bool coupled = kCoupled) -> Output {
+  static auto Distance(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, TScalar* J_lhs = nullptr, TScalar* J_rhs = nullptr, const bool global = kGlobal,
+                       const bool coupled = kCoupled) -> Output {
     Output output;
     Distance(lhs.data(), rhs.data(), output.data(), J_lhs, J_rhs, global, coupled);
     return output;
@@ -96,7 +94,7 @@ class ManifoldMetric<TScalar, ManifoldEnum::SE3> final : public Metric<TScalar> 
   /// \param output Distance between elements.
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
-  auto distance(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void final {
+  auto distance(const TScalar* lhs, const TScalar* rhs, TScalar* output, TScalar* J_lhs, TScalar* J_rhs) -> void final {
     Distance(lhs, rhs, output, J_lhs, J_rhs, global_, coupled_);
   }
 
@@ -106,8 +104,7 @@ class ManifoldMetric<TScalar, ManifoldEnum::SE3> final : public Metric<TScalar> 
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
   /// \return Distance between elements.
-  auto distance(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, Scalar* J_lhs = nullptr,
-      Scalar* J_rhs = nullptr) const -> Output {
+  auto distance(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, TScalar* J_lhs = nullptr, TScalar* J_rhs = nullptr) const -> Output {
     return Distance(lhs, rhs, J_lhs, J_rhs, global_, coupled_);
   }
 
@@ -116,4 +113,4 @@ class ManifoldMetric<TScalar, ManifoldEnum::SE3> final : public Metric<TScalar> 
   bool coupled_;
 };
 
-} // namespace hyper
+}  // namespace hyper::metrics

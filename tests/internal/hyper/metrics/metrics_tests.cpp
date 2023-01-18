@@ -11,8 +11,7 @@ namespace hyper::tests {
 
 using Scalar = double;
 
-class MetricsTests
-    : public testing::Test {
+class MetricsTests : public testing::Test {
  protected:
   static constexpr auto kNumIterations = 5;
   static constexpr auto kNumericIncrement = 1e-8;
@@ -20,7 +19,7 @@ class MetricsTests
 
   [[nodiscard]] static auto CheckCartesianMetric() -> bool {
     using Input = Cartesian<Scalar, 3>;
-    using Metric = CartesianMetric<Scalar, 3>;
+    using Metric = metrics::CartesianMetric<Scalar, 3>;
     using Output = Metric::Output;
     using Jacobian = JacobianNM<Output, Input>;
 
@@ -34,13 +33,12 @@ class MetricsTests
       J_rhs_n.col(i) = (Metric::Distance(u, v + kNumericIncrement * Input::Unit(i)) - f) / kNumericIncrement;
     }
 
-    return J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) &&
-           J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
+    return J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) && J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
   }
 
   [[nodiscard]] static auto CheckAngularMetric() -> bool {
     using Input = Cartesian<Scalar, 3>;
-    using Metric = AngularMetric<Scalar, 3>;
+    using Metric = metrics::AngularMetric<Scalar, 3>;
     using Output = Metric::Output;
     using Jacobian = JacobianNM<Output, Input>;
 
@@ -54,14 +52,13 @@ class MetricsTests
       J_rhs_n.col(i) = (Metric::Distance(u, v + kNumericIncrement * Input::Unit(i)) - f) / kNumericIncrement;
     }
 
-    return std::abs(f[0] - std::acos(u.dot(v) / (u.norm() * v.norm()))) <= kNumericTolerance &&
-           J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) &&
+    return std::abs(f[0] - std::acos(u.dot(v) / (u.norm() * v.norm()))) <= kNumericTolerance && J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) &&
            J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
   }
 
   [[nodiscard]] static auto CheckManifoldMetric(const bool global, const bool coupled) -> bool {
     using Input = SE3<Scalar>;
-    using Metric = ManifoldMetric<Scalar, ManifoldEnum::SE3>;
+    using Metric = metrics::ManifoldMetric<Input>;
     using Output = Metric::Output;
     using Jacobian = JacobianNM<Output, Tangent<SE3<Scalar>>>;
 
@@ -75,8 +72,7 @@ class MetricsTests
       J_rhs_n.col(i) = (Metric::Distance(u, SE3NumericGroupPlus(v, global, coupled, i)) - f) / kNumericIncrement;
     }
 
-    return J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) &&
-           J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
+    return J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) && J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
   }
 
  private:
@@ -120,4 +116,4 @@ TEST_F(MetricsTests, Manifold) {
   }
 }
 
-} // namespace hyper::tests
+}  // namespace hyper::tests
