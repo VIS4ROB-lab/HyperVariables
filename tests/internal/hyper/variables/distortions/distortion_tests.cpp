@@ -32,6 +32,7 @@ class DistortionTests : public testing::TestWithParam<AbstractDistortion<Scalar>
   using Pixel = variables::Pixel<Scalar>;
   using PixelJacobian = variables::JacobianNM<Pixel>;
   using Distortion = variables::AbstractDistortion<Scalar>;
+  using DistortionJacobian = variables::JacobianNX<Pixel>;
 
   DistortionTests() : distortion_{nullptr} {}
 
@@ -74,11 +75,12 @@ class DistortionTests : public testing::TestWithParam<AbstractDistortion<Scalar>
 
   auto checkParameterJacobian() const -> void {
     for (auto i = 0; i < kNumInnerIterations; ++i) {
-      auto J_a = distortion_->allocatePixelDistortionJacobian();
+      const auto num_distortion_parameters = distortion_->asVector().size();
+      auto J_a = DistortionJacobian{Pixel::kNumParameters, num_distortion_parameters};
       const Pixel px = Pixel::Random();
       const Pixel d_px = distortion_->distort(px, nullptr, J_a.data());
 
-      auto J_n = distortion_->allocatePixelDistortionJacobian();
+      auto J_n = DistortionJacobian{Pixel::kNumParameters, num_distortion_parameters};
       auto vector = distortion_->asVector();
       for (auto j = 0; j < vector.size(); ++j) {
         const auto tmp = vector[j];
@@ -130,10 +132,11 @@ class DistortionTests : public testing::TestWithParam<AbstractDistortion<Scalar>
     for (auto i = 0; i < kNumInnerIterations; ++i) {
       const Pixel px = Pixel::Random();
 
-      auto J_a = distortion_->allocatePixelDistortionJacobian();
+      const auto num_distortion_parameters = distortion_->asVector().size();
+      auto J_a = DistortionJacobian{Pixel::kNumParameters, num_distortion_parameters};
       const Pixel d_px = distortion_->undistort(px, nullptr, J_a.data());
 
-      auto J_n = distortion_->allocatePixelDistortionJacobian();
+      auto J_n = DistortionJacobian{Pixel::kNumParameters, num_distortion_parameters};
       auto vector = distortion_->asVector();
       for (auto j = 0; j < vector.size(); ++j) {
         const auto tmp = vector[j];

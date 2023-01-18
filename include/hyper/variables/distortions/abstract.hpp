@@ -21,10 +21,6 @@ class AbstractDistortionBase : public TBase {
   // Definitions.
   using Scalar = TScalar;
 
-  /// Allocates a Jacobian.
-  /// \return Allocated Jacobian.
-  auto allocatePixelDistortionJacobian() const -> JacobianNX<Pixel<Scalar>>;
-
   /// Distorts a pixel.
   /// \param pixel Pixel to distort.
   /// \param raw_J_p_p Pixel Jacobian.
@@ -69,12 +65,6 @@ class AbstractDistortion : public AbstractDistortionBase<TScalar, Variable<TScal
   /// \param scale Perturbation scale.
   virtual auto perturb(const Scalar& scale) -> AbstractDistortion& = 0;
 };
-
-template <typename TScalar, typename TBase>
-auto AbstractDistortionBase<TScalar, TBase>::allocatePixelDistortionJacobian() const -> JacobianNX<Pixel<Scalar>> {
-  const auto size = this->asVector().size();
-  return {Pixel<Scalar>::kNumParameters, size};
-}
 
 template <typename TScalar, typename TBase>
 auto AbstractDistortionBase<TScalar, TBase>::undistort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> {
