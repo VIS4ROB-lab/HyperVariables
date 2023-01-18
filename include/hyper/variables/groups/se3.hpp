@@ -6,12 +6,11 @@
 #include "hyper/variables/groups/su2.hpp"
 #include "hyper/variables/jacobian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
-class SE3Base
-    : public Traits<TDerived>::Base,
-      public ConditionalConstBase_t<TDerived, AbstractVariable<DerivedScalar_t<TDerived>>, ConstAbstractVariable<DerivedScalar_t<TDerived>>> {
+class SE3Base : public Traits<TDerived>::Base,
+                public ConditionalConstBase_t<TDerived, AbstractVariable<DerivedScalar_t<TDerived>>, ConstAbstractVariable<DerivedScalar_t<TDerived>>> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
@@ -96,7 +95,8 @@ class SE3Base
   /// \param coupled Compute SE3 instead of SU2 x R3 Jacobians.
   /// \return Additive element.
   template <typename TOtherDerived_>
-  auto groupPlus(const SE3Base<TOtherDerived_>& other, Scalar* raw_J_this = nullptr, Scalar* raw_J_other = nullptr, bool global = kDefaultDerivativesAreGlobal, bool coupled = kDefaultDerivativesAreCoupled) const -> SE3<Scalar>;
+  auto groupPlus(const SE3Base<TOtherDerived_>& other, Scalar* raw_J_this = nullptr, Scalar* raw_J_other = nullptr, bool global = kDefaultDerivativesAreGlobal,
+                 bool coupled = kDefaultDerivativesAreCoupled) const -> SE3<Scalar>;
 
   /// Vector plus.
   /// \tparam TOtherDerived_ Other derived type.
@@ -107,7 +107,8 @@ class SE3Base
   /// \param coupled Compute SE3 instead of SU2 x R3 Jacobians.
   /// \return Additive element.
   template <typename TOtherDerived_>
-  auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, Scalar* raw_J_this = nullptr, Scalar* raw_J_v = nullptr, bool global = kDefaultDerivativesAreGlobal, bool coupled = kDefaultDerivativesAreCoupled) const -> Translation;
+  auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, Scalar* raw_J_this = nullptr, Scalar* raw_J_v = nullptr, bool global = kDefaultDerivativesAreGlobal,
+                  bool coupled = kDefaultDerivativesAreCoupled) const -> Translation;
 
   /// Conversion to tangent element.
   /// \param raw_J Input Jacobian (if requested).
@@ -118,8 +119,7 @@ class SE3Base
 };
 
 template <typename TScalar>
-class SE3 final
-    : public SE3Base<SE3<TScalar>> {
+class SE3 final : public SE3Base<SE3<TScalar>> {
  public:
   using Base = SE3Base<SE3<TScalar>>;
 
@@ -131,14 +131,13 @@ class SE3 final
 
   /// Constructor from address.
   /// \param other Input address.
-  explicit SE3(const TScalar* other)
-      : Base{other} {}
+  explicit SE3(const TScalar* other) : Base{other} {}
 
   /// Copy constructor.
   /// \tparam TOtherDerived_ Other derived type.
   /// \param other Other input instance.
   template <typename TOtherDerived_>
-  SE3(const SE3Base<TOtherDerived_>& other) // NOLINT
+  SE3(const SE3Base<TOtherDerived_>& other)  // NOLINT
       : Base{other} {}
 
   /// Assignment operator.
@@ -164,8 +163,7 @@ class SE3 final
 };
 
 template <typename TDerived>
-class SE3TangentBase
-    : public CartesianBase<TDerived> {
+class SE3TangentBase : public CartesianBase<TDerived> {
  public:
   // Definitions.
   using Base = CartesianBase<TDerived>;
@@ -202,27 +200,19 @@ class SE3TangentBase
 
   /// Angular tangent accessor.
   /// \return Angular tangent.
-  [[nodiscard]] auto angular() const -> Eigen::Map<const Angular> {
-    return Eigen::Map<const Angular>{this->data() + kAngularOffset};
-  }
+  [[nodiscard]] auto angular() const -> Eigen::Map<const Angular> { return Eigen::Map<const Angular>{this->data() + kAngularOffset}; }
 
   /// Angular tangent modifier.
   /// \return Angular tangent.
-  auto angular() -> Eigen::Map<AngularWithConstIfNotLvalue> {
-    return Eigen::Map<AngularWithConstIfNotLvalue>{this->data() + kAngularOffset};
-  }
+  auto angular() -> Eigen::Map<AngularWithConstIfNotLvalue> { return Eigen::Map<AngularWithConstIfNotLvalue>{this->data() + kAngularOffset}; }
 
   /// Linear tangent accessor.
   /// \return Linear tangent.
-  [[nodiscard]] auto linear() const -> Eigen::Map<const Linear> {
-    return Eigen::Map<const Linear>{this->data() + kLinearOffset};
-  }
+  [[nodiscard]] auto linear() const -> Eigen::Map<const Linear> { return Eigen::Map<const Linear>{this->data() + kLinearOffset}; }
 
   /// Linear tangent modifier.
   /// \return Linear tangent.
-  auto linear() -> Eigen::Map<LinearWithConstIfNotLvalue> {
-    return Eigen::Map<LinearWithConstIfNotLvalue>{this->data() + kLinearOffset};
-  }
+  auto linear() -> Eigen::Map<LinearWithConstIfNotLvalue> { return Eigen::Map<LinearWithConstIfNotLvalue>{this->data() + kLinearOffset}; }
 
   /// Converts this to a manifold element.
   /// \param raw_J Input Jacobian (if requested).
@@ -233,8 +223,7 @@ class SE3TangentBase
 };
 
 template <typename TScalar>
-class Tangent<SE3<TScalar>> final
-    : public SE3TangentBase<Tangent<SE3<TScalar>>> {
+class Tangent<SE3<TScalar>> final : public SE3TangentBase<Tangent<SE3<TScalar>>> {
  public:
   using Base = SE3TangentBase<Tangent<SE3<TScalar>>>;
   using Base::Base;
@@ -242,12 +231,12 @@ class Tangent<SE3<TScalar>> final
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Tangent)
 };
 
-} // namespace hyper
+}  // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::SE3)
-HYPER_DECLARE_TANGENT_MAP(hyper::SE3)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::SE3)
+HYPER_DECLARE_TANGENT_MAP(hyper::variables::SE3)
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
 auto SE3Base<TDerived>::Identity() -> SE3<Scalar> {
@@ -521,4 +510,4 @@ auto SE3TangentBase<TDerived>::toManifold(Scalar* raw_J, const bool global, cons
   return output;
 }
 
-} // namespace hyper
+}  // namespace hyper::variables

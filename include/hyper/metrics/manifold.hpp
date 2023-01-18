@@ -10,12 +10,12 @@
 namespace hyper::metrics {
 
 template <typename TScalar>
-class ManifoldMetric<SE3<TScalar>> final : public Metric<TScalar> {
+class ManifoldMetric<variables::SE3<TScalar>> final : public Metric<TScalar> {
  public:
   // Definitions.
-  using Input = SE3<TScalar>;
-  using Output = Tangent<Input>;
-  using Jacobian = JacobianNM<Output>;
+  using Input = variables::SE3<TScalar>;
+  using Output = variables::Tangent<Input>;
+  using Jacobian = variables::JacobianNM<Output>;
 
   // Constants.
   static constexpr auto kInputDim = Input::kNumParameters;

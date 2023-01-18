@@ -7,10 +7,8 @@
 
 namespace hyper {
 
-// clang-format off
-
 constexpr auto DefaultMatrixStorageOption(const int rows, const int cols) -> int {
-  return Eigen::AutoAlign | ((rows == 1 && cols != 1) ? Eigen::RowMajor : ((cols == 1 && rows != 1) ? Eigen::ColMajor : EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION)); // NOLINT
+  return Eigen::AutoAlign | ((rows == 1 && cols != 1) ? Eigen::RowMajor : ((cols == 1 && rows != 1) ? Eigen::ColMajor : EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION));  // NOLINT
 }
 
 template <typename TScalar, int TNumRows, int TNumCols = TNumRows, int TOptions = DefaultMatrixStorageOption(TNumRows, TNumCols)>
@@ -28,6 +26,4 @@ using MatrixXN = Matrix<typename TOtherDerived::Scalar, Eigen::Dynamic, TOtherDe
 template <typename TScalar, int TOptions = DefaultMatrixStorageOption(Eigen::Dynamic, Eigen::Dynamic)>
 using MatrixX = Matrix<TScalar, Eigen::Dynamic, Eigen::Dynamic, TOptions>;
 
-// clang-format on
-
-} // namespace hyper
+}  // namespace hyper

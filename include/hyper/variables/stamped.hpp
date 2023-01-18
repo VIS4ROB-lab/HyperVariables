@@ -5,7 +5,7 @@
 
 #include "hyper/variables/cartesian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TScalar>
 class AbstractStamped : public AbstractVariable<TScalar> {
@@ -36,9 +36,8 @@ class ConstAbstractStamped : public ConstAbstractVariable<TScalar> {
 };
 
 template <typename TDerived>
-class StampedBase
-    : public Traits<TDerived>::Base,
-      public ConditionalConstBase_t<TDerived, AbstractStamped<DerivedScalar_t<TDerived>>, ConstAbstractStamped<DerivedScalar_t<TDerived>>> {
+class StampedBase : public Traits<TDerived>::Base,
+                    public ConditionalConstBase_t<TDerived, AbstractStamped<DerivedScalar_t<TDerived>>, ConstAbstractStamped<DerivedScalar_t<TDerived>>> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
@@ -61,44 +60,31 @@ class StampedBase
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final {
-    return *this;
-  }
+  auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final { return *this; }
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> final {
-    return *this;
-  }
+  auto asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> final { return *this; }
 
   /// Stamp accessor.
   /// \return Stamp.
-  [[nodiscard]] auto stamp() const -> const Scalar& final {
-    return this->data()[kStampOffset];
-  }
+  [[nodiscard]] auto stamp() const -> const Scalar& final { return this->data()[kStampOffset]; }
 
   /// Stamp modifier.
   /// \return Stamp.
-  auto stamp() -> ScalarWithConstIfNotLvalue& {
-    return this->data()[kStampOffset];
-  }
+  auto stamp() -> ScalarWithConstIfNotLvalue& { return this->data()[kStampOffset]; }
 
   /// Variable accessor.
   /// \return Variable.
-  [[nodiscard]] auto variable() const -> Eigen::Map<const Variable> {
-    return Eigen::Map<const Variable>{this->data() + kVariableOffset};
-  }
+  [[nodiscard]] auto variable() const -> Eigen::Map<const Variable> { return Eigen::Map<const Variable>{this->data() + kVariableOffset}; }
 
   /// Variable modifier.
   /// \return Variable.
-  auto variable() -> Eigen::Map<VariableWithConstIfNotLvalue> {
-    return Eigen::Map<VariableWithConstIfNotLvalue>{this->data() + kVariableOffset};
-  }
+  auto variable() -> Eigen::Map<VariableWithConstIfNotLvalue> { return Eigen::Map<VariableWithConstIfNotLvalue>{this->data() + kVariableOffset}; }
 };
 
 template <typename TVariable>
-class Stamped final
-    : public StampedBase<Stamped<TVariable>> {
+class Stamped final : public StampedBase<Stamped<TVariable>> {
  public:
   using Base = StampedBase<Stamped<TVariable>>;
   using Base::Base;
@@ -106,6 +92,6 @@ class Stamped final
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Stamped)
 };
 
-} // namespace hyper
+}  // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::Stamped)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Stamped)

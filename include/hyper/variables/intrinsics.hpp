@@ -6,11 +6,10 @@
 #include "hyper/variables/cartesian.hpp"
 #include "hyper/variables/jacobian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
-class IntrinsicsBase
-    : public CartesianBase<TDerived> {
+class IntrinsicsBase : public CartesianBase<TDerived> {
  public:
   // Definitions.
   using Base = CartesianBase<TDerived>;
@@ -32,82 +31,58 @@ class IntrinsicsBase
 
   /// Retrieves the x-component of the principal point.
   /// \return Principal point in x-direction.
-  [[nodiscard]] auto cx() const -> const Scalar& {
-    return this->data()[kPrincipalOffsetX];
-  }
+  [[nodiscard]] auto cx() const -> const Scalar& { return this->data()[kPrincipalOffsetX]; }
 
   /// Retrieves the x-component of the principal point.
   /// \return Principal point in x-direction.
-  auto cx() -> ScalarWithConstIfNotLvalue& {
-    return this->data()[kPrincipalOffsetX];
-  }
+  auto cx() -> ScalarWithConstIfNotLvalue& { return this->data()[kPrincipalOffsetX]; }
 
   /// Retrieves the y-component of the principal point.
   /// \return Principal point in y-direction.
-  [[nodiscard]] auto cy() const -> const Scalar& {
-    return this->data()[kPrincipalOffsetY];
-  }
+  [[nodiscard]] auto cy() const -> const Scalar& { return this->data()[kPrincipalOffsetY]; }
 
   /// Retrieves the y-component of the principal point.
   /// \return Principal point in y-direction.
-  auto cy() -> ScalarWithConstIfNotLvalue& {
-    return this->data()[kPrincipalOffsetY];
-  }
+  auto cy() -> ScalarWithConstIfNotLvalue& { return this->data()[kPrincipalOffsetY]; }
 
   /// Retrieves the x-component of the focal length.
   /// \return Focal length in x-direction.
-  [[nodiscard]] auto fx() const -> const Scalar& {
-    return this->data()[kFocalOffsetX];
-  }
+  [[nodiscard]] auto fx() const -> const Scalar& { return this->data()[kFocalOffsetX]; }
 
   /// Retrieves the x-component of the focal length.
   /// \return Focal length in x-direction.
-  auto fx() -> ScalarWithConstIfNotLvalue& {
-    return this->data()[kFocalOffsetX];
-  }
+  auto fx() -> ScalarWithConstIfNotLvalue& { return this->data()[kFocalOffsetX]; }
 
   /// Retrieves the y-component of the focal length.
   /// \return Focal length in y-direction.
-  [[nodiscard]] auto fy() const -> const Scalar& {
-    return this->data()[kFocalOffsetY];
-  }
+  [[nodiscard]] auto fy() const -> const Scalar& { return this->data()[kFocalOffsetY]; }
 
   /// Retrieves the y-component of the focal length.
   /// \return Focal length in y-direction.
-  auto fy() -> ScalarWithConstIfNotLvalue& {
-    return this->data()[kFocalOffsetY];
-  }
+  auto fy() -> ScalarWithConstIfNotLvalue& { return this->data()[kFocalOffsetY]; }
 
   /// Principal parameters accessor.
   /// \return Principal parameters.
-  [[nodiscard]] auto principalParameters() const {
-    return this->template head<kNumPrincipalParameters>();
-  }
+  [[nodiscard]] auto principalParameters() const { return this->template head<kNumPrincipalParameters>(); }
 
   /// Principal parameters modifier.
   /// \return Principal parameters.
-  auto principalParameters() {
-    return this->template head<kNumPrincipalParameters>();
-  }
+  auto principalParameters() { return this->template head<kNumPrincipalParameters>(); }
 
   /// Focal parameters accessor.
   /// \return Focal parameters.
-  [[nodiscard]] auto focalParameters() const {
-    return this->template tail<kNumFocalParameters>();
-  }
+  [[nodiscard]] auto focalParameters() const { return this->template tail<kNumFocalParameters>(); }
 
   /// Focal parameters modifier.
   /// \return Focal parameters.
-  auto focalParameters() {
-    return this->template tail<kNumFocalParameters>();
-  }
+  auto focalParameters() { return this->template tail<kNumFocalParameters>(); }
 
   /// Normalizes pixel coordinates on the image plane.
   /// \param input Non-normalized input pixel.
   /// \param raw_J_p_p Pointer to pixel to pixel Jacobian.
   /// \param raw_J_p_i Pointer to pixel to intrinsics Jacobian.
   /// \return Normalized pixel coordinates.
-  auto normalize(const Eigen::Ref<const typename Traits<Pixel<Scalar>>::Base>& input, Scalar* raw_J_p_p = nullptr, Scalar* raw_J_p_i = nullptr) const -> Pixel<Scalar> { // NOLINT
+  auto normalize(const Eigen::Ref<const typename Traits<Pixel<Scalar>>::Base>& input, Scalar* raw_J_p_p = nullptr, Scalar* raw_J_p_i = nullptr) const -> Pixel<Scalar> {  // NOLINT
     const auto ifx = Scalar{1} / fx();
     const auto ify = Scalar{1} / fy();
     const auto dx = input.x() - cx();
@@ -143,7 +118,8 @@ class IntrinsicsBase
   /// \param raw_J_p_p Pointer to pixel to pixel Jacobian.
   /// \param raw_J_p_i Pointer to pixel to intrinsics Jacobian.
   /// \return Denormalized pixel coordinates.
-  auto denormalize(const Eigen::Ref<const typename Traits<Pixel<Scalar>>::Base>& input, Scalar* raw_J_p_p = nullptr, Scalar* raw_J_p_i = nullptr) const -> Pixel<Scalar> { // NOLINT
+  auto denormalize(const Eigen::Ref<const typename Traits<Pixel<Scalar>>::Base>& input, Scalar* raw_J_p_p = nullptr, Scalar* raw_J_p_i = nullptr) const
+      -> Pixel<Scalar> {  // NOLINT
     if (raw_J_p_p) {
       auto J = Eigen::Map<JacobianNM<Pixel<Scalar>>>{raw_J_p_p};
       J(0, 0) = fx();
@@ -169,8 +145,7 @@ class IntrinsicsBase
 };
 
 template <typename TScalar>
-class Intrinsics final
-    : public IntrinsicsBase<Intrinsics<TScalar>> {
+class Intrinsics final : public IntrinsicsBase<Intrinsics<TScalar>> {
  public:
   using Base = IntrinsicsBase<Intrinsics>;
   using Base::Base;
@@ -178,6 +153,6 @@ class Intrinsics final
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Intrinsics)
 };
 
-} // namespace hyper
+}  // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::Intrinsics)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Intrinsics)

@@ -7,7 +7,7 @@
 
 #include "hyper/variables/macros.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename>
 struct Traits;
@@ -32,73 +32,65 @@ struct Traits<Cartesian<TScalar, TNumParameters>> {
   using Base = Eigen::Matrix<TScalar, TNumParameters, 1>;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::Cartesian, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::Cartesian, int)
 
 template <typename>
 class PitchYaw;
 
 template <typename TScalar>
-struct Traits<PitchYaw<TScalar>>
-    : public Traits<Cartesian<TScalar, 2>> {};
+struct Traits<PitchYaw<TScalar>> : public Traits<Cartesian<TScalar, 2>> {};
 
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::PitchYaw)
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::PitchYaw)
 
 template <typename>
 class Bearing;
 
 template <typename TScalar>
-struct Traits<Bearing<TScalar>>
-    : public Traits<Cartesian<TScalar, 3>> {};
+struct Traits<Bearing<TScalar>> : public Traits<Cartesian<TScalar, 3>> {};
 
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::Bearing)
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Bearing)
 
 template <typename>
 class Gravity;
 
 template <typename TScalar>
-struct Traits<Gravity<TScalar>>
-    : public Traits<Cartesian<TScalar, 3>> {};
+struct Traits<Gravity<TScalar>> : public Traits<Cartesian<TScalar, 3>> {};
 
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::Gravity)
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Gravity)
 
 template <typename>
 class Intrinsics;
 
 template <typename TScalar>
-struct Traits<Intrinsics<TScalar>>
-    : public Traits<Cartesian<TScalar, 4>> {};
+struct Traits<Intrinsics<TScalar>> : public Traits<Cartesian<TScalar, 4>> {};
 
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::Intrinsics)
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Intrinsics)
 
 template <typename, int>
 class OrthonormalityAlignment;
 
 template <typename TScalar, int TOrder>
-struct Traits<OrthonormalityAlignment<TScalar, TOrder>>
-    : public Traits<Cartesian<TScalar, TOrder + ((TOrder - 1) * TOrder) / 2>> {
+struct Traits<OrthonormalityAlignment<TScalar, TOrder>> : public Traits<Cartesian<TScalar, TOrder + ((TOrder - 1) * TOrder) / 2>> {
   static constexpr auto kOrder = TOrder;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::OrthonormalityAlignment, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::OrthonormalityAlignment, int)
 
 template <typename TScalar>
 using Stamp = Cartesian<TScalar, 1>;
 
 template <typename TVariable>
-struct Traits<Stamped<TVariable>>
-    : public Traits<Cartesian<typename TVariable::Scalar, Stamp<typename TVariable::Scalar>::kNumParameters + TVariable::kNumParameters>> {
+struct Traits<Stamped<TVariable>> : public Traits<Cartesian<typename TVariable::Scalar, Stamp<typename TVariable::Scalar>::kNumParameters + TVariable::kNumParameters>> {
   using Variable = TVariable;
 };
 
 template <typename TVariable, int TMapOptions>
-struct Traits<Eigen::Map<Stamped<TVariable>, TMapOptions>> final
-    : public Traits<Stamped<TVariable>> {
+struct Traits<Eigen::Map<Stamped<TVariable>, TMapOptions>> final : public Traits<Stamped<TVariable>> {
   using Base = Eigen::Map<typename Traits<Stamped<TVariable>>::Base, TMapOptions>;
 };
 
 template <typename TVariable, int TMapOptions>
-struct Traits<Eigen::Map<const Stamped<TVariable>, TMapOptions>> final
-    : public Traits<Stamped<TVariable>> {
+struct Traits<Eigen::Map<const Stamped<TVariable>, TMapOptions>> final : public Traits<Stamped<TVariable>> {
   using Base = Eigen::Map<const typename Traits<Stamped<TVariable>>::Base, TMapOptions>;
 };
 
@@ -142,4 +134,4 @@ using ConstValueIfVariableIsNotLValue_t = std::conditional_t<VariableIsLValue_v<
 template <typename TDerived, typename TBase, typename TConstBase>
 using ConditionalConstBase_t = std::conditional_t<VariableIsLValue_v<TDerived>, TBase, TConstBase>;
 
-} // namespace hyper
+}  // namespace hyper::variables

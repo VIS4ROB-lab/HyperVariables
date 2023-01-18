@@ -5,11 +5,10 @@
 
 #include "hyper/variables/distortions/base.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
-class IterativeRadialDistortionBase
-    : public ConditionalConstBase_t<TDerived, Distortion<TDerived>, ConstDistortion<TDerived>> {
+class IterativeRadialDistortionBase : public ConditionalConstBase_t<TDerived, Distortion<TDerived>, ConstDistortion<TDerived>> {
  public:
   // Definitions.
   using Base = ConditionalConstBase_t<TDerived, Distortion<TDerived>, ConstDistortion<TDerived>>;
@@ -63,8 +62,7 @@ class IterativeRadialDistortionBase
 };
 
 template <typename TScalar, int TOrder>
-class IterativeRadialDistortion final
-    : public IterativeRadialDistortionBase<IterativeRadialDistortion<TScalar, TOrder>> {
+class IterativeRadialDistortion final : public IterativeRadialDistortionBase<IterativeRadialDistortion<TScalar, TOrder>> {
  public:
   using Base = IterativeRadialDistortionBase<IterativeRadialDistortion>;
   using Base::Base;
@@ -173,7 +171,8 @@ auto IterativeRadialDistortionBase<TDerived>::undistort(const Eigen::Ref<const P
 }
 
 template <typename TDerived>
-auto IterativeRadialDistortionBase<TDerived>::IterativePixelPixelJacobian(const Scalar& x2, const Scalar& xy, const Scalar& y2, const Scalar& rho2, const Scalar& alpha) const -> JacobianNM<Pixel<Scalar>> {
+auto IterativeRadialDistortionBase<TDerived>::IterativePixelPixelJacobian(const Scalar& x2, const Scalar& xy, const Scalar& y2, const Scalar& rho2, const Scalar& alpha) const
+    -> JacobianNM<Pixel<Scalar>> {
   const auto a = std::sqrt(Scalar{0.25} - alpha * rho2);
   const auto b = Scalar{0.5} + a;
   const auto c = Scalar{1} / (b * b);
@@ -188,7 +187,8 @@ auto IterativeRadialDistortionBase<TDerived>::IterativePixelPixelJacobian(const 
 }
 
 template <typename TDerived>
-auto IterativeRadialDistortionBase<TDerived>::InverseIterativePixelPixelJacobian(const Scalar& x2, const Scalar& xy, const Scalar& y2, const Scalar& rho2, const Scalar& alpha) const -> JacobianNM<Pixel<Scalar>> {
+auto IterativeRadialDistortionBase<TDerived>::InverseIterativePixelPixelJacobian(const Scalar& x2, const Scalar& xy, const Scalar& y2, const Scalar& rho2,
+                                                                                 const Scalar& alpha) const -> JacobianNM<Pixel<Scalar>> {
   const auto a = Scalar{1} + alpha * rho2;
   const auto b = Scalar{1} / (a * a);
   const auto c = alpha * (y2 - x2);
@@ -217,6 +217,6 @@ auto IterativeRadialDistortionBase<TDerived>::InverseIterativePixelDistortionJac
   return b * pixel;
 }
 
-} // namespace hyper
+}  // namespace hyper::variables
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::IterativeRadialDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::IterativeRadialDistortion, int)

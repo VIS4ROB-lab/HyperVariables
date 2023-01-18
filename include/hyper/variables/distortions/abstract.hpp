@@ -13,7 +13,7 @@
 #include "hyper/variables/cartesian.hpp"
 #include "hyper/variables/jacobian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TScalar, typename TBase>
 class AbstractDistortionBase : public TBase {
@@ -87,7 +87,8 @@ auto AbstractDistortionBase<TScalar, TBase>::undistort(const Eigen::Ref<const Pi
 
     if (NumericVariableTraits<Scalar>::kDistortionTolerance2 < b.dot(b)) {
       DLOG_IF(WARNING, i == NumericVariableTraits<Scalar>::kMaxNumDistortionSteps) << "Maximum number of iterations reached.";
-      DLOG_IF_EVERY_N(WARNING, J_p_p_i.determinant() < NumericVariableTraits<Scalar>::kSmallAngleTolerance, NumericVariableTraits<Scalar>::kMaxNumDistortionSteps) << "Numerical issues detected.";
+      DLOG_IF_EVERY_N(WARNING, J_p_p_i.determinant() < NumericVariableTraits<Scalar>::kSmallAngleTolerance, NumericVariableTraits<Scalar>::kMaxNumDistortionSteps)
+          << "Numerical issues detected.";
       output.noalias() -= J_p_p * b;
     } else {
       break;
@@ -108,4 +109,4 @@ auto AbstractDistortionBase<TScalar, TBase>::undistort(const Eigen::Ref<const Pi
   return output;
 }
 
-} // namespace hyper
+}  // namespace hyper::variables

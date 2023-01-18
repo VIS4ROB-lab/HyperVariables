@@ -5,11 +5,10 @@
 
 #include "hyper/variables/distortions/base.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
-class EquidistantDistortionBase
-    : public ConditionalConstBase_t<TDerived, Distortion<TDerived>, ConstDistortion<TDerived>> {
+class EquidistantDistortionBase : public ConditionalConstBase_t<TDerived, Distortion<TDerived>, ConstDistortion<TDerived>> {
  public:
   // Definitions.
   using Base = ConditionalConstBase_t<TDerived, Distortion<TDerived>, ConstDistortion<TDerived>>;
@@ -60,8 +59,7 @@ class EquidistantDistortionBase
 };
 
 template <typename TScalar, int TOrder>
-class EquidistantDistortion final
-    : public EquidistantDistortionBase<EquidistantDistortion<TScalar, TOrder>> {
+class EquidistantDistortion final : public EquidistantDistortionBase<EquidistantDistortion<TScalar, TOrder>> {
  public:
   using Base = EquidistantDistortionBase<EquidistantDistortion>;
   using Base::Base;
@@ -170,6 +168,6 @@ auto EquidistantDistortionBase<TDerived>::distortTheta(const Scalar& theta, Scal
   return this->dot(thetas);
 }
 
-} // namespace hyper
+}  // namespace hyper::variables
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::EquidistantDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::EquidistantDistortion, int)

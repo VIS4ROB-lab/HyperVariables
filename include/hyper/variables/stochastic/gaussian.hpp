@@ -8,7 +8,7 @@
 #include "hyper/variables/cartesian.hpp"
 #include "hyper/variables/stochastic/invert_psd_matrix.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
 class GaussianBase : public Traits<TDerived>::Base {
@@ -33,9 +33,7 @@ class GaussianBase : public Traits<TDerived>::Base {
 
   /// Retrieves the order.
   /// \return Order.
-  [[nodiscard]] auto order() const -> Index {
-    return this->rows();
-  }
+  [[nodiscard]] auto order() const -> Index { return this->rows(); }
 
   /// Mean accessor.
   /// \return Mean.
@@ -55,9 +53,7 @@ class GaussianBase : public Traits<TDerived>::Base {
 
   /// Inverse covariance.
   /// \return Inverse covariance.
-  inline auto inverseSigma() const {
-    return invertPSDMatrix<Scalar, kOrder>(sigma(), true);
-  }
+  inline auto inverseSigma() const { return invertPSDMatrix<Scalar, kOrder>(sigma(), true); }
 
   /// Converts this.
   /// \return Canonical Gaussian.
@@ -65,8 +61,7 @@ class GaussianBase : public Traits<TDerived>::Base {
 };
 
 template <typename TScalar, int TOrder>
-class Gaussian final
-    : public GaussianBase<Gaussian<TScalar, TOrder>> {
+class Gaussian final : public GaussianBase<Gaussian<TScalar, TOrder>> {
  public:
   using Base = GaussianBase<Gaussian<TScalar, TOrder>>;
   using Index = typename Base::Index;
@@ -142,9 +137,7 @@ class CanonicalGaussianBase : public Traits<TDerived>::Base {
 
   /// Retrieves the order.
   /// \return Order.
-  [[nodiscard]] auto order() const -> Index {
-    return this->rows();
-  }
+  [[nodiscard]] auto order() const -> Index { return this->rows(); }
 
   /// Information accessor.
   /// \return Information.
@@ -164,9 +157,7 @@ class CanonicalGaussianBase : public Traits<TDerived>::Base {
 
   /// Inverse precision.
   /// \return Inverse precision.
-  inline auto inverseLambda() const {
-    return invertPSDMatrix<Scalar, kOrder>(lambda(), true);
-  }
+  inline auto inverseLambda() const { return invertPSDMatrix<Scalar, kOrder>(lambda(), true); }
 
   /// Converts this.
   /// \return Gaussian.
@@ -174,8 +165,7 @@ class CanonicalGaussianBase : public Traits<TDerived>::Base {
 };
 
 template <typename TScalar, int TOrder>
-class CanonicalGaussian final
-    : public CanonicalGaussianBase<CanonicalGaussian<TScalar, TOrder>> {
+class CanonicalGaussian final : public CanonicalGaussianBase<CanonicalGaussian<TScalar, TOrder>> {
  public:
   using Base = CanonicalGaussianBase<CanonicalGaussian<TScalar, TOrder>>;
   using Index = typename Base::Index;
@@ -246,21 +236,17 @@ auto CanonicalGaussianBase<TDerived>::toGaussian() const -> Gaussian<Scalar, kOr
   return gaussian;
 }
 
-} // namespace hyper
+}  // namespace hyper::variables
 
 #define HYPER_GAUSSIAN_PLUGIN(BASE)     \
   using Scalar = typename Base::Scalar; \
-  BASE(Scalar* ptr)                     \
-      : Base{ptr} {}                    \
-  BASE(Scalar* ptr, const int size)     \
-      : Base{ptr, size, size + 1} {}
+  BASE(Scalar* ptr) : Base{ptr} {}      \
+  BASE(Scalar* ptr, const int size) : Base{ptr, size, size + 1} {}
 
 #define HYPER_CONST_GAUSSIAN_PLUGIN(BASE) \
   using Scalar = typename Base::Scalar;   \
-  BASE(const Scalar* ptr)                 \
-      : Base{ptr} {}                      \
-  BASE(const Scalar* ptr, const int size) \
-      : Base{ptr, size, size + 1} {}
+  BASE(const Scalar* ptr) : Base{ptr} {}  \
+  BASE(const Scalar* ptr, const int size) : Base{ptr, size, size + 1} {}
 
 HYPER_DECLARE_TEMPLATED_EIGEN_CLASS(Map, hyper::Gaussian, int, HYPER_GAUSSIAN_PLUGIN(Map))
 HYPER_DECLARE_TEMPLATED_CONST_EIGEN_CLASS(Map, hyper::Gaussian, int, HYPER_CONST_GAUSSIAN_PLUGIN(Map))

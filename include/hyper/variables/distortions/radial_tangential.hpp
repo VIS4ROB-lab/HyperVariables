@@ -5,11 +5,10 @@
 
 #include "hyper/variables/distortions/base.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
-class RadialTangentialDistortionBase
-    : public ConditionalConstBase_t<TDerived, Distortion<TDerived>, ConstDistortion<TDerived>> {
+class RadialTangentialDistortionBase : public ConditionalConstBase_t<TDerived, Distortion<TDerived>, ConstDistortion<TDerived>> {
  public:
   // Definitions.
   using Base = ConditionalConstBase_t<TDerived, Distortion<TDerived>, ConstDistortion<TDerived>>;
@@ -40,27 +39,19 @@ class RadialTangentialDistortionBase
 
   /// Radial parameters accessor.
   /// \return Radial parameters.
-  auto radial() const {
-    return this->segment(kRadialOffset, radialOrder());
-  }
+  auto radial() const { return this->segment(kRadialOffset, radialOrder()); }
 
   /// Radial parameters modifier.
   /// \return Radial parameters.
-  auto radial() {
-    return this->segment(kRadialOffset, radialOrder());
-  }
+  auto radial() { return this->segment(kRadialOffset, radialOrder()); }
 
   /// Tangential parameters accessor.
   /// \return Tangential parameters.
-  auto tangential() const {
-    return this->segment(kRadialOffset + radialOrder(), tangentialOrder());
-  }
+  auto tangential() const { return this->segment(kRadialOffset + radialOrder(), tangentialOrder()); }
 
   /// Tangential parameters modifier.
   /// \return Tangential parameters.
-  auto tangential() {
-    return this->segment(kRadialOffset + radialOrder(), tangentialOrder());
-  }
+  auto tangential() { return this->segment(kRadialOffset + radialOrder(), tangentialOrder()); }
 
   /// Sets the default parameters.
   template <typename TScalar_ = ScalarWithConstIfNotLvalue, std::enable_if_t<!std::is_const_v<TScalar_>, bool> = true>
@@ -80,8 +71,7 @@ class RadialTangentialDistortionBase
 };
 
 template <typename TScalar, int TOrder>
-class RadialTangentialDistortion final
-    : public RadialTangentialDistortionBase<RadialTangentialDistortion<TScalar, TOrder>> {
+class RadialTangentialDistortion final : public RadialTangentialDistortionBase<RadialTangentialDistortion<TScalar, TOrder>> {
  public:
   using Base = RadialTangentialDistortionBase<RadialTangentialDistortion<TScalar, TOrder>>;
   using Base::Base;
@@ -121,7 +111,7 @@ auto RadialTangentialDistortionBase<TDerived>::perturb(const Scalar& scale) -> R
 }
 
 template <typename TDerived>
-auto RadialTangentialDistortionBase<TDerived>::distort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> { // NOLINT
+auto RadialTangentialDistortionBase<TDerived>::distort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> {  // NOLINT
   // Map inputs.
   const auto radial_order = this->radialOrder();
   const auto x2 = pixel.x() * pixel.x();
@@ -165,6 +155,6 @@ auto RadialTangentialDistortionBase<TDerived>::distort(const Eigen::Ref<const Pi
   return a * pixel + rho2 * P;
 }
 
-} // namespace hyper
+}  // namespace hyper::variables
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::RadialTangentialDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::RadialTangentialDistortion, int)

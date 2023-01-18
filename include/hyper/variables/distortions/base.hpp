@@ -5,7 +5,7 @@
 
 #include "hyper/variables/distortions/abstract.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived, typename TBase>
 class DistortionBase : public Traits<TDerived>::Base, public TBase {
@@ -104,4 +104,4 @@ auto Distortion<TDerived>::perturb(const Scalar& scale) -> Distortion& {
   return static_cast<TDerived&>(*this).perturb(scale);
 }
 
-} // namespace hyper
+}  // namespace hyper::variables
