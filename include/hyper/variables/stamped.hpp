@@ -8,7 +8,7 @@
 namespace hyper::variables {
 
 template <typename TScalar>
-class AbstractStamped : public AbstractVariable<TScalar> {
+class AbstractStamped : public Variable<TScalar> {
  public:
   using Scalar = std::remove_const_t<TScalar>;
 
@@ -22,7 +22,7 @@ class AbstractStamped : public AbstractVariable<TScalar> {
 };
 
 template <typename TScalar>
-class ConstAbstractStamped : public ConstAbstractVariable<TScalar> {
+class ConstAbstractStamped : public ConstVariable<TScalar> {
  public:
   using Scalar = std::remove_const_t<TScalar>;
 

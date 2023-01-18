@@ -13,13 +13,10 @@ template <typename>
 struct Traits;
 
 template <typename>
-class AbstractVariable;
+class Variable;
 
 template <typename>
-class ConstAbstractVariable;
-
-template <typename>
-class AbstractStamped;
+class ConstVariable;
 
 template <typename>
 class Stamped;

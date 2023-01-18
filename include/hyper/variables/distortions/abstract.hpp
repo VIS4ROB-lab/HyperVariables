@@ -51,13 +51,13 @@ class AbstractDistortionBase : public TBase {
 };
 
 template <typename TScalar>
-class ConstAbstractDistortion : public AbstractDistortionBase<TScalar, ConstAbstractVariable<TScalar>> {
+class ConstAbstractDistortion : public AbstractDistortionBase<TScalar, ConstVariable<TScalar>> {
   // Definitions.
   using Scalar = TScalar;
 };
 
 template <typename TScalar>
-class AbstractDistortion : public AbstractDistortionBase<TScalar, AbstractVariable<TScalar>> {
+class AbstractDistortion : public AbstractDistortionBase<TScalar, Variable<TScalar>> {
  public:
   // Definitions.
   using Scalar = TScalar;

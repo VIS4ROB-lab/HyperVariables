@@ -15,7 +15,7 @@ namespace hyper::variables {
 
 template <typename TDerived>
 class QuaternionBase : public Traits<TDerived>::Base,
-                       public ConditionalConstBase_t<TDerived, AbstractVariable<DerivedScalar_t<TDerived>>, ConstAbstractVariable<DerivedScalar_t<TDerived>>> {
+                       public ConditionalConstBase_t<TDerived, Variable<DerivedScalar_t<TDerived>>, ConstVariable<DerivedScalar_t<TDerived>>> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;

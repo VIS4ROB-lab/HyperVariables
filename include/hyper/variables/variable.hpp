@@ -10,13 +10,13 @@
 namespace hyper::variables {
 
 template <typename TScalar>
-class ConstAbstractVariable {
+class ConstVariable {
  public:
   // Definitions.
   using Scalar = TScalar;
 
   /// Virtual default destructor.
-  virtual ~ConstAbstractVariable() = default;
+  virtual ~ConstVariable() = default;
 
   /// Map as Eigen vector.
   /// \return Vector.
@@ -28,13 +28,13 @@ class ConstAbstractVariable {
 };
 
 template <typename TScalar>
-class AbstractVariable {
+class Variable {
  public:
   // Definitions.
   using Scalar = TScalar;
 
   /// Virtual default destructor.
-  virtual ~AbstractVariable() = default;
+  virtual ~Variable() = default;
 
   /// Map as Eigen vector.
   /// \return Vector.
