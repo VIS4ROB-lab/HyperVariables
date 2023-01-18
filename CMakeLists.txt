@@ -1,6 +1,5 @@
 # Check CMake version.
 cmake_minimum_required(VERSION 3.16)
-enable_language(CXX)
 
 # Define projects.
 project(HyperVariables VERSION 22.06.14 DESCRIPTION "" HOMEPAGE_URL https://github.com/VIS4ROB-lab/HyperVariables LANGUAGES CXX)
@@ -10,6 +9,7 @@ if(PROJECT_IS_TOP_LEVEL)
     set(CMAKE_CXX_STANDARD 20)
     set(CMAKE_CXX_STANDARD_REQUIRED YES)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -Wall -Wextra -Wnon-virtual-dtor -pedantic")
+    option(HYPER_BUILD_TESTING "Build tests." TRUE)
 endif()
 
 # Define libraries and aliases.
@@ -38,7 +38,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SO
 target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen PUBLIC glog::glog PUBLIC GTest::GTest)
 
 # Build tests.
-option(HYPER_BUILD_TESTING "Build tests." TRUE)
 if (HYPER_BUILD_TESTING)
     add_subdirectory(${PROJECT_SOURCE_DIR}/apps/tests)
 endif (HYPER_BUILD_TESTING)

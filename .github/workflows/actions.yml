@@ -1,4 +1,4 @@
-name: CMake
+name: actions
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
     # You can convert this to a matrix build if you need cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v3
@@ -33,10 +33,11 @@ jobs:
 
       - name: Test
         working-directory: ${{github.workspace}}/build
-        run: ./apps/tests/HyperVariablesTests --gtest_output="xml:${{github.workspace}}/test-results/logs/results.xml"
+        run: ./apps/tests/HyperVariablesTests --gtest_output="xml:${{github.workspace}}/tests/junit/results.xml"
 
       - name: Publish
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          files: "test-results/**/*.xml"
+          junit_files: "tests/junit/*.xml"
+          check_name: "tests"
