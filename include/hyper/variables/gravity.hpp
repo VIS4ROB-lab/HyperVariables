@@ -7,7 +7,7 @@
 
 #include "hyper/variables/cartesian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
 class GravityBase : public CartesianBase<TDerived> {
@@ -18,20 +18,17 @@ class GravityBase : public CartesianBase<TDerived> {
   using Base::Base;
 
   // Constants.
-  static constexpr auto kNorm = Scalar{9.80741}; // Magnitude of local gravity for Zurich in [m/s²].
+  static constexpr auto kNorm = Scalar{9.80741};  // Magnitude of local gravity for Zurich in [m/s²].
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(GravityBase)
 
   /// Checks the norm.
   /// \return True if correct.
-  [[nodiscard]] auto checkNorm() const -> bool {
-    return Eigen::internal::isApprox(this->norm(), kNorm);
-  }
+  [[nodiscard]] auto checkNorm() const -> bool { return Eigen::internal::isApprox(this->norm(), kNorm); }
 };
 
 template <typename TScalar>
-class Gravity final
-    : public GravityBase<Gravity<TScalar>> {
+class Gravity final : public GravityBase<Gravity<TScalar>> {
  public:
   using Base = GravityBase<Gravity<TScalar>>;
 
@@ -44,12 +41,12 @@ class Gravity final
   /// \tparam TArgs_ Input argument types.
   /// \param args Inputs arguments.
   template <typename... TArgs_>
-  Gravity(TArgs_&&... args) // NOLINT
+  Gravity(TArgs_&&... args)  // NOLINT
       : Base{std::forward<TArgs_>(args)...} {
     DCHECK(this->checkNorm());
   }
 };
 
-} // namespace hyper
+}  // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::Gravity)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Gravity)

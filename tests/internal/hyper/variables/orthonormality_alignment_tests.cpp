@@ -5,12 +5,11 @@
 
 #include "hyper/variables/orthonormality_alignment.hpp"
 
-namespace hyper::tests {
+namespace hyper::variables::tests {
 
 using Scalar = double;
 
-class OrthonormalityAlignmentTests
-    : public testing::Test {
+class OrthonormalityAlignmentTests : public testing::Test {
  protected:
   static constexpr auto kNumOuterIterations = 5;
   static constexpr auto kNumInnerIterations = 25;
@@ -18,15 +17,13 @@ class OrthonormalityAlignmentTests
   static constexpr auto kNumericTolerance = 1e-8;
 
   static constexpr auto Order = 3;
-  using Alignment = OrthonormalityAlignment<Scalar, Order>;
+  using Alignment = variables::OrthonormalityAlignment<Scalar, Order>;
   using Input = Alignment::Input;
 
-  using InputJacobian = JacobianNM<Alignment::Output, Alignment::Input>;
-  using ParameterJacobian = JacobianNM<Alignment::Output, Alignment>;
+  using InputJacobian = variables::JacobianNM<Alignment::Output, Alignment::Input>;
+  using ParameterJacobian = variables::JacobianNM<Alignment::Output, Alignment>;
 
-  auto setRandom() -> void {
-    alignment_.setRandom();
-  }
+  auto setRandom() -> void { alignment_.setRandom(); }
 
   [[nodiscard]] auto checkDuality() const -> bool {
     const auto S = alignment_.scalingMatrix();
@@ -42,7 +39,7 @@ class OrthonormalityAlignmentTests
     const auto output = alignment_.align(input, J_a.data(), nullptr);
 
     InputJacobian J_n;
-    for (auto j = 0; j < Traits<Alignment>::kOrder; ++j) {
+    for (auto j = 0; j < Alignment::kOrder; ++j) {
       const Input d_input = input + kNumericIncrement * Input::Unit(j);
       const auto d_output = alignment_.align(d_input, nullptr, nullptr);
       J_n.col(j) = (d_output - output) / kNumericIncrement;
@@ -96,4 +93,4 @@ TEST_F(OrthonormalityAlignmentTests, ParameterJacobian) {
   }
 }
 
-} // namespace hyper::tests
+}  // namespace hyper::variables::tests

@@ -7,7 +7,7 @@
 
 #include "hyper/matrix.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 /// Inverts a positive semi-definite matrix.
 /// \tparam TScalar Scalar type.
@@ -34,4 +34,4 @@ auto invertPSDMatrix(const Eigen::Ref<const Matrix<TScalar, TSize, TSize>>& matr
   return svd.solve(TSVDMatrix::Identity(size, size));
 }
 
-} // namespace hyper
+}  // namespace hyper::variables

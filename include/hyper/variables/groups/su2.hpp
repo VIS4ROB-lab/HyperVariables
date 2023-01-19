@@ -11,12 +11,11 @@
 #include "hyper/variables/cartesian.hpp"
 #include "hyper/variables/jacobian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
-class QuaternionBase
-    : public Traits<TDerived>::Base,
-      public ConditionalConstBase_t<TDerived, AbstractVariable<DerivedScalar_t<TDerived>>, ConstAbstractVariable<DerivedScalar_t<TDerived>>> {
+class QuaternionBase : public Traits<TDerived>::Base,
+                       public ConditionalConstBase_t<TDerived, Variable<DerivedScalar_t<TDerived>>, ConstVariable<DerivedScalar_t<TDerived>>> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
@@ -36,15 +35,11 @@ class QuaternionBase
 
   /// Constructs an identity element.
   /// \return Identity element.
-  static auto Identity() -> Quaternion<Scalar> {
-    return Base::Identity();
-  }
+  static auto Identity() -> Quaternion<Scalar> { return Base::Identity(); }
 
   /// Constructs a random element.
   /// \return Random element.
-  static auto Random() -> Quaternion<Scalar> {
-    return Base::UnitRandom();
-  }
+  static auto Random() -> Quaternion<Scalar> { return Base::UnitRandom(); }
 
   /// Data pointer accessor.
   /// \return Data pointer.
@@ -90,8 +85,7 @@ class QuaternionBase
 };
 
 template <typename TDerived>
-class SU2Base
-    : public QuaternionBase<TDerived> {
+class SU2Base : public QuaternionBase<TDerived> {
  public:
   using Base = QuaternionBase<TDerived>;
   using Scalar = typename Base::Scalar;
@@ -106,21 +100,15 @@ class SU2Base
 
   /// Constructs an identity element.
   /// \return Identity element.
-  static auto Identity() -> SU2<Scalar> {
-    return Base::Identity();
-  }
+  static auto Identity() -> SU2<Scalar> { return Base::Identity(); }
 
   /// Constructs a random element.
   /// \return Random element.
-  static auto Random() -> SU2<Scalar> {
-    return Base::UnitRandom();
-  }
+  static auto Random() -> SU2<Scalar> { return Base::UnitRandom(); }
 
   /// Group adjoint.
   /// \return Adjoint.
-  [[nodiscard]] auto groupAdjoint() const {
-    return this->matrix();
-  }
+  [[nodiscard]] auto groupAdjoint() const { return this->matrix(); }
 
   /// Group inverse.
   /// \param raw_J Input Jacobian (if requested).
@@ -136,7 +124,8 @@ class SU2Base
   /// \param global Request global Jacobians flag.
   /// \return Additive element.
   template <typename TOtherDerived_>
-  auto groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* raw_J_this = nullptr, Scalar* raw_J_other = nullptr, bool global = kDefaultDerivativesAreGlobal) const -> SU2<Scalar>;
+  auto groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* raw_J_this = nullptr, Scalar* raw_J_other = nullptr, bool global = kDefaultDerivativesAreGlobal) const
+      -> SU2<Scalar>;
 
   /// Vector plus.
   /// \tparam TOtherDerived_ Other derived type.
@@ -146,7 +135,8 @@ class SU2Base
   /// \param global Request global Jacobians flag.
   /// \return Additive element.
   template <typename TOtherDerived_>
-  auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, Scalar* raw_J_this = nullptr, Scalar* raw_J_vector = nullptr, bool global = kDefaultDerivativesAreGlobal) const -> Translation;
+  auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, Scalar* raw_J_this = nullptr, Scalar* raw_J_vector = nullptr, bool global = kDefaultDerivativesAreGlobal) const
+      -> Translation;
 
   /// Group logarithm.
   /// \return Logarithmic element.
@@ -164,8 +154,7 @@ class SU2Base
 };
 
 template <typename TDerived>
-class SU2AlgebraBase
-    : public QuaternionBase<TDerived> {
+class SU2AlgebraBase : public QuaternionBase<TDerived> {
  public:
   using Base = QuaternionBase<TDerived>;
   using Scalar = typename Base::Scalar;
@@ -196,8 +185,7 @@ class SU2AlgebraBase
 };
 
 template <typename TScalar>
-class Quaternion final
-    : public QuaternionBase<Quaternion<TScalar>> {
+class Quaternion final : public QuaternionBase<Quaternion<TScalar>> {
  public:
   using Base = QuaternionBase<Quaternion<TScalar>>;
   using Base::Base;
@@ -206,8 +194,7 @@ class Quaternion final
 };
 
 template <typename TScalar>
-class SU2 final
-    : public SU2Base<SU2<TScalar>> {
+class SU2 final : public SU2Base<SU2<TScalar>> {
  public:
   using Base = SU2Base<SU2<TScalar>>;
 
@@ -216,7 +203,7 @@ class SU2 final
 
   /// Perfect forwarding constructor.
   template <typename... TArgs>
-  SU2(TArgs&&... args) // NOLINT
+  SU2(TArgs&&... args)  // NOLINT
       : Base{std::forward<TArgs>(args)...} {
     // DCHECK(Eigen::internal::isApprox(this->norm(), TScalar{1}));
   }
@@ -225,8 +212,7 @@ class SU2 final
 };
 
 template <typename TScalar>
-class Algebra<SU2<TScalar>> final
-    : public SU2AlgebraBase<Algebra<SU2<TScalar>>> {
+class Algebra<SU2<TScalar>> final : public SU2AlgebraBase<Algebra<SU2<TScalar>>> {
  public:
   using Base = SU2AlgebraBase<Algebra<SU2<TScalar>>>;
 
@@ -235,7 +221,7 @@ class Algebra<SU2<TScalar>> final
 
   /// Perfect forwarding constructor.
   template <typename... TArgs>
-  Algebra(TArgs&&... args) // NOLINT
+  Algebra(TArgs&&... args)  // NOLINT
       : Base{std::forward<TArgs>(args)...} {
     DCHECK(Eigen::internal::isApprox(TScalar{1} + this->w(), TScalar{1}));
   }
@@ -244,8 +230,7 @@ class Algebra<SU2<TScalar>> final
 };
 
 template <typename TDerived>
-class SU2TangentBase
-    : public CartesianBase<TDerived> {
+class SU2TangentBase : public CartesianBase<TDerived> {
  public:
   // Definitions.
   using Base = CartesianBase<TDerived>;
@@ -272,8 +257,7 @@ class SU2TangentBase
 };
 
 template <typename TScalar>
-class Tangent<SU2<TScalar>> final
-    : public SU2TangentBase<Tangent<SU2<TScalar>>> {
+class Tangent<SU2<TScalar>> final : public SU2TangentBase<Tangent<SU2<TScalar>>> {
  public:
   using Base = SU2TangentBase<Tangent<SU2<TScalar>>>;
   using Base::Base;
@@ -546,9 +530,9 @@ auto SU2TangentBase<TDerived>::toManifold(Scalar* raw_J, const bool global) cons
   return output;
 }
 
-} // namespace hyper
+}  // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::Quaternion)
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::SU2)
-HYPER_DECLARE_ALGEBRA_MAP(hyper::SU2)
-HYPER_DECLARE_TANGENT_MAP(hyper::SU2)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Quaternion)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::SU2)
+HYPER_DECLARE_ALGEBRA_MAP(hyper::variables::SU2)
+HYPER_DECLARE_TANGENT_MAP(hyper::variables::SU2)

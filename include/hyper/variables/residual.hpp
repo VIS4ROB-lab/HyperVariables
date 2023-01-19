@@ -5,7 +5,7 @@
 
 #include "hyper/vector.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TScalar, int TNumRows, int TOptions = DefaultVectorStorageOption(TNumRows, 1)>
 using Residual = Vector<TScalar, TNumRows, TOptions>;
@@ -16,4 +16,4 @@ using ResidualN = VectorN<TDerived, TOptions>;
 template <typename TScalar, int TOptions = DefaultVectorStorageOption(Eigen::Dynamic, 1)>
 using ResidualX = VectorX<TScalar, TOptions>;
 
-} // namespace hyper
+}  // namespace hyper::variables

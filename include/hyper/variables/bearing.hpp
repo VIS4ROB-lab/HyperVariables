@@ -8,7 +8,7 @@
 
 #include "hyper/variables/cartesian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
 class BearingBase : public CartesianBase<TDerived> {
@@ -25,9 +25,7 @@ class BearingBase : public CartesianBase<TDerived> {
 
   /// Checks the norm.
   /// \return True if correct.
-  [[nodiscard]] auto checkNorm() const -> bool {
-    return Eigen::internal::isApprox(this->norm(), kNorm);
-  }
+  [[nodiscard]] auto checkNorm() const -> bool { return Eigen::internal::isApprox(this->norm(), kNorm); }
 
   /// Finds an orthonormal basis where the first unit
   /// vector points along the direction of the bearing.
@@ -43,8 +41,8 @@ class BearingBase : public CartesianBase<TDerived> {
     const auto& vz = this->z();
 
     const auto c0 = Scalar{1} / (Scalar{1} + std::abs(vx));
-    const auto hy = -c0 * vy; // y-component of Householder vector.
-    const auto hz = -c0 * vz; // z-component of Householder vector.
+    const auto hy = -c0 * vy;  // y-component of Householder vector.
+    const auto hz = -c0 * vz;  // z-component of Householder vector.
 
     Matrix matrix;
     matrix(0, 0) = vx;
@@ -54,13 +52,13 @@ class BearingBase : public CartesianBase<TDerived> {
     matrix(2, 1) = vz * hy;
 
     if (vx > Scalar{0}) {
-      const auto hx = vx + Scalar{1}; // x-component of Householder vector.
+      const auto hx = vx + Scalar{1};  // x-component of Householder vector.
       matrix(0, 1) = hx * hy;
       matrix(0, 2) = hx * hz;
       matrix(1, 2) = vy * hz;
       matrix(2, 2) = vz * hz + Scalar{1};
     } else {
-      const auto hx = vx - Scalar{1}; // x-component of Householder vector.
+      const auto hx = vx - Scalar{1};  // x-component of Householder vector.
       matrix(0, 1) = hx * hy;
       matrix(0, 2) = -hx * hz;
       matrix(1, 2) = -vy * hz;
@@ -74,8 +72,7 @@ class BearingBase : public CartesianBase<TDerived> {
 };
 
 template <typename TScalar>
-class Bearing final
-    : public BearingBase<Bearing<TScalar>> {
+class Bearing final : public BearingBase<Bearing<TScalar>> {
  public:
   using Base = BearingBase<Bearing<TScalar>>;
 
@@ -88,12 +85,12 @@ class Bearing final
   /// \tparam TArgs_ Input argument types.
   /// \param args Inputs arguments.
   template <typename... TArgs_>
-  Bearing(TArgs_&&... args) // NOLINT
+  Bearing(TArgs_&&... args)  // NOLINT
       : Base{std::forward<TArgs_>(args)...} {
     DCHECK(this->checkNorm());
   }
 };
 
-} // namespace hyper
+}  // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::Bearing)
+HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Bearing)

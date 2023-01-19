@@ -7,22 +7,26 @@
 #include "hyper/metrics/cartesian.hpp"
 #include "hyper/metrics/manifold.hpp"
 
-namespace hyper::tests {
+namespace hyper::metrics::tests {
 
-using Scalar = double;
-
-class MetricsTests
-    : public testing::Test {
+class MetricsTests : public testing::Test {
  protected:
+  // Constants.
   static constexpr auto kNumIterations = 5;
   static constexpr auto kNumericIncrement = 1e-8;
   static constexpr auto kNumericTolerance = 1e-7;
 
+  // Definitions.
+  using Scalar = double;
+  using Index = Eigen::Index;
+  using SE3 = variables::SE3<Scalar>;
+  using SE3Tangent = variables::Tangent<SE3>;
+
   [[nodiscard]] static auto CheckCartesianMetric() -> bool {
-    using Input = Cartesian<Scalar, 3>;
-    using Metric = CartesianMetric<Scalar, 3>;
-    using Output = Metric::Output;
-    using Jacobian = JacobianNM<Output, Input>;
+    using Metric = metrics::CartesianMetric<Scalar, 3>;
+    using Input = Metric::Input;
+    // using Output = Metric::Output;
+    using Jacobian = Metric::Jacobian;
 
     Input u = Input::Random();
     Input v = Input::Random();
@@ -34,15 +38,14 @@ class MetricsTests
       J_rhs_n.col(i) = (Metric::Distance(u, v + kNumericIncrement * Input::Unit(i)) - f) / kNumericIncrement;
     }
 
-    return J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) &&
-           J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
+    return J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) && J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
   }
 
   [[nodiscard]] static auto CheckAngularMetric() -> bool {
-    using Input = Cartesian<Scalar, 3>;
-    using Metric = AngularMetric<Scalar, 3>;
-    using Output = Metric::Output;
-    using Jacobian = JacobianNM<Output, Input>;
+    using Metric = metrics::AngularMetric<Scalar, 3>;
+    using Input = Metric::Input;
+    // using Output = Metric::Output;
+    using Jacobian = Metric::Jacobian;
 
     Input u = Input::Random();
     Input v = Input::Random();
@@ -54,34 +57,32 @@ class MetricsTests
       J_rhs_n.col(i) = (Metric::Distance(u, v + kNumericIncrement * Input::Unit(i)) - f) / kNumericIncrement;
     }
 
-    return std::abs(f[0] - std::acos(u.dot(v) / (u.norm() * v.norm()))) <= kNumericTolerance &&
-           J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) &&
+    return std::abs(f[0] - std::acos(u.dot(v) / (u.norm() * v.norm()))) <= kNumericTolerance && J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) &&
            J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
   }
 
   [[nodiscard]] static auto CheckManifoldMetric(const bool global, const bool coupled) -> bool {
-    using Input = SE3<Scalar>;
-    using Metric = ManifoldMetric<Scalar, ManifoldEnum::SE3>;
+    using Metric = metrics::ManifoldMetric<SE3>;
+    using Input = Metric::Input;
     using Output = Metric::Output;
-    using Jacobian = JacobianNM<Output, Tangent<SE3<Scalar>>>;
+    using Jacobian = Metric::Jacobian;
 
     Input u = Input::Random();
     Input v = Input::Random();
 
     Jacobian J_lhs_a, J_rhs_a, J_lhs_n, J_rhs_n;
     const auto f = Metric::Distance(u, v, J_lhs_a.data(), J_rhs_a.data(), global, coupled);
-    for (auto i = Eigen::Index{0}; i < Tangent<SE3<Scalar>>::kNumParameters; ++i) {
+    for (auto i = Eigen::Index{0}; i < Output::kNumParameters; ++i) {
       J_lhs_n.col(i) = (Metric::Distance(SE3NumericGroupPlus(u, global, coupled, i), v) - f) / kNumericIncrement;
       J_rhs_n.col(i) = (Metric::Distance(u, SE3NumericGroupPlus(v, global, coupled, i)) - f) / kNumericIncrement;
     }
 
-    return J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) &&
-           J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
+    return J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) && J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
   }
 
  private:
-  static auto SE3NumericGroupPlus(const Eigen::Ref<const SE3<Scalar>>& se3, const bool global, const bool coupled, const Eigen::Index i) -> SE3<Scalar> {
-    const auto tau = Tangent<SE3<Scalar>>{kNumericIncrement * Tangent<SE3<Scalar>>::Unit(i)};
+  static auto SE3NumericGroupPlus(const Eigen::Ref<const SE3>& se3, const bool global, const bool coupled, const Index i) -> SE3 {
+    const auto tau = SE3Tangent{kNumericIncrement * SE3Tangent::Unit(i)};
 
     if (coupled) {
       if (global) {
@@ -120,4 +121,4 @@ TEST_F(MetricsTests, Manifold) {
   }
 }
 
-} // namespace hyper::tests
+}  // namespace hyper::metrics::tests

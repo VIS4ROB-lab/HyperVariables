@@ -3,19 +3,23 @@
 
 #pragma once
 
-#include "hyper/variables/distortions/base.hpp"
+#include "hyper/variables/distortions/distortion.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
-class RadialTangentialDistortionBase
-    : public ConditionalConstBase_t<TDerived, Distortion<TDerived>, ConstDistortion<TDerived>> {
+class RadialTangentialDistortionBase : public DistortionBase<TDerived> {
  public:
   // Definitions.
-  using Base = ConditionalConstBase_t<TDerived, Distortion<TDerived>, ConstDistortion<TDerived>>;
+  using Base = DistortionBase<TDerived>;
   using Scalar = typename Base::Scalar;
   using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
   using Base::Base;
+
+  using Index = Eigen::Index;
+  using Pixel = variables::Pixel<Scalar>;
+  using PixelJacobian = variables::JacobianNM<Pixel>;
+  using PlainDistortion = typename Traits<TDerived>::PlainDistortion;
 
   // Constants.
   static constexpr auto kOrder = Traits<TDerived>::kOrder;
@@ -26,62 +30,63 @@ class RadialTangentialDistortionBase
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(RadialTangentialDistortionBase)
 
+  /// Default distortion (i.e. trivial).
+  static auto Default() -> PlainDistortion;
+
+  /// Perturbation.
+  /// \param scale Perturbation scale.
+  /// \return Perturbation.
+  static auto Perturbation(const Scalar& scale) -> PlainDistortion;
+
+  /// Perturbed distortion.
+  /// \param scale Perturbation scale.
+  /// \return Perturbed distortion.
+  static auto Perturbed(const Scalar& scale) -> PlainDistortion;
+
   /// Radial order accessor.
   /// \return Order.
-  [[nodiscard]] auto radialOrder() const -> Eigen::Index;
+  [[nodiscard]] inline auto radialOrder() const -> Index { return this->size() - tangentialOrder(); }
 
   /// Sets the radial order.
   /// \param order Input order.
-  auto setRadialOrder(Eigen::Index order) -> void;
+  inline auto setRadialOrder(const Index& order) -> void { this->resize(order + tangentialOrder()); }
 
   /// Tangential order accessor.
   /// \return Order.
-  [[nodiscard]] auto tangentialOrder() const -> Eigen::Index;
+  [[nodiscard]] inline auto tangentialOrder() const -> Index { return 2; }
 
   /// Radial parameters accessor.
   /// \return Radial parameters.
-  auto radial() const {
-    return this->segment(kRadialOffset, radialOrder());
-  }
+  inline auto radial() const { return this->segment(kRadialOffset, radialOrder()); }
 
   /// Radial parameters modifier.
   /// \return Radial parameters.
-  auto radial() {
-    return this->segment(kRadialOffset, radialOrder());
-  }
+  inline auto radial() { return this->segment(kRadialOffset, radialOrder()); }
 
   /// Tangential parameters accessor.
   /// \return Tangential parameters.
-  auto tangential() const {
-    return this->segment(kRadialOffset + radialOrder(), tangentialOrder());
-  }
+  inline auto tangential() const { return this->segment(kRadialOffset + radialOrder(), tangentialOrder()); }
 
   /// Tangential parameters modifier.
   /// \return Tangential parameters.
-  auto tangential() {
-    return this->segment(kRadialOffset + radialOrder(), tangentialOrder());
-  }
+  inline auto tangential() { return this->segment(kRadialOffset + radialOrder(), tangentialOrder()); }
 
-  /// Sets the default parameters.
-  template <typename TScalar_ = ScalarWithConstIfNotLvalue, std::enable_if_t<!std::is_const_v<TScalar_>, bool> = true>
-  auto setDefault() -> RadialTangentialDistortionBase&;
-
-  /// Perturbs this.
+  /// Perturbed distortion.
   /// \param scale Perturbation scale.
-  template <typename TScalar_ = ScalarWithConstIfNotLvalue, std::enable_if_t<!std::is_const_v<TScalar_>, bool> = true>
-  auto perturb(const Scalar& scale) -> RadialTangentialDistortionBase&;
+  /// \return Perturbed distortion.
+  auto perturbed(const Scalar& scale) const -> VectorX<Scalar> final { return Perturbed(scale); }
 
   /// Distorts a pixel.
-  /// \param pixel Pixel to distort.
-  /// \param raw_J_p_p Pixel Jacobian.
-  /// \param raw_J_p_d  Distortion Jacobian.
+  /// \param p Pixel to distort.
+  /// \param J_p Pixel Jacobian.
+  /// \param J_d  Distortion Jacobian.
+  /// \param parameters Distort with external parameters.
   /// \return Distorted pixel.
-  auto distort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> final;
+  auto distort(const Eigen::Ref<const Pixel>& p, Scalar* J_p, Scalar* J_d, const Scalar* parameters) const -> Pixel final;
 };
 
 template <typename TScalar, int TOrder>
-class RadialTangentialDistortion final
-    : public RadialTangentialDistortionBase<RadialTangentialDistortion<TScalar, TOrder>> {
+class RadialTangentialDistortion final : public RadialTangentialDistortionBase<RadialTangentialDistortion<TScalar, TOrder>> {
  public:
   using Base = RadialTangentialDistortionBase<RadialTangentialDistortion<TScalar, TOrder>>;
   using Base::Base;
@@ -90,81 +95,71 @@ class RadialTangentialDistortion final
 };
 
 template <typename TDerived>
-auto RadialTangentialDistortionBase<TDerived>::radialOrder() const -> Eigen::Index {
-  return this->size() - tangentialOrder();
+auto RadialTangentialDistortionBase<TDerived>::Default() -> PlainDistortion {
+  return PlainDistortion::Zero();
 }
 
 template <typename TDerived>
-auto RadialTangentialDistortionBase<TDerived>::setRadialOrder(const Eigen::Index /* order */) -> void {
-  this->resize(radialOrder() + tangentialOrder());
+auto RadialTangentialDistortionBase<TDerived>::Perturbation(const Scalar& scale) -> PlainDistortion {
+  PlainDistortion plain_distortion = scale * PlainDistortion::Random();
+  plain_distortion.radial() *= Scalar{0.1} * scale;
+  plain_distortion.tangential() * scale;
+  return plain_distortion;
 }
 
 template <typename TDerived>
-auto RadialTangentialDistortionBase<TDerived>::tangentialOrder() const -> Eigen::Index {
-  return 2;
+auto RadialTangentialDistortionBase<TDerived>::Perturbed(const Scalar& scale) -> PlainDistortion {
+  return Default() + Perturbation(scale);
 }
 
 template <typename TDerived>
-template <typename TScalar_, std::enable_if_t<!std::is_const_v<TScalar_>, bool>>
-auto RadialTangentialDistortionBase<TDerived>::setDefault() -> RadialTangentialDistortionBase& {
-  this->setZero();
-  return *this;
-}
+auto RadialTangentialDistortionBase<TDerived>::distort(const Eigen::Ref<const Pixel>& p, Scalar* J_p, Scalar* J_d, const Scalar* parameters) const -> Pixel {  // NOLINT
+  if (!parameters) {
+    // Map inputs.
+    const auto radial_order = this->radialOrder();
+    const auto x2 = p.x() * p.x();
+    const auto y2 = p.y() * p.y();
+    const auto rho2 = x2 + y2;
+    const auto K = radial();
+    const auto P = tangential();
 
-template <typename TDerived>
-template <typename TScalar_, std::enable_if_t<!std::is_const_v<TScalar_>, bool>>
-auto RadialTangentialDistortionBase<TDerived>::perturb(const Scalar& scale) -> RadialTangentialDistortionBase& {
-  using Parameters = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
-  this->radial() += Scalar{0.1} * scale * Parameters::Random(this->radialOrder(), 1);
-  this->tangential() += scale * Parameters::Random(this->tangentialOrder(), 1);
-  return *this;
-}
-
-template <typename TDerived>
-auto RadialTangentialDistortionBase<TDerived>::distort(const Eigen::Ref<const Pixel<Scalar>>& pixel, Scalar* raw_J_p_p, Scalar* raw_J_p_d) const -> Pixel<Scalar> { // NOLINT
-  // Map inputs.
-  const auto radial_order = this->radialOrder();
-  const auto x2 = pixel.x() * pixel.x();
-  const auto y2 = pixel.y() * pixel.y();
-  const auto rho2 = x2 + y2;
-  const auto K = radial();
-  const auto P = tangential();
-
-  using Rhos = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
-  auto rhos = Rhos{radial_order, 1};
-  for (auto i = 0; i < radial_order; ++i) {
-    rhos[i] = (i == 0) ? rho2 : rhos[i - 1] * rho2;
-  }
-
-  const auto a = Scalar{1} + K.dot(rhos) + Scalar{2} * P.dot(pixel);
-
-  if (raw_J_p_p) {
-    auto d_radial_sum = K[0];
-    for (auto i = 1; i < radial_order; ++i) {
-      d_radial_sum += (i + 1) * K[i] * rhos[i - 1];
-    }
-
-    const auto d_radial = (Scalar{2} * d_radial_sum * pixel.transpose()).eval();
-    const auto d_tangential = (Scalar{2} * P.transpose()).eval();
-
-    using Jacobian = JacobianNM<Pixel<Scalar>>;
-    auto J = Eigen::Map<Jacobian>{raw_J_p_p};
-    J = a * Jacobian::Identity() + pixel * (d_radial + d_tangential) + Scalar{2} * P * pixel.transpose();
-  }
-
-  if (raw_J_p_d) {
-    const auto size = this->size();
-    const auto tangential_order = this->tangentialOrder();
-    auto J = Eigen::Map<JacobianNX<Pixel<Scalar>>>{raw_J_p_d, Pixel<Scalar>::kNumParameters, size};
+    using Rhos = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
+    auto rhos = Rhos{radial_order, 1};
     for (auto i = 0; i < radial_order; ++i) {
-      J.col(i) = rhos[i] * pixel;
+      rhos[i] = (i == 0) ? rho2 : rhos[i - 1] * rho2;
     }
-    J.middleCols(radial_order, tangential_order) = Scalar{2} * pixel * pixel.transpose() + rho2 * JacobianNM<Pixel<Scalar>>::Identity();
-  }
 
-  return a * pixel + rho2 * P;
+    const auto a = Scalar{1} + K.dot(rhos) + Scalar{2} * P.dot(p);
+
+    if (J_p) {
+      auto d_radial_sum = K[0];
+      for (auto i = 1; i < radial_order; ++i) {
+        d_radial_sum += (i + 1) * K[i] * rhos[i - 1];
+      }
+
+      const auto d_radial = (Scalar{2} * d_radial_sum * p.transpose()).eval();
+      const auto d_tangential = (Scalar{2} * P.transpose()).eval();
+
+      auto J = Eigen::Map<PixelJacobian>{J_p};
+      J = a * PixelJacobian::Identity() + p * (d_radial + d_tangential) + Scalar{2} * P * p.transpose();
+    }
+
+    if (J_d) {
+      const auto size = this->size();
+      const auto tangential_order = this->tangentialOrder();
+      auto J = Eigen::Map<JacobianNX<Pixel>>{J_d, Pixel::kNumParameters, size};
+      for (auto i = 0; i < radial_order; ++i) {
+        J.col(i) = rhos[i] * p;
+      }
+      J.middleCols(radial_order, tangential_order) = Scalar{2} * p * p.transpose() + rho2 * PixelJacobian::Identity();
+    }
+
+    return a * p + rho2 * P;
+  } else {
+    return Eigen::Map<const PlainDistortion>{parameters}.distort(p, J_p, J_d, nullptr);
+  }
 }
 
-} // namespace hyper
+}  // namespace hyper::variables
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::RadialTangentialDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::RadialTangentialDistortion, int)

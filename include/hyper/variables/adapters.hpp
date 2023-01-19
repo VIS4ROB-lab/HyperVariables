@@ -6,7 +6,7 @@
 #include "hyper/variables/groups/se3.hpp"
 #include "hyper/variables/jacobian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 /// SU2 Jacobian adapter making
 /// internal SU2 Jacobians compatible
@@ -53,11 +53,12 @@ auto SU2JacobianAdapter(const TScalar* raw_su2) -> JacobianNM<Tangent<SU2<TScala
 template <typename TScalar>
 auto SE3JacobianAdapter(const TScalar* raw_se3) -> JacobianNM<Tangent<SE3<TScalar>>, SE3<TScalar>> {
   JacobianNM<Tangent<SE3<TScalar>>, SE3<TScalar>> J;
-  SE3<TScalar>::template RotationJacobian<Tangent<SE3<TScalar>>::kNumAngularParameters>(J, Tangent<SE3<TScalar>>::kAngularOffset).noalias() = SU2JacobianAdapter(raw_se3 + SE3<TScalar>::kRotationOffset);
+  SE3<TScalar>::template RotationJacobian<Tangent<SE3<TScalar>>::kNumAngularParameters>(J, Tangent<SE3<TScalar>>::kAngularOffset).noalias() =
+      SU2JacobianAdapter(raw_se3 + SE3<TScalar>::kRotationOffset);
   SE3<TScalar>::template TranslationJacobian<Tangent<SE3<TScalar>>::kNumAngularParameters>(J, Tangent<SE3<TScalar>>::kAngularOffset).setZero();
   SE3<TScalar>::template RotationJacobian<Tangent<SE3<TScalar>>::kNumLinearParameters>(J, Tangent<SE3<TScalar>>::kLinearOffset).setZero();
   SE3<TScalar>::template TranslationJacobian<Tangent<SE3<TScalar>>::kNumLinearParameters>(J, Tangent<SE3<TScalar>>::kLinearOffset).setIdentity();
   return J;
 }
 
-} // namespace hyper
+}  // namespace hyper::variables

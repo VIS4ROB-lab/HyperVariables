@@ -6,11 +6,10 @@
 #include "hyper/variables/cartesian.hpp"
 #include "hyper/variables/jacobian.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename TDerived>
-class OrthonormalityAlignmentBase
-    : public CartesianBase<TDerived> {
+class OrthonormalityAlignmentBase : public CartesianBase<TDerived> {
  public:
   // Constants.
   static constexpr auto kOrder = Traits<TDerived>::kOrder;
@@ -37,27 +36,19 @@ class OrthonormalityAlignmentBase
 
   /// Accessor to the diagonal parameters.
   /// \return Scaling parameters.
-  [[nodiscard]] auto diagonalParameters() const {
-    return this->template head<kNumDiagonalParameters>();
-  }
+  [[nodiscard]] auto diagonalParameters() const { return this->template head<kNumDiagonalParameters>(); }
 
   /// Modifier of the diagonal parameters.
   /// \return Scaling parameters.
-  auto diagonalParameters() {
-    return this->template head<kNumDiagonalParameters>();
-  }
+  auto diagonalParameters() { return this->template head<kNumDiagonalParameters>(); }
 
   /// Accessor to the off-diagonal parameters.
   /// \return Orthogonality parameters.
-  [[nodiscard]] auto offDiagonalParameters() const {
-    return this->template tail<kNumOffDiagonalParameters>();
-  }
+  [[nodiscard]] auto offDiagonalParameters() const { return this->template tail<kNumOffDiagonalParameters>(); }
 
   /// Modifier of the off-diagonal parameters.
   /// \return Orthogonality parameters.
-  auto offDiagonalParameters() {
-    return this->template tail<kNumOffDiagonalParameters>();
-  }
+  auto offDiagonalParameters() { return this->template tail<kNumOffDiagonalParameters>(); }
 
   /// Sets the underlying parameters to
   /// represent the identity alignment matrix.
@@ -85,9 +76,7 @@ class OrthonormalityAlignmentBase
 
   /// Returns the scaling parameters in their matrix form.
   /// \return Scaling parameters as matrix.
-  [[nodiscard]] auto scalingMatrix() const -> AlignmentMatrix {
-    return diagonalParameters().asDiagonal();
-  }
+  [[nodiscard]] auto scalingMatrix() const -> AlignmentMatrix { return diagonalParameters().asDiagonal(); }
 
   /// Returns the alignment parameters in their matrix form.
   /// \return Alignment parameters as matrix.
@@ -141,8 +130,7 @@ class OrthonormalityAlignmentBase
 };
 
 template <typename TScalar, int TOrder>
-class OrthonormalityAlignment final
-    : public OrthonormalityAlignmentBase<OrthonormalityAlignment<TScalar, TOrder>> {
+class OrthonormalityAlignment final : public OrthonormalityAlignmentBase<OrthonormalityAlignment<TScalar, TOrder>> {
  public:
   using Base = OrthonormalityAlignmentBase<OrthonormalityAlignment<TScalar, TOrder>>;
   using Base::Base;
@@ -150,6 +138,6 @@ class OrthonormalityAlignment final
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(OrthonormalityAlignment)
 };
 
-} // namespace hyper
+}  // namespace hyper::variables
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::OrthonormalityAlignment, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::OrthonormalityAlignment, int)

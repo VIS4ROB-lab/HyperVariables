@@ -5,7 +5,7 @@
 
 #include "hyper/variables/forward.hpp"
 
-namespace hyper {
+namespace hyper::variables {
 
 template <typename, int>
 class Gaussian;
@@ -15,7 +15,7 @@ struct Traits<Gaussian<TScalar, TOrder>> {
   using Base = Eigen::Matrix<TScalar, TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::Gaussian, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::Gaussian, int)
 
 template <typename, int>
 class CanonicalGaussian;
@@ -25,6 +25,6 @@ struct Traits<CanonicalGaussian<TScalar, TOrder>> {
   using Base = Eigen::Matrix<TScalar, TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::CanonicalGaussian, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::CanonicalGaussian, int)
 
-} // namespace hyper
+}  // namespace hyper::variables
