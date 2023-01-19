@@ -5,12 +5,12 @@ cmake_minimum_required(VERSION 3.16)
 project(HyperVariables VERSION 22.06.14 DESCRIPTION "" HOMEPAGE_URL https://github.com/VIS4ROB-lab/HyperVariables LANGUAGES CXX)
 
 # Set properties.
-if(PROJECT_IS_TOP_LEVEL)
+if (PROJECT_IS_TOP_LEVEL)
     set(CMAKE_CXX_STANDARD 20)
     set(CMAKE_CXX_STANDARD_REQUIRED YES)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -Wall -Wextra -Wnon-virtual-dtor -pedantic")
-    option(HYPER_BUILD_TESTING "Build tests." TRUE)
-endif()
+    option(HYPER_BUILD_TESTS "Build tests." TRUE)
+endif ()
 
 # Define libraries and aliases.
 file(GLOB_RECURSE PROJECT_SOURCE_FILES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/include/*.hpp ${PROJECT_SOURCE_DIR}/internal/*.cpp)
@@ -38,6 +38,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SO
 target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen PUBLIC glog::glog PUBLIC GTest::GTest)
 
 # Build tests.
-if (HYPER_BUILD_TESTING)
+if (HYPER_BUILD_TESTS)
     add_subdirectory(${PROJECT_SOURCE_DIR}/apps/tests)
-endif (HYPER_BUILD_TESTING)
+endif (HYPER_BUILD_TESTS)

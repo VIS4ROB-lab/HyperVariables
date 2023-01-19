@@ -15,12 +15,13 @@ using Scalar = double;
 
 template <typename TDistortion>
 auto createDefaultDistortion() -> TDistortion* {
+  constexpr auto kMaxPerturbation = 0.01;
   auto distortion = new TDistortion();
-  distortion->setDefault();
+  *distortion = TDistortion::Perturbed(kMaxPerturbation);
   return distortion;
 }
 
-class DistortionTests : public testing::TestWithParam<AbstractDistortion<Scalar>*> {
+class DistortionTests : public testing::TestWithParam<Distortion<Scalar>*> {
  public:
   // Constants.
   static constexpr auto kNumOuterIterations = 5;
@@ -31,7 +32,7 @@ class DistortionTests : public testing::TestWithParam<AbstractDistortion<Scalar>
   // Definitions.
   using Pixel = variables::Pixel<Scalar>;
   using PixelJacobian = variables::JacobianNM<Pixel>;
-  using Distortion = variables::AbstractDistortion<Scalar>;
+  using Distortion = variables::Distortion<Scalar>;
   using DistortionJacobian = variables::JacobianNX<Pixel>;
 
   DistortionTests() : distortion_{nullptr} {}
@@ -48,8 +49,8 @@ class DistortionTests : public testing::TestWithParam<AbstractDistortion<Scalar>
   auto checkDuality() const -> void {
     for (auto i = 0; i < kNumInnerIterations; ++i) {
       const Pixel px = Pixel::Random();
-      const Pixel py = distortion_->distort(px, nullptr, nullptr);
-      const Pixel pz = distortion_->undistort(py, nullptr, nullptr);
+      const Pixel py = distortion_->distort(px, nullptr, nullptr, nullptr);
+      const Pixel pz = distortion_->undistort(py, nullptr, nullptr, nullptr);
       EXPECT_TRUE(pz.isApprox(px, kNumericTolerance));
     }
   }
@@ -58,14 +59,14 @@ class DistortionTests : public testing::TestWithParam<AbstractDistortion<Scalar>
     for (auto i = 0; i < kNumInnerIterations; ++i) {
       PixelJacobian J_a;
       const Pixel px = Pixel::Random();
-      const Pixel d_px = distortion_->distort(px, J_a.data(), nullptr);
+      const Pixel d_px = distortion_->distort(px, J_a.data(), nullptr, nullptr);
 
       PixelJacobian J_n;
       for (auto j = 0; j < Pixel::kNumParameters; ++j) {
         const Pixel py_0 = px - kNumericIncrement * Pixel::Unit(j);
-        const Pixel d_py_0 = distortion_->distort(py_0, nullptr, nullptr);
+        const Pixel d_py_0 = distortion_->distort(py_0, nullptr, nullptr, nullptr);
         const Pixel py_1 = px + kNumericIncrement * Pixel::Unit(j);
-        const Pixel d_py_1 = distortion_->distort(py_1, nullptr, nullptr);
+        const Pixel d_py_1 = distortion_->distort(py_1, nullptr, nullptr, nullptr);
         J_n.col(j) = (d_py_1 - d_py_0) / (Scalar{2} * kNumericIncrement);
       }
 
@@ -78,16 +79,16 @@ class DistortionTests : public testing::TestWithParam<AbstractDistortion<Scalar>
       const auto num_distortion_parameters = distortion_->asVector().size();
       auto J_a = DistortionJacobian{Pixel::kNumParameters, num_distortion_parameters};
       const Pixel px = Pixel::Random();
-      const Pixel d_px = distortion_->distort(px, nullptr, J_a.data());
+      const Pixel d_px = distortion_->distort(px, nullptr, J_a.data(), nullptr);
 
       auto J_n = DistortionJacobian{Pixel::kNumParameters, num_distortion_parameters};
       auto vector = distortion_->asVector();
       for (auto j = 0; j < vector.size(); ++j) {
         const auto tmp = vector[j];
         vector[j] = tmp - kNumericIncrement;
-        const Pixel d_py_0 = distortion_->distort(px, nullptr, nullptr);
+        const Pixel d_py_0 = distortion_->distort(px, nullptr, nullptr, nullptr);
         vector[j] = tmp + kNumericIncrement;
-        const Pixel d_py_1 = distortion_->distort(px, nullptr, nullptr);
+        const Pixel d_py_1 = distortion_->distort(px, nullptr, nullptr, nullptr);
         J_n.col(j) = (d_py_1 - d_py_0) / (Scalar{2} * kNumericIncrement);
         vector[j] = tmp;
       }
@@ -101,8 +102,8 @@ class DistortionTests : public testing::TestWithParam<AbstractDistortion<Scalar>
       const Pixel px = Pixel::Random();
 
       PixelJacobian J_a, J_b;
-      const Pixel py = distortion_->distort(px, J_a.data(), nullptr);
-      const Pixel pz = distortion_->undistort(py, J_b.data(), nullptr);
+      const Pixel py = distortion_->distort(px, J_a.data(), nullptr, nullptr);
+      const Pixel pz = distortion_->undistort(py, J_b.data(), nullptr, nullptr);
 
       EXPECT_TRUE((J_a * J_b).isIdentity(kNumericTolerance));
     }
@@ -113,14 +114,14 @@ class DistortionTests : public testing::TestWithParam<AbstractDistortion<Scalar>
       const Pixel px = Pixel::Random();
 
       PixelJacobian J_a;
-      const Pixel d_px = distortion_->undistort(px, J_a.data(), nullptr);
+      const Pixel d_px = distortion_->undistort(px, J_a.data(), nullptr, nullptr);
 
       PixelJacobian J_n;
       for (auto j = 0; j < Pixel::kNumParameters; ++j) {
         const Pixel py_0 = px - kNumericIncrement * Pixel::Unit(j);
-        const Pixel d_py_0 = distortion_->undistort(py_0, nullptr, nullptr);
+        const Pixel d_py_0 = distortion_->undistort(py_0, nullptr, nullptr, nullptr);
         const Pixel py_1 = px + kNumericIncrement * Pixel::Unit(j);
-        const Pixel d_py_1 = distortion_->undistort(py_1, nullptr, nullptr);
+        const Pixel d_py_1 = distortion_->undistort(py_1, nullptr, nullptr, nullptr);
         J_n.col(j) = (d_py_1 - d_py_0) / (Scalar{2} * kNumericIncrement);
       }
 
@@ -134,16 +135,16 @@ class DistortionTests : public testing::TestWithParam<AbstractDistortion<Scalar>
 
       const auto num_distortion_parameters = distortion_->asVector().size();
       auto J_a = DistortionJacobian{Pixel::kNumParameters, num_distortion_parameters};
-      const Pixel d_px = distortion_->undistort(px, nullptr, J_a.data());
+      const Pixel d_px = distortion_->undistort(px, nullptr, J_a.data(), nullptr);
 
       auto J_n = DistortionJacobian{Pixel::kNumParameters, num_distortion_parameters};
       auto vector = distortion_->asVector();
       for (auto j = 0; j < vector.size(); ++j) {
         const auto tmp = vector[j];
         vector[j] = tmp - kNumericIncrement;
-        const Pixel d_py_0 = distortion_->undistort(px, nullptr, nullptr);
+        const Pixel d_py_0 = distortion_->undistort(px, nullptr, nullptr, nullptr);
         vector[j] = tmp + kNumericIncrement;
-        const Pixel d_py_1 = distortion_->undistort(px, nullptr, nullptr);
+        const Pixel d_py_1 = distortion_->undistort(px, nullptr, nullptr, nullptr);
         J_n.col(j) = (d_py_1 - d_py_0) / (Scalar{2} * kNumericIncrement);
         vector[j] = tmp;
       }
@@ -153,9 +154,9 @@ class DistortionTests : public testing::TestWithParam<AbstractDistortion<Scalar>
   }
 
   auto setPerturbed() -> void {
-    constexpr auto kMaxPerturbation = 0.002;
+    /* constexpr auto kMaxPerturbation = 0.002;
     distortion_->setDefault();
-    distortion_->perturb(kMaxPerturbation);
+    distortion_->perturb(kMaxPerturbation); */
   }
 
  protected:
