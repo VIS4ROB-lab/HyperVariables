@@ -13,17 +13,10 @@ namespace hyper::variables::tests {
 
 using Scalar = double;
 
-template <typename TDistortion>
-auto createDefaultDistortion() -> TDistortion* {
-  constexpr auto kMaxPerturbation = 0.01;
-  auto distortion = new TDistortion();
-  *distortion = TDistortion::Perturbed(kMaxPerturbation);
-  return distortion;
-}
-
 class DistortionTests : public testing::TestWithParam<Distortion<Scalar>*> {
  public:
   // Constants.
+  static constexpr auto kMaxPerturbation = 0.03;
   static constexpr auto kNumOuterIterations = 5;
   static constexpr auto kNumInnerIterations = 25;
   static constexpr auto kNumericIncrement = 1e-7;
@@ -153,63 +146,55 @@ class DistortionTests : public testing::TestWithParam<Distortion<Scalar>*> {
     }
   }
 
-  auto setPerturbed() -> void {
-    /* constexpr auto kMaxPerturbation = 0.002;
-    distortion_->setDefault();
-    distortion_->perturb(kMaxPerturbation); */
-  }
-
  protected:
   Distortion* distortion_;
 };
 
 TEST_P(DistortionTests, Duality) {
   for (auto i = 0; i < kNumOuterIterations; ++i) {
+    distortion_->asVector() = distortion_->perturbed(kMaxPerturbation);
     checkDuality();
-    setPerturbed();
   }
 }
 
 TEST_P(DistortionTests, InputJacobian) {
   for (auto i = 0; i < kNumOuterIterations; ++i) {
+    distortion_->asVector() = distortion_->perturbed(kMaxPerturbation);
     checkInputJacobian();
-    setPerturbed();
   }
 }
 
 TEST_P(DistortionTests, ParameterJacobian) {
   for (auto i = 0; i < kNumOuterIterations; ++i) {
+    distortion_->asVector() = distortion_->perturbed(kMaxPerturbation);
     checkParameterJacobian();
-    setPerturbed();
   }
 }
 
 TEST_P(DistortionTests, InverseTheorem) {
   for (auto i = 0; i < kNumOuterIterations; ++i) {
+    distortion_->asVector() = distortion_->perturbed(kMaxPerturbation);
     checkInverseTheorem();
-    setPerturbed();
   }
 }
 
 TEST_P(DistortionTests, InverseInputJacobian) {
   for (auto i = 0; i < kNumOuterIterations; ++i) {
+    distortion_->asVector() = distortion_->perturbed(kMaxPerturbation);
     checkInverseInputJacobian();
-    setPerturbed();
   }
 }
 
 TEST_P(DistortionTests, InverseParameterJacobian) {
   for (auto i = 0; i < kNumOuterIterations; ++i) {
+    distortion_->asVector() = distortion_->perturbed(kMaxPerturbation);
     checkInverseParameterJacobian();
-    setPerturbed();
   }
 }
 
 INSTANTIATE_TEST_SUITE_P(, DistortionTests,
-                         testing::Values(createDefaultDistortion<variables::EquidistantDistortion<Scalar, 5>>(),
-                                         createDefaultDistortion<variables::RadialTangentialDistortion<Scalar, 2>>(),
-                                         createDefaultDistortion<variables::RadialTangentialDistortion<Scalar, 4>>(),
-                                         createDefaultDistortion<variables::IterativeRadialDistortion<Scalar, 2>>(),
-                                         createDefaultDistortion<variables::IterativeRadialDistortion<Scalar, 4>>()));
+                         testing::Values(new variables::EquidistantDistortion<Scalar, 5>(), new variables::RadialTangentialDistortion<Scalar, 2>(),
+                                         new variables::RadialTangentialDistortion<Scalar, 4>(), new variables::IterativeRadialDistortion<Scalar, 2>(),
+                                         new variables::IterativeRadialDistortion<Scalar, 4>()));
 
 }  // namespace hyper::variables::tests

@@ -29,7 +29,7 @@ auto Undistort(const TDistortion* distortion, const Eigen::Ref<const Pixel<TScal
 
     if (NumericVariableTraits<TScalar>::kDistortionTolerance2 < b.dot(b)) {
       DLOG_IF(WARNING, i == NumericVariableTraits<TScalar>::kMaxNumDistortionSteps) << "Maximum number of iterations reached.";
-      DLOG_IF_EVERY_N(WARNING, J_p_p_i.determinant() < NumericVariableTraits<TScalar>::kSmallAngleTolerance, NumericVariableTraits<Scalar>::kMaxNumDistortionSteps)
+      DLOG_IF_EVERY_N(WARNING, J_p_p_i.determinant() < NumericVariableTraits<TScalar>::kSmallAngleTolerance, NumericVariableTraits<TScalar>::kMaxNumDistortionSteps)
           << "Numerical issues detected.";
       output.noalias() -= J_p_p * b;
     } else {
@@ -58,6 +58,11 @@ class ConstDistortion : public ConstVariable<TScalar> {
   using Scalar = TScalar;
   using Pixel = variables::Pixel<TScalar>;
 
+  /// Perturbed distortion.
+  /// \param scale Perturbation scale.
+  /// \return Perturbed distortion.
+  virtual auto perturbed(const Scalar& scale) const -> VectorX<Scalar> = 0;
+
   /// Distorts a pixel.
   /// \param p Pixel to distort.
   /// \param J_p Pixel Jacobian.
@@ -81,6 +86,11 @@ class Distortion : public Variable<TScalar> {
   // Definitions.
   using Scalar = TScalar;
   using Pixel = variables::Pixel<TScalar>;
+
+  /// Perturbed distortion.
+  /// \param scale Perturbation scale.
+  /// \return Perturbed distortion.
+  virtual auto perturbed(const Scalar& scale) const -> VectorX<Scalar> = 0;
 
   /// Distorts a pixel.
   /// \param p Pixel to distort.

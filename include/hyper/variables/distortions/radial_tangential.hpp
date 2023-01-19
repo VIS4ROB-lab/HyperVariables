@@ -71,6 +71,11 @@ class RadialTangentialDistortionBase : public DistortionBase<TDerived> {
   /// \return Tangential parameters.
   inline auto tangential() { return this->segment(kRadialOffset + radialOrder(), tangentialOrder()); }
 
+  /// Perturbed distortion.
+  /// \param scale Perturbation scale.
+  /// \return Perturbed distortion.
+  auto perturbed(const Scalar& scale) const -> VectorX<Scalar> final { return Perturbed(scale); }
+
   /// Distorts a pixel.
   /// \param p Pixel to distort.
   /// \param J_p Pixel Jacobian.

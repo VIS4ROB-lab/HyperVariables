@@ -49,6 +49,11 @@ class EquidistantDistortionBase : public DistortionBase<TDerived> {
   /// \param order Input order.
   inline auto setOrder(const Index& order) -> void { this->resize(order); }
 
+  /// Perturbed distortion.
+  /// \param scale Perturbation scale.
+  /// \return Perturbed distortion.
+  auto perturbed(const Scalar& scale) const -> VectorX<Scalar> final { return Perturbed(scale); }
+
   /// Distorts a pixel.
   /// \param p Pixel to distort.
   /// \param J_p Pixel Jacobian.

@@ -4,7 +4,7 @@
 #include <glog/logging.h>
 #include <gtest/gtest.h>
 
-auto main(int argc, char **argv) -> int {
+auto main(int argc, char** argv) -> int {
   google::InitGoogleLogging(argv[0]);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

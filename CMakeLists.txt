@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 # Define projects.
-project(HyperVariables VERSION 22.06.14 DESCRIPTION "" HOMEPAGE_URL https://github.com/VIS4ROB-lab/HyperVariables LANGUAGES CXX)
+project(HyperVariables VERSION 23.01.19 DESCRIPTION "" HOMEPAGE_URL https://github.com/VIS4ROB-lab/HyperVariables LANGUAGES CXX)
 
 # Set properties.
 if (PROJECT_IS_TOP_LEVEL)
