@@ -14,8 +14,7 @@
 namespace hyper::variables {
 
 template <typename TDerived>
-class QuaternionBase : public Traits<TDerived>::Base,
-                       public ConditionalConstBase_t<TDerived, Variable<DerivedScalar_t<TDerived>>, ConstVariable<DerivedScalar_t<TDerived>>> {
+class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, Variable<DerivedScalar_t<TDerived>>, ConstVariable<DerivedScalar_t<TDerived>>> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
@@ -30,6 +29,14 @@ class QuaternionBase : public Traits<TDerived>::Base,
   // Constants.
   static constexpr auto SizeAtCompileTime = (int)Base::Coefficients::SizeAtCompileTime;
   static constexpr auto kNumParameters = (int)Base::Coefficients::SizeAtCompileTime;
+
+  // Ordering.
+  struct Ordering {
+    static constexpr auto kW = 3;
+    static constexpr auto kX = 0;
+    static constexpr auto kY = 1;
+    static constexpr auto kZ = 2;
+  };
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(QuaternionBase)
 

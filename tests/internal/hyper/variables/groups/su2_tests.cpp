@@ -7,8 +7,6 @@
 
 namespace hyper::variables::tests {
 
-using Scalar = double;
-
 class QuaternionTests : public testing::Test {
  protected:
   // Constants.
@@ -16,6 +14,7 @@ class QuaternionTests : public testing::Test {
   static constexpr auto kNumericTolerance = 1e-7;
 
   // Definitions.
+  using Scalar = double;
   using Quaternion = variables::Quaternion<Scalar>;
 
   static auto Random() -> Quaternion { return Quaternion{Eigen::internal::random<Scalar>(0.5, 1.5) * Quaternion::UnitRandom().coeffs()}; }
@@ -44,6 +43,7 @@ class SU2Tests : public testing::Test {
   static constexpr auto kNumericTolerance = 1e-7;
 
   // Definitions.
+  using Scalar = double;
   using SU2 = variables::SU2<Scalar>;
   using SU2Tangent = variables::Tangent<SU2>;
   using Vector = variables::Cartesian<Scalar, 3>;

@@ -7,8 +7,6 @@
 
 namespace hyper::variables::tests {
 
-using Scalar = double;
-
 class SE3Tests : public testing::Test {
  protected:
   // Constants.
@@ -17,6 +15,7 @@ class SE3Tests : public testing::Test {
   static constexpr auto kNumericTolerance = 1e-7;
 
   // Definitions.
+  using Scalar = double;
   using SE3 = variables::SE3<Scalar>;
   using SE3Tangent = variables::Tangent<SE3>;
   using SE3Jacobian = variables::JacobianNM<SE3Tangent>;

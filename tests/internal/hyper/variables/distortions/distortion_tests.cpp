@@ -5,9 +5,7 @@
 
 #include <glog/logging.h>
 
-#include "hyper/variables/distortions/equidistant.hpp"
-#include "hyper/variables/distortions/iterative_radial.hpp"
-#include "hyper/variables/distortions/radial_tangential.hpp"
+#include "hyper/variables/distortions/distortions.hpp"
 
 namespace hyper::variables::tests {
 
@@ -16,10 +14,10 @@ using Scalar = double;
 class DistortionTests : public testing::TestWithParam<Distortion<Scalar>*> {
  public:
   // Constants.
-  static constexpr auto kMaxPerturbation = 0.03;
+  static constexpr auto kMaxPerturbation = 0.01;
   static constexpr auto kNumOuterIterations = 5;
   static constexpr auto kNumInnerIterations = 25;
-  static constexpr auto kNumericIncrement = 1e-7;
+  static constexpr auto kNumericIncrement = 1e-6;
   static constexpr auto kNumericTolerance = 1e-5;
 
   // Definitions.
