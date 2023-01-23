@@ -248,12 +248,12 @@ auto CanonicalGaussianBase<TDerived>::toGaussian() const -> Gaussian<Scalar, kOr
   BASE(const Scalar* ptr) : Base{ptr} {}  \
   BASE(const Scalar* ptr, const int size) : Base{ptr, size, size + 1} {}
 
-HYPER_DECLARE_TEMPLATED_EIGEN_CLASS(Map, hyper::Gaussian, int, HYPER_GAUSSIAN_PLUGIN(Map))
-HYPER_DECLARE_TEMPLATED_CONST_EIGEN_CLASS(Map, hyper::Gaussian, int, HYPER_CONST_GAUSSIAN_PLUGIN(Map))
-HYPER_DECLARE_TEMPLATED_EIGEN_CLASS(Ref, hyper::Gaussian, int, using Base::Base;)
-HYPER_DECLARE_TEMPLATED_CONST_EIGEN_CLASS(Ref, hyper::Gaussian, int, using Base::Base;)
+HYPER_DECLARE_TEMPLATED_EIGEN_CLASS(Map, hyper::variables::Gaussian, int, HYPER_GAUSSIAN_PLUGIN(Map))
+HYPER_DECLARE_TEMPLATED_CONST_EIGEN_CLASS(Map, hyper::variables::Gaussian, int, HYPER_CONST_GAUSSIAN_PLUGIN(Map))
+HYPER_DECLARE_TEMPLATED_EIGEN_CLASS(Ref, hyper::variables::Gaussian, int, using Base::Base;)
+HYPER_DECLARE_TEMPLATED_CONST_EIGEN_CLASS(Ref, hyper::variables::Gaussian, int, using Base::Base;)
 
-HYPER_DECLARE_TEMPLATED_EIGEN_CLASS(Map, hyper::CanonicalGaussian, int, HYPER_GAUSSIAN_PLUGIN(Map))
-HYPER_DECLARE_TEMPLATED_CONST_EIGEN_CLASS(Map, hyper::CanonicalGaussian, int, HYPER_CONST_GAUSSIAN_PLUGIN(Map))
-HYPER_DECLARE_TEMPLATED_EIGEN_CLASS(Ref, hyper::CanonicalGaussian, int, using Base::Base;)
-HYPER_DECLARE_TEMPLATED_CONST_EIGEN_CLASS(Ref, hyper::CanonicalGaussian, int, using Base::Base;)
+HYPER_DECLARE_TEMPLATED_EIGEN_CLASS(Map, hyper::variables::CanonicalGaussian, int, HYPER_GAUSSIAN_PLUGIN(Map))
+HYPER_DECLARE_TEMPLATED_CONST_EIGEN_CLASS(Map, hyper::variables::CanonicalGaussian, int, HYPER_CONST_GAUSSIAN_PLUGIN(Map))
+HYPER_DECLARE_TEMPLATED_EIGEN_CLASS(Ref, hyper::variables::CanonicalGaussian, int, using Base::Base;)
+HYPER_DECLARE_TEMPLATED_CONST_EIGEN_CLASS(Ref, hyper::variables::CanonicalGaussian, int, using Base::Base;)

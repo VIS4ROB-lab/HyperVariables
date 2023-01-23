@@ -9,6 +9,7 @@ if (PROJECT_IS_TOP_LEVEL)
     set(CMAKE_CXX_STANDARD 20)
     set(CMAKE_CXX_STANDARD_REQUIRED YES)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -Wall -Wextra -Wnon-virtual-dtor -pedantic")
+    option(HYPER_BUILD_WITH_CERES "Build with Ceres." FALSE)
     option(HYPER_BUILD_TESTS "Build tests." TRUE)
 endif ()
 
@@ -32,10 +33,22 @@ if (NOT TARGET glog::glog)
     find_package(glog REQUIRED)
 endif ()
 
-# Add includes and link libraries.
-target_compile_definitions(${PROJECT_NAME} PUBLIC EIGEN_MATRIXBASE_PLUGIN="${PROJECT_SOURCE_DIR}/plugins/matrix_base_plugin.hpp")
-target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen PUBLIC glog::glog PUBLIC GTest::GTest)
+if (HYPER_BUILD_WITH_CERES)
+    # Find Ceres target if not present.
+    if (NOT TARGET Ceres::ceres)
+        find_package(Ceres REQUIRED)
+    endif ()
+
+    # Add includes and link libraries.
+    target_compile_definitions(${PROJECT_NAME} PUBLIC HYPER_COMPILE_WITH_CERES EIGEN_MATRIXBASE_PLUGIN="${PROJECT_SOURCE_DIR}/plugins/matrix_base_plugin.hpp")
+    target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    target_link_libraries(${PROJECT_NAME} PUBLIC Ceres::ceres PUBLIC Eigen3::Eigen PUBLIC glog::glog PUBLIC GTest::GTest)
+else ()
+    # Add includes and link libraries.
+    target_compile_definitions(${PROJECT_NAME} PUBLIC EIGEN_MATRIXBASE_PLUGIN="${PROJECT_SOURCE_DIR}/plugins/matrix_base_plugin.hpp")
+    target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen PUBLIC glog::glog PUBLIC GTest::GTest)
+endif ()
 
 # Build tests.
 if (HYPER_BUILD_TESTS)
