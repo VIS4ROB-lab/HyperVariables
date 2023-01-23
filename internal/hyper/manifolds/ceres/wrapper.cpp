@@ -1,9 +1,11 @@
 /// This file is subject to the terms and conditions defined in
 /// the 'LICENSE' file, which is part of this repository.
 
+#ifdef HYPER_COMPILE_WITH_CERES
+
 #include "hyper/manifolds/ceres/wrapper.hpp"
 
-namespace hyper::manifolds {
+namespace hyper::manifolds::ceres {
 
 auto ManifoldWrapper::AmbientSize() const -> int {
   return manifold_->AmbientSize();
@@ -33,6 +35,8 @@ auto ManifoldWrapper::MinusJacobian(const Scalar* x, Scalar* jacobian) const -> 
   return manifold_->MinusJacobian(x, jacobian);
 }
 
-ManifoldWrapper::ManifoldWrapper(std::unique_ptr<ceres::Manifold>&& manifold) : manifold_{std::move(manifold)} {}
+ManifoldWrapper::ManifoldWrapper(std::unique_ptr<::ceres::Manifold>&& manifold) : manifold_{std::move(manifold)} {}
 
-}  // namespace hyper::manifolds
+}  // namespace hyper::manifolds::ceres
+
+#endif

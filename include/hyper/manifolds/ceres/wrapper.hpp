@@ -1,11 +1,13 @@
 /// This file is subject to the terms and conditions defined in
 /// the 'LICENSE' file, which is part of this repository.
 
+#ifdef HYPER_COMPILE_WITH_CERES
+
 #pragma once
 
 #include <ceres/manifold.h>
 
-namespace hyper::manifolds {
+namespace hyper::manifolds::ceres {
 
 /// @class Manifold wrapper for Ceres.
 /// This wrapper is required due to some
@@ -14,7 +16,7 @@ namespace hyper::manifolds {
 /// We refer to the Ceres documentation
 /// for all inherited and overloaded
 /// functions in this class.
-class ManifoldWrapper : public ceres::Manifold {
+class ManifoldWrapper : public ::ceres::Manifold {
  public:
   using Scalar = double;  // Ceres scalar type.
 
@@ -35,10 +37,12 @@ class ManifoldWrapper : public ceres::Manifold {
  protected:
   /// Protected constructor from input manifold.
   /// \param manifold Input manifold.
-  explicit ManifoldWrapper(std::unique_ptr<ceres::Manifold>&& manifold);
+  explicit ManifoldWrapper(std::unique_ptr<::ceres::Manifold>&& manifold);
 
  private:
-  std::unique_ptr<ceres::Manifold> manifold_;  ///< Manifold.
+  std::unique_ptr<::ceres::Manifold> manifold_;  ///< Manifold.
 };
 
-}  // namespace hyper::manifolds
+}  // namespace hyper::manifolds::ceres
+
+#endif
