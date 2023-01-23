@@ -18,7 +18,7 @@ add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCE_FILES})
 add_library(Hyper::Variables ALIAS ${PROJECT_NAME})
 
 # Add compile definitions.
-target_compile_definitions(${PROJECT_NAME} PUBLIC HYPER_COMPILE_WITH_CERES=true)
+# target_compile_definitions(${PROJECT_NAME} PUBLIC HYPER_COMPILE_WITH_CERES=true)
 
 # Find Eigen target if not present.
 if (NOT TARGET Eigen3::Eigen)
