@@ -11,17 +11,18 @@ using Scalar = double;
 
 class OrthonormalityAlignmentTests : public testing::Test {
  protected:
+  // Constants.
   static constexpr auto kNumOuterIterations = 5;
   static constexpr auto kNumInnerIterations = 25;
   static constexpr auto kNumericIncrement = 1e-6;
   static constexpr auto kNumericTolerance = 1e-8;
 
-  static constexpr auto Order = 3;
-  using Alignment = variables::OrthonormalityAlignment<Scalar, Order>;
-  using Input = Alignment::Input;
+  // Definitions.
+  using Alignment = variables::OrthonormalityAlignment<Scalar, 3>;
 
-  using InputJacobian = variables::JacobianNM<Alignment::Output, Alignment::Input>;
-  using ParameterJacobian = variables::JacobianNM<Alignment::Output, Alignment>;
+  using Input = Alignment::Input;
+  using InputJacobian = Alignment::InputJacobian;
+  using ParameterJacobian = Alignment::ParameterJacobian;
 
   auto setRandom() -> void { alignment_.setRandom(); }
 

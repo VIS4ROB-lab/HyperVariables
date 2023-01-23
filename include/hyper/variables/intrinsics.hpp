@@ -27,6 +27,13 @@ class IntrinsicsBase : public CartesianBase<TDerived> {
   static constexpr auto kFocalOffsetY = kFocalOffset + 1;
   static constexpr auto kNumFocalParameters = 2;
 
+  // using Index = Eigen::Index;
+  using Pixel = variables::Pixel<Scalar>;
+
+  using Input = Pixel;
+  using InputJacobian = variables::JacobianNM<Pixel>;
+  using ParameterJacobian = variables::JacobianNM<Pixel, Base>;
+
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(IntrinsicsBase)
 
   /// Retrieves the x-component of the principal point.
@@ -79,10 +86,10 @@ class IntrinsicsBase : public CartesianBase<TDerived> {
 
   /// Normalizes pixel coordinates on the image plane.
   /// \param input Non-normalized input pixel.
-  /// \param raw_J_p_p Pointer to pixel to pixel Jacobian.
-  /// \param raw_J_p_i Pointer to pixel to intrinsics Jacobian.
+  /// \param J_i Input Jacobian.
+  /// \param J_p Parameter Jacobian.
   /// \return Normalized pixel coordinates.
-  auto normalize(const Eigen::Ref<const typename Traits<Pixel<Scalar>>::Base>& input, Scalar* raw_J_p_p = nullptr, Scalar* raw_J_p_i = nullptr) const -> Pixel<Scalar> {  // NOLINT
+  auto normalize(const Eigen::Ref<const Input>& input, Scalar* J_i = nullptr, Scalar* J_p = nullptr) const -> Pixel {  // NOLINT
     const auto ifx = Scalar{1} / fx();
     const auto ify = Scalar{1} / fy();
     const auto dx = input.x() - cx();
@@ -90,16 +97,16 @@ class IntrinsicsBase : public CartesianBase<TDerived> {
     const auto dx_ifx = dx * ifx;
     const auto dy_ify = dy * ify;
 
-    if (raw_J_p_p) {
-      auto J = Eigen::Map<JacobianNM<Pixel<Scalar>>>{raw_J_p_p};
+    if (J_i) {
+      auto J = Eigen::Map<InputJacobian>{J_i};
       J(0, 0) = ifx;
       J(1, 0) = Scalar{0};
       J(0, 1) = Scalar{0};
       J(1, 1) = ify;
     }
 
-    if (raw_J_p_i) {
-      auto J = Eigen::Map<JacobianNM<Pixel<Scalar>, Intrinsics<Scalar>>>{raw_J_p_i};
+    if (J_p) {
+      auto J = Eigen::Map<ParameterJacobian>{J_p};
       J(0, kPrincipalOffsetX) = Scalar{-1} * ifx;
       J(1, kPrincipalOffsetX) = Scalar{0};
       J(0, kPrincipalOffsetY) = Scalar{0};
@@ -115,21 +122,20 @@ class IntrinsicsBase : public CartesianBase<TDerived> {
 
   /// Denormalizes normalized pixel coordinates.
   /// \param input Normalized input pixel.
-  /// \param raw_J_p_p Pointer to pixel to pixel Jacobian.
-  /// \param raw_J_p_i Pointer to pixel to intrinsics Jacobian.
+  /// \param J_i Input Jacobian.
+  /// \param J_p Parameter Jacobian.
   /// \return Denormalized pixel coordinates.
-  auto denormalize(const Eigen::Ref<const typename Traits<Pixel<Scalar>>::Base>& input, Scalar* raw_J_p_p = nullptr, Scalar* raw_J_p_i = nullptr) const
-      -> Pixel<Scalar> {  // NOLINT
-    if (raw_J_p_p) {
-      auto J = Eigen::Map<JacobianNM<Pixel<Scalar>>>{raw_J_p_p};
+  auto denormalize(const Eigen::Ref<const Input>& input, Scalar* J_i = nullptr, Scalar* J_p = nullptr) const -> Pixel {  // NOLINT
+    if (J_i) {
+      auto J = Eigen::Map<InputJacobian>{J_i};
       J(0, 0) = fx();
       J(1, 0) = Scalar{0};
       J(0, 1) = Scalar{0};
       J(1, 1) = fy();
     }
 
-    if (raw_J_p_i) {
-      auto J = Eigen::Map<JacobianNM<Pixel<Scalar>, Intrinsics<Scalar>>>{raw_J_p_i};
+    if (J_p) {
+      auto J = Eigen::Map<ParameterJacobian>{J_p};
       J(0, kPrincipalOffsetX) = Scalar{1};
       J(1, kPrincipalOffsetX) = Scalar{0};
       J(0, kPrincipalOffsetY) = Scalar{0};
