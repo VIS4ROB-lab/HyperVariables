@@ -9,8 +9,7 @@
 namespace hyper::variables {
 
 template <typename TDerived>
-class SE3Base : public Traits<TDerived>::Base,
-                public ConditionalConstBase_t<TDerived, Variable<DerivedScalar_t<TDerived>>, ConstVariable<DerivedScalar_t<TDerived>>> {
+class SE3Base : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, Variable<DerivedScalar_t<TDerived>>, ConstVariable<DerivedScalar_t<TDerived>>> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
@@ -30,8 +29,8 @@ class SE3Base : public Traits<TDerived>::Base,
   static constexpr auto kNumTranslationParameters = 3;
   static constexpr auto kNumParameters = kNumRotationParameters + kNumTranslationParameters;
 
-  static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES;
-  static constexpr auto kDefaultDerivativesAreCoupled = HYPER_DEFAULT_TO_COUPLED_LIE_GROUP_DERIVATIVES;
+  static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_MANIFOLD_DERIVATIVES;
+  static constexpr auto kDefaultDerivativesAreCoupled = HYPER_DEFAULT_TO_COUPLED_MANIFOLD_DERIVATIVES;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SE3Base)
 
@@ -181,8 +180,8 @@ class SE3TangentBase : public CartesianBase<TDerived> {
   static constexpr auto kLinearOffset = kAngularOffset + kNumAngularParameters;
   static constexpr auto kNumLinearParameters = 3;
 
-  static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES;
-  static constexpr auto kDefaultDerivativesAreCoupled = HYPER_DEFAULT_TO_COUPLED_LIE_GROUP_DERIVATIVES;
+  static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_MANIFOLD_DERIVATIVES;
+  static constexpr auto kDefaultDerivativesAreCoupled = HYPER_DEFAULT_TO_COUPLED_MANIFOLD_DERIVATIVES;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SE3TangentBase)
 

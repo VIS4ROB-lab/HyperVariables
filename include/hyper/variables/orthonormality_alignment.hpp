@@ -65,17 +65,17 @@ class OrthonormalityAlignmentBase : public CartesianBase<TDerived> {
   /// Returns the parameters in their matrix form.
   /// \return Orthonormality alignment as matrix.
   [[nodiscard]] auto asMatrix() const -> OrderMatrix {
-    auto A = scalingMatrix();
+    auto matrix = scalingMatrix();
 
     Index i = 0;
     const auto off_diagonal_parameters = offDiagonalParameters();
     for (Index j = 0; j < kOrder - 1; ++j) {
       for (Index k = j + 1; k < kOrder; ++k) {
-        A(k, j) = off_diagonal_parameters[i];
+        matrix(k, j) = off_diagonal_parameters[i];
         ++i;
       }
     }
-    return A;
+    return matrix;
   }
 
   /// Returns the scaling parameters in their matrix form.
@@ -99,16 +99,16 @@ class OrthonormalityAlignmentBase : public CartesianBase<TDerived> {
     return A;
   }
 
-  /// Aligns an input.
-  /// \param input Input to align.
+  /// Acts on the input.
+  /// \param input Input to act on.
   /// \param J_i Input Jacobian.
   /// \param J_p Parameter Jacobian.
-  /// \return Aligned input.
-  auto align(const Eigen::Ref<const Input>& input, Scalar* J_i = nullptr, Scalar* J_p = nullptr) const -> OrderVector {
-    const auto A = asMatrix();
+  /// \return Output.
+  auto act(const Eigen::Ref<const Input>& input, Scalar* J_i = nullptr, Scalar* J_p = nullptr) const -> OrderVector {
+    const auto this_as_matrix = asMatrix();
 
     if (J_i) {
-      Eigen::Map<InputJacobian>{J_i}.noalias() = A;
+      Eigen::Map<InputJacobian>{J_i}.noalias() = this_as_matrix;
     }
 
     if (J_p) {
@@ -129,7 +129,7 @@ class OrthonormalityAlignmentBase : public CartesianBase<TDerived> {
       }
     }
 
-    return A * input;
+    return this_as_matrix * input;
   }
 };
 

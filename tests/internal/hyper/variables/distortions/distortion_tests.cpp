@@ -14,7 +14,7 @@ using Scalar = double;
 class DistortionTests : public testing::TestWithParam<Distortion<Scalar>*> {
  public:
   // Constants.
-  static constexpr auto kMaxPerturbation = 0.01;
+  static constexpr auto kMaxPerturbation = 0.005;
   static constexpr auto kNumOuterIterations = 5;
   static constexpr auto kNumInnerIterations = 25;
   static constexpr auto kNumericIncrement = 1e-6;

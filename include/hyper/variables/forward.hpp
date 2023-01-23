@@ -73,6 +73,16 @@ struct Traits<OrthonormalityAlignment<TScalar, TOrder>> : public Traits<Cartesia
 
 HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::OrthonormalityAlignment, int)
 
+template <typename, int>
+class Sensitivity;
+
+template <typename TScalar, int TOrder>
+struct Traits<Sensitivity<TScalar, TOrder>> : public Traits<Cartesian<TScalar, TOrder * TOrder>> {
+  static constexpr auto kOrder = TOrder;
+};
+
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::Sensitivity, int)
+
 template <typename TScalar>
 using Stamp = Cartesian<TScalar, 1>;
 

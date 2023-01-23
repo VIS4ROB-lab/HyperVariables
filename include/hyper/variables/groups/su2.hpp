@@ -101,7 +101,7 @@ class SU2Base : public QuaternionBase<TDerived> {
 
   using Translation = typename Base::Translation;
 
-  static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES;
+  static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_MANIFOLD_DERIVATIVES;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SU2Base)
 
@@ -248,7 +248,7 @@ class SU2TangentBase : public CartesianBase<TDerived> {
   static constexpr auto kAngularOffset = 0;
   static constexpr auto kNumAngularParameters = 3;
 
-  static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_LIE_GROUP_DERIVATIVES;
+  static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_MANIFOLD_DERIVATIVES;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SU2TangentBase)
 
