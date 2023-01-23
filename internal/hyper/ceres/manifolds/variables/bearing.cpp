@@ -5,11 +5,11 @@
 
 #include <ceres/sphere_manifold.h>
 
-#include "hyper/manifolds/ceres/bearing.hpp"
-#include "hyper/manifolds/ceres/euclidean.hpp"
+#include "hyper/ceres/manifolds/variables/bearing.hpp"
+#include "hyper/ceres/manifolds/variables/euclidean.hpp"
 #include "hyper/variables/bearing.hpp"
 
-namespace hyper::manifolds::ceres {
+namespace hyper::ceres::manifolds {
 
 auto Manifold<variables::Bearing<double>>::CreateManifold(const bool constant) -> std::unique_ptr<::ceres::Manifold> {
   if (constant) {
@@ -19,6 +19,6 @@ auto Manifold<variables::Bearing<double>>::CreateManifold(const bool constant) -
   }
 }
 
-}  // namespace hyper::manifolds::ceres
+}  // namespace hyper::ceres::manifolds
 
 #endif

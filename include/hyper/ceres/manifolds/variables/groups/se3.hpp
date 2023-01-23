@@ -7,9 +7,9 @@
 
 #include "hyper/variables/groups/forward.hpp"
 
-#include "hyper/manifolds/ceres/su2.hpp"
+#include "hyper/ceres/manifolds/variables/groups/su2.hpp"
 
-namespace hyper::manifolds::ceres {
+namespace hyper::ceres::manifolds {
 
 template <>
 class Manifold<variables::SE3<double>> final : public ManifoldWrapper {
@@ -30,6 +30,6 @@ class Manifold<variables::SE3<double>> final : public ManifoldWrapper {
   static auto CreateManifold(bool rotation_constant, bool translation_constant) -> std::unique_ptr<::ceres::Manifold>;
 };
 
-}  // namespace hyper::manifolds::ceres
+}  // namespace hyper::ceres::manifolds
 
 #endif

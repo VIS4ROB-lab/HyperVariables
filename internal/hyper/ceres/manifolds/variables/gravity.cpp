@@ -3,12 +3,12 @@
 
 #ifdef HYPER_COMPILE_WITH_CERES
 
-#include "hyper/manifolds/ceres/gravity.hpp"
+#include "hyper/ceres/manifolds/variables/gravity.hpp"
 
-namespace hyper::manifolds::ceres {
+namespace hyper::ceres::manifolds {
 
 Manifold<variables::Gravity<double>>::Manifold(const bool constant) : Manifold<Bearing>{constant} {}
 
-}  // namespace hyper::manifolds::ceres
+}  // namespace hyper::ceres::manifolds
 
 #endif

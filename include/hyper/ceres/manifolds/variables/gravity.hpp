@@ -5,9 +5,9 @@
 
 #ifdef HYPER_COMPILE_WITH_CERES
 
-#include "hyper/manifolds/ceres/bearing.hpp"
+#include "hyper/ceres/manifolds/variables/bearing.hpp"
 
-namespace hyper::manifolds::ceres {
+namespace hyper::ceres::manifolds {
 
 template <>
 class Manifold<variables::Gravity<double>> final : public Manifold<variables::Bearing<double>> {
@@ -21,6 +21,6 @@ class Manifold<variables::Gravity<double>> final : public Manifold<variables::Be
   explicit Manifold(bool constant = false);
 };
 
-}  // namespace hyper::manifolds::ceres
+}  // namespace hyper::ceres::manifolds
 
 #endif

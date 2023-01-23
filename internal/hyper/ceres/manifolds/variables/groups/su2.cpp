@@ -3,11 +3,11 @@
 
 #ifdef HYPER_COMPILE_WITH_CERES
 
-#include "hyper/manifolds/ceres/su2.hpp"
-#include "hyper/manifolds/ceres/euclidean.hpp"
+#include "hyper/ceres/manifolds/variables/groups/su2.hpp"
+#include "hyper/ceres/manifolds/variables/euclidean.hpp"
 #include "hyper/variables/groups/su2.hpp"
 
-namespace hyper::manifolds::ceres {
+namespace hyper::ceres::manifolds {
 
 auto Manifold<variables::SU2<double>>::CreateManifold(const bool constant) -> std::unique_ptr<::ceres::Manifold> {
   if (constant) {
@@ -17,6 +17,6 @@ auto Manifold<variables::SU2<double>>::CreateManifold(const bool constant) -> st
   }
 }
 
-}  // namespace hyper::manifolds::ceres
+}  // namespace hyper::ceres::manifolds
 
 #endif

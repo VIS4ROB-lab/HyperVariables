@@ -7,9 +7,9 @@
 
 #include <ceres/manifold.h>
 
-#include "hyper/manifolds/ceres/forward.hpp"
+#include "hyper/ceres/manifolds/variables/forward.hpp"
 
-namespace hyper::manifolds::ceres {
+namespace hyper::ceres::manifolds {
 
 /// @class Manifold wrapper for Ceres.
 /// This wrapper is required due to some
@@ -20,7 +20,7 @@ namespace hyper::manifolds::ceres {
 /// functions in this class.
 class ManifoldWrapper : public ::ceres::Manifold {
  public:
-  using Scalar = double;  // Ceres scalar type.
+  using Scalar = double;  // Ceres scalar.
 
   /// Creates a constancy mask (i.e. all parameters are held constant).
   /// \param num_parameters Number of parameters.
@@ -50,6 +50,6 @@ class ManifoldWrapper : public ::ceres::Manifold {
   std::unique_ptr<::ceres::Manifold> manifold_;  ///< Manifold.
 };
 
-}  // namespace hyper::manifolds::ceres
+}  // namespace hyper::ceres::manifolds
 
 #endif

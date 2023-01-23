@@ -5,18 +5,17 @@
 
 #ifdef HYPER_COMPILE_WITH_CERES
 
-#include "hyper/variables/groups/forward.hpp"
+#include "hyper/variables/forward.hpp"
 
-#include "hyper/manifolds/ceres/wrapper.hpp"
-#include "hyper/variables/jacobian.hpp"
+#include "hyper/ceres/manifolds/wrapper.hpp"
 
-namespace hyper::manifolds::ceres {
+namespace hyper::ceres::manifolds {
 
 template <>
-class Manifold<variables::SU2<double>> final : public ManifoldWrapper {
+class Manifold<variables::Bearing<double>> : public ManifoldWrapper {
  public:
   // Definitions.
-  using SU2 = variables::SU2<Scalar>;
+  using Bearing = variables::Bearing<Scalar>;
 
   /// Constructor from constancy flag.
   /// \param constant Constancy flag.
@@ -29,6 +28,6 @@ class Manifold<variables::SU2<double>> final : public ManifoldWrapper {
   static auto CreateManifold(bool constant) -> std::unique_ptr<::ceres::Manifold>;
 };
 
-}  // namespace hyper::manifolds::ceres
+}  // namespace hyper::ceres::manifolds
 
 #endif

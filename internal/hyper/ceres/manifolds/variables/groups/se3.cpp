@@ -5,11 +5,11 @@
 
 #include <ceres/product_manifold.h>
 
-#include "hyper/manifolds/ceres/euclidean.hpp"
-#include "hyper/manifolds/ceres/se3.hpp"
+#include "hyper/ceres/manifolds/variables/euclidean.hpp"
+#include "hyper/ceres/manifolds/variables/groups/se3.hpp"
 #include "hyper/variables/groups/se3.hpp"
 
-namespace hyper::manifolds::ceres {
+namespace hyper::ceres::manifolds {
 
 auto Manifold<variables::SE3<double>>::CreateManifold(const bool rotation_constant, const bool translation_constant) -> std::unique_ptr<::ceres::Manifold> {
   using RotationManifold = Manifold<SE3::Rotation>;
@@ -18,6 +18,6 @@ auto Manifold<variables::SE3<double>>::CreateManifold(const bool rotation_consta
   return std::make_unique<ProductManifold>(RotationManifold{rotation_constant}, TranslationManifold{translation_constant});
 }
 
-}  // namespace hyper::manifolds::ceres
+}  // namespace hyper::ceres::manifolds
 
 #endif

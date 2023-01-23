@@ -5,13 +5,10 @@
 
 #ifdef HYPER_COMPILE_WITH_CERES
 
-namespace hyper::manifolds::ceres {
+namespace hyper::ceres::manifolds {
 
 class ManifoldWrapper;
 
-template <typename>
-class Manifold;
-
-}  // namespace hyper::manifolds::ceres
+}  // namespace hyper::ceres::manifolds
 
 #endif

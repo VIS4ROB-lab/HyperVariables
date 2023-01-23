@@ -5,9 +5,9 @@
 
 #include <numeric>
 
-#include "hyper/manifolds/ceres/wrapper.hpp"
+#include "hyper/ceres/manifolds/wrapper.hpp"
 
-namespace hyper::manifolds::ceres {
+namespace hyper::ceres::manifolds {
 
 auto ManifoldWrapper::ConstancyMask(const int num_parameters) -> std::vector<int> {
   std::vector<int> mask;
@@ -46,6 +46,6 @@ auto ManifoldWrapper::MinusJacobian(const Scalar* x, Scalar* jacobian) const -> 
 
 ManifoldWrapper::ManifoldWrapper(std::unique_ptr<::ceres::Manifold>&& manifold) : manifold_{std::move(manifold)} {}
 
-}  // namespace hyper::manifolds::ceres
+}  // namespace hyper::ceres::manifolds
 
 #endif

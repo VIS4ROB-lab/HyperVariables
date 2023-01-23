@@ -9,9 +9,9 @@
 
 #include "hyper/variables/forward.hpp"
 
-#include "hyper/manifolds/ceres/wrapper.hpp"
+#include "hyper/ceres/manifolds/wrapper.hpp"
 
-namespace hyper::manifolds::ceres {
+namespace hyper::ceres::manifolds {
 
 template <int TNumParameters>
 class Manifold<variables::Cartesian<double, TNumParameters>> final : public ManifoldWrapper {
@@ -42,6 +42,6 @@ class Manifold<variables::Cartesian<double, TNumParameters>> final : public Mani
   }
 };
 
-}  // namespace hyper::manifolds::ceres
+}  // namespace hyper::ceres::manifolds
 
 #endif
