@@ -1,11 +1,13 @@
 /// This file is subject to the terms and conditions defined in
 /// the 'LICENSE' file, which is part of this repository.
 
-#ifdef HYPER_COMPILE_WITH_CERES
-
 #pragma once
 
+#ifdef HYPER_COMPILE_WITH_CERES
+
 #include <ceres/manifold.h>
+
+#include "hyper/manifolds/ceres/forward.hpp"
 
 namespace hyper::manifolds::ceres {
 
@@ -20,6 +22,11 @@ class ManifoldWrapper : public ::ceres::Manifold {
  public:
   using Scalar = double;  // Ceres scalar type.
 
+  /// Creates a constancy mask (i.e. all parameters are held constant).
+  /// \param num_parameters Number of parameters.
+  /// \return Constancy mask.
+  static auto ConstancyMask(int num_parameters) -> std::vector<int>;
+
   [[nodiscard]] auto AmbientSize() const -> int final;
 
   [[nodiscard]] auto TangentSize() const -> int final;
@@ -28,7 +35,7 @@ class ManifoldWrapper : public ::ceres::Manifold {
 
   auto PlusJacobian(const Scalar* x, Scalar* jacobian) const -> bool final;
 
-  auto RightMultiplyByPlusJacobian(const Scalar* x, const int num_rows, const Scalar* ambient_matrix, Scalar* tangent_matrix) const -> bool final;  // NOLINT
+  auto RightMultiplyByPlusJacobian(const Scalar* x, int num_rows, const Scalar* ambient_matrix, Scalar* tangent_matrix) const -> bool final;
 
   auto Minus(const Scalar* y, const Scalar* x, Scalar* y_minus_x) const -> bool final;
 

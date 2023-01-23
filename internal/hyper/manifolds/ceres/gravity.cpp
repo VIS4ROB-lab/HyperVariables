@@ -1,16 +1,13 @@
 /// This file is subject to the terms and conditions defined in
 /// the 'LICENSE' file, which is part of this repository.
 
-#pragma once
-
 #ifdef HYPER_COMPILE_WITH_CERES
+
+#include "hyper/manifolds/ceres/gravity.hpp"
 
 namespace hyper::manifolds::ceres {
 
-class ManifoldWrapper;
-
-template <typename>
-class Manifold;
+Manifold<variables::Gravity<double>>::Manifold(const bool constant) : Manifold<Bearing>{constant} {}
 
 }  // namespace hyper::manifolds::ceres
 

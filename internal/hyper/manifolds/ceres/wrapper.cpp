@@ -3,9 +3,18 @@
 
 #ifdef HYPER_COMPILE_WITH_CERES
 
+#include <numeric>
+
 #include "hyper/manifolds/ceres/wrapper.hpp"
 
 namespace hyper::manifolds::ceres {
+
+auto ManifoldWrapper::ConstancyMask(const int num_parameters) -> std::vector<int> {
+  std::vector<int> mask;
+  mask.resize(num_parameters);
+  std::iota(mask.begin(), mask.end(), 0);
+  return mask;
+}
 
 auto ManifoldWrapper::AmbientSize() const -> int {
   return manifold_->AmbientSize();
