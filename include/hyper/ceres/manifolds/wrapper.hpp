@@ -7,7 +7,7 @@
 
 #include <ceres/manifold.h>
 
-#include "hyper/ceres/manifolds/variables/forward.hpp"
+#include "hyper/ceres/manifolds/forward.hpp"
 
 namespace hyper::ceres::manifolds {
 

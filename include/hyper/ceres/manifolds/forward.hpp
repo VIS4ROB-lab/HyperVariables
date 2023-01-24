@@ -9,6 +9,9 @@ namespace hyper::ceres::manifolds {
 
 class ManifoldWrapper;
 
+template <typename>
+class Manifold;
+
 }  // namespace hyper::ceres::manifolds
 
 #endif
