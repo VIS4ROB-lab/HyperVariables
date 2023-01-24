@@ -13,15 +13,15 @@
 
 namespace hyper::ceres::manifolds {
 
-template <int TNumParameters>
-class Manifold<variables::Cartesian<double, TNumParameters>> final : public ManifoldWrapper {
+template <typename TVariable>
+class Manifold final : public ManifoldWrapper {
  public:
   // Definitions.
-  using Cartesian = variables::Cartesian<double, TNumParameters>;
+  using Variable = TVariable;
 
   /// Constructor from constancy flag.
   /// \param constant Constancy flag.
-  explicit Manifold(const bool constant = false) : Manifold{TNumParameters, constant} {}
+  explicit Manifold(const bool constant = false) : Manifold{TVariable::kNumParameters, constant} {}
 
   /// Constructor from number of parameters and constancy flag.
   /// \param num_parameters Number of parameters.
@@ -37,7 +37,7 @@ class Manifold<variables::Cartesian<double, TNumParameters>> final : public Mani
     if (constant) {
       return std::make_unique<::ceres::SubsetManifold>(num_parameters, ManifoldWrapper::ConstancyMask(num_parameters));
     } else {
-      return std::make_unique<::ceres::EuclideanManifold<TNumParameters>>(num_parameters);
+      return std::make_unique<::ceres::EuclideanManifold<TVariable::kNumParameters>>(num_parameters);
     }
   }
 };
