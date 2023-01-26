@@ -17,6 +17,7 @@ class SE3Base : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDe
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
   using Base::Base;
 
+  using Index = Eigen::Index;
   using Rotation = SU2<Scalar>;
   using RotationWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Rotation>;
   using Translation = Cartesian<Scalar, 3>;
@@ -34,23 +35,23 @@ class SE3Base : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDe
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SE3Base)
 
-  /// Utility function to access correct Jacobian submatrix.
+  /// Rotation Jacobian accessor/modifier.
   template <int NumRows, typename TMatrix>
-  static auto RotationJacobian(TMatrix& matrix, Eigen::Index row) {
+  static auto RotationJacobian(TMatrix& matrix, const Index& row) {
     return matrix.template block<NumRows, kNumRotationParameters>(row, kRotationOffset);
   }
 
-  /// Utility function to access correct Jacobian submatrix.
+  /// Translation Jacobian accessor/modifier.
   template <int NumRows, typename TMatrix>
-  static auto TranslationJacobian(TMatrix& matrix, Eigen::Index row) {
+  static auto TranslationJacobian(TMatrix& matrix, const Index& row) {
     return matrix.template block<NumRows, kNumTranslationParameters>(row, kTranslationOffset);
   }
 
-  /// Constructs an identity element.
+  /// Identity group element.
   /// \return Identity element.
   static auto Identity() -> SE3<Scalar>;
 
-  /// Constructs a random element.
+  /// Random group element.
   /// \return Random element.
   static auto Random() -> SE3<Scalar>;
 
@@ -79,31 +80,49 @@ class SE3Base : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDe
   auto translation() -> Eigen::Map<TranslationWithConstIfNotLvalue>;
 
   /// Group inverse.
-  /// \param raw_J Input Jacobian (if requested).
-  /// \param global Request global Jacobians flag.
-  /// \param coupled Compute SE3 instead of SU2 x R3 Jacobians.
-  /// \return Inverse element.
+  /// \param raw_J_this Jacobian (optional).
+  /// \param global Global Jacobian flag.
+  /// \param coupled Coupled Jacobian flag.
+  /// \return Inverse group element.
   auto groupInverse(Scalar* raw_J_this = nullptr, bool global = kDefaultDerivativesAreGlobal, bool coupled = kDefaultDerivativesAreCoupled) const -> SE3<Scalar>;
 
   /// Group plus.
   /// \tparam TOtherDerived_ Other derived type.
   /// \param other Other input.
-  /// \param raw_J_this This input Jacobian (if requested).
-  /// \param raw_J_other Other input Jacobian (if requested).
-  /// \param global Request global Jacobians flag.
-  /// \param coupled Compute SE3 instead of SU2 x R3 Jacobians.
-  /// \return Additive element.
+  /// \param raw_J_this Jacobian w.r.t. to this element (optional).
+  /// \param raw_J_other Jacobian w.r.t. to other element (optional).
+  /// \param global Global Jacobian flag.
+  /// \param coupled Coupled Jacobian flag.
+  /// \return Group element.
   template <typename TOtherDerived_>
   auto groupPlus(const SE3Base<TOtherDerived_>& other, Scalar* raw_J_this = nullptr, Scalar* raw_J_other = nullptr, bool global = kDefaultDerivativesAreGlobal,
                  bool coupled = kDefaultDerivativesAreCoupled) const -> SE3<Scalar>;
+
+  /// Numeric group increment.
+  /// \param i Index to increment (in tangent space).
+  /// \param delta Numerical increment to use.
+  /// \param global Global Jacobian flag.
+  /// \param coupled Coupled Jacobian flag.
+  /// \return Group element.
+  auto numericGroupPlus(const Index& i, const Scalar& delta, bool global = kDefaultDerivativesAreGlobal, bool coupled = kDefaultDerivativesAreCoupled) const -> SE3<Scalar>;
+
+  ///
+  /// \tparam TOtherDerived_ Other derived type.
+  /// \param other
+  /// \param delta
+  /// \param global
+  /// \param coupled
+  /// \return
+  template <typename TOtherDerived_>
+  auto numericGroupMinus(const SE3Base<TOtherDerived_>& other, const Scalar& delta, const bool global, const bool coupled) const -> Tangent<SE3<Scalar>>;
 
   /// Vector plus.
   /// \tparam TOtherDerived_ Other derived type.
   /// \param v Input vector.
   /// \param raw_J_this This input Jacobian (if requested).
   /// \param raw_J_v Point input Jacobian (if requested).
-  /// \param global Request global Jacobians flag.
-  /// \param coupled Compute SE3 instead of SU2 x R3 Jacobians.
+  /// \param global Global Jacobian flag.
+  /// \param coupled Coupled Jacobian flag.
   /// \return Additive element.
   template <typename TOtherDerived_>
   auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, Scalar* raw_J_this = nullptr, Scalar* raw_J_v = nullptr, bool global = kDefaultDerivativesAreGlobal,
@@ -111,8 +130,8 @@ class SE3Base : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDe
 
   /// Conversion to tangent element.
   /// \param raw_J Input Jacobian (if requested).
-  /// \param global Request global Jacobians flag.
-  /// \param coupled Compute SE3 instead of SU2 x R3 Jacobians.
+  /// \param global Global Jacobian flag.
+  /// \param coupled Coupled Jacobian flag.
   /// \return Tangent element.
   auto toTangent(Scalar* raw_J = nullptr, bool global = kDefaultDerivativesAreGlobal, bool coupled = kDefaultDerivativesAreCoupled) const -> Tangent<SE3<Scalar>>;
 };
@@ -169,6 +188,7 @@ class SE3TangentBase : public CartesianBase<TDerived> {
   using Scalar = typename Base::Scalar;
   using Base::Base;
 
+  using Index = Eigen::Index;
   using Angular = Tangent<typename SE3<Scalar>::Rotation>;
   using AngularWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Angular>;
   using Linear = Tangent<typename SE3<Scalar>::Translation>;
@@ -185,15 +205,15 @@ class SE3TangentBase : public CartesianBase<TDerived> {
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SE3TangentBase)
 
-  /// Utility function to access correct Jacobian submatrix.
+  /// Angular Jacobian accessor/modifier.
   template <int NumRows, typename TMatrix>
-  static auto AngularJacobian(TMatrix& matrix, Eigen::Index row) {
+  static auto AngularJacobian(TMatrix& matrix, const Index& row) {
     return matrix.template block<NumRows, kNumAngularParameters>(row, kAngularOffset);
   }
 
-  /// Utility function to access correct Jacobian submatrix.
+  /// Linear Jacobian accessor/modifier.
   template <int NumRows, typename TMatrix>
-  static auto LinearJacobian(TMatrix& matrix, Eigen::Index row) {
+  static auto LinearJacobian(TMatrix& matrix, const Index& row) {
     return matrix.template block<NumRows, kNumLinearParameters>(row, kLinearOffset);
   }
 
@@ -391,6 +411,52 @@ auto SE3Base<TDerived>::groupPlus(const SE3Base<TOtherDerived_>& other, Scalar* 
   }
 
   return output;
+}
+
+template <typename TDerived>
+auto SE3Base<TDerived>::numericGroupPlus(const Index& i, const Scalar& delta, const bool global, const bool coupled) const -> SE3<Scalar> {
+  // Definitions.
+  using Tangent = Tangent<SE3<Scalar>>;
+
+  const auto tau = Tangent{delta * Tangent::Unit(i)};
+
+  if (coupled) {
+    if (global) {
+      return tau.toManifold().groupPlus(*this);
+    } else {
+      return this->groupPlus(tau.toManifold());
+    }
+  } else {
+    if (global) {
+      return {tau.angular().toManifold().groupPlus(rotation()), translation() + tau.linear()};
+    } else {
+      return {rotation().groupPlus(tau.angular().toManifold()), translation() + tau.linear()};
+    }
+  }
+}
+
+template <typename TDerived>
+template <typename TOtherDerived_>
+auto SE3Base<TDerived>::numericGroupMinus(const SE3Base<TOtherDerived_>& other, const Scalar& delta, const bool global, const bool coupled) const -> Tangent<SE3<Scalar>> {
+  if (coupled) {
+    if (global) {
+      return this->groupPlus(other.groupInverse()).toTangent() / delta;
+    } else {
+      return other.groupInverse().groupPlus(*this).toTangent() / delta;
+    }
+  } else {
+    if (global) {
+      Tangent<SE3<Scalar>> tangent;
+      tangent.angular() = rotation().groupPlus(other.rotation().groupInverse()).toTangent() / delta;
+      tangent.linear() = (translation() - other.translation()) / delta;
+      return tangent;
+    } else {
+      Tangent<SE3<Scalar>> tangent;
+      tangent.angular() = other.rotation().groupInverse().groupPlus(rotation()).toTangent() / delta;
+      tangent.linear() = (translation() - other.translation()) / delta;
+      return tangent;
+    }
+  }
 }
 
 template <typename TDerived>

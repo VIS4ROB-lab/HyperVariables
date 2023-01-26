@@ -29,7 +29,7 @@ class SE3Tests : public testing::Test {
     SE3Jacobian J_a, J_n;
     const auto i_se3 = se3_.groupInverse(J_a.data(), global, coupled);
     for (auto j = 0; j < SE3Tangent::kNumParameters; ++j) {
-      J_n.col(j) = NumericGroupMinus(NumericGroupPlus(se3_, global, coupled, j).groupInverse(), i_se3, global, coupled);
+      J_n.col(j) = se3_.numericGroupPlus(j, kNumericIncrement, global, coupled).groupInverse().numericGroupMinus(i_se3, kNumericIncrement, global, coupled);
     }
 
     return J_n.isApprox(J_a, kNumericTolerance);
@@ -41,8 +41,8 @@ class SE3Tests : public testing::Test {
     SE3Jacobian J_lhs_a, J_lhs_n, J_rhs_a, J_rhs_n;
     const auto se3 = se3_.groupPlus(other_se3, J_lhs_a.data(), J_rhs_a.data(), global, coupled);
     for (auto j = 0; j < SE3Tangent::kNumParameters; ++j) {
-      J_lhs_n.col(j) = NumericGroupMinus(NumericGroupPlus(se3_, global, coupled, j).groupPlus(other_se3), se3, global, coupled);
-      J_rhs_n.col(j) = NumericGroupMinus(se3_.groupPlus(NumericGroupPlus(other_se3, global, coupled, j)), se3, global, coupled);
+      J_lhs_n.col(j) = se3_.numericGroupPlus(j, kNumericIncrement, global, coupled).groupPlus(other_se3).numericGroupMinus(se3, kNumericIncrement, global, coupled);
+      J_rhs_n.col(j) = se3_.groupPlus(other_se3.numericGroupPlus(j, kNumericIncrement, global, coupled)).numericGroupMinus(se3, kNumericIncrement, global, coupled);
     }
 
     return J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) && J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
@@ -58,8 +58,8 @@ class SE3Tests : public testing::Test {
     se3_.vectorPlus(input, J_l_a.data(), J_l_p_a.data(), coupled, true);
     se3_.vectorPlus(input, J_r_a.data(), J_r_p_a.data(), coupled, false);
     for (auto j = 0; j < SE3Tangent::kNumParameters; ++j) {
-      J_l_n.col(j) = (NumericGroupPlus(se3_, coupled, true, j).vectorPlus(input) - output) / kNumericIncrement;
-      J_r_n.col(j) = (NumericGroupPlus(se3_, coupled, false, j).vectorPlus(input) - output) / kNumericIncrement;
+      J_l_n.col(j) = (se3_.numericGroupPlus(j, kNumericIncrement, coupled, true).vectorPlus(input) - output) / kNumericIncrement;
+      J_r_n.col(j) = (se3_.numericGroupPlus(j, kNumericIncrement, coupled, false).vectorPlus(input) - output) / kNumericIncrement;
     }
 
     for (auto j = 0; j < Vector::kNumParameters; ++j) {
@@ -83,8 +83,8 @@ class SE3Tests : public testing::Test {
     SE3Jacobian J_l_n, J_e_n;
     for (auto j = 0; j < SE3Tangent::kNumParameters; ++j) {
       const auto d_tangent = SE3Tangent{tangent + kNumericIncrement * SE3Tangent::Unit(j)};
-      J_l_n.col(j) = (NumericGroupPlus(se3_, global, coupled, j).toTangent() - tangent) / kNumericIncrement;
-      J_e_n.col(j) = NumericGroupMinus(d_tangent.toManifold(), se3_, global, coupled);
+      J_l_n.col(j) = (se3_.numericGroupPlus(j, kNumericIncrement, global, coupled).toTangent() - tangent) / kNumericIncrement;
+      J_e_n.col(j) = d_tangent.toManifold().numericGroupMinus(se3_, kNumericIncrement, global, coupled);
     }
 
     return se3.isApprox(se3_, kNumericTolerance) && (J_l_a * J_e_a).isIdentity(kNumericTolerance) && J_l_n.isApprox(J_l_a, kNumericTolerance) &&
@@ -92,47 +92,6 @@ class SE3Tests : public testing::Test {
   }
 
   SE3 se3_;
-
- private:
-  static auto NumericGroupPlus(const Eigen::Ref<const SE3>& se3, const bool global, const bool coupled, const Eigen::Index i) -> SE3 {
-    const auto tau = SE3Tangent{kNumericIncrement * SE3Tangent::Unit(i)};
-
-    if (coupled) {
-      if (global) {
-        return tau.toManifold().groupPlus(se3);
-      } else {
-        return se3.groupPlus(tau.toManifold());
-      }
-    } else {
-      if (global) {
-        return {tau.angular().toManifold().groupPlus(se3.rotation()), se3.translation() + tau.linear()};
-      } else {
-        return {se3.rotation().groupPlus(tau.angular().toManifold()), se3.translation() + tau.linear()};
-      }
-    }
-  }
-
-  static auto NumericGroupMinus(const Eigen::Ref<const SE3>& d_se3, const Eigen::Ref<const SE3>& se3, const bool global, const bool coupled) -> SE3Tangent {
-    if (coupled) {
-      if (global) {
-        return d_se3.groupPlus(se3.groupInverse()).toTangent() / kNumericIncrement;
-      } else {
-        return se3.groupInverse().groupPlus(d_se3).toTangent() / kNumericIncrement;
-      }
-    } else {
-      if (global) {
-        SE3Tangent tangent;
-        tangent.angular() = d_se3.rotation().groupPlus(se3.rotation().groupInverse()).toTangent() / kNumericIncrement;
-        tangent.linear() = (d_se3.translation() - se3.translation()) / kNumericIncrement;
-        return tangent;
-      } else {
-        SE3Tangent tangent;
-        tangent.angular() = se3.rotation().groupInverse().groupPlus(d_se3.rotation()).toTangent() / kNumericIncrement;
-        tangent.linear() = (d_se3.translation() - se3.translation()) / kNumericIncrement;
-        return tangent;
-      }
-    }
-  }
 };
 
 TEST_F(SE3Tests, GroupInverse) {
