@@ -55,7 +55,8 @@ class SU2Tests : public testing::Test {
     SU2Jacobian J_a, J_n;
     const auto i_q = su2_.groupInverse(J_a.data(), global);
     for (auto j = 0; j < SU2Tangent::kNumParameters; ++j) {
-      J_n.col(j) = NumericGroupMinus(NumericGroupPlus(su2_, global, j).groupInverse(), i_q, global);
+      const SU2Tangent increment = kNumericIncrement * SU2Tangent::Unit(j);
+      J_n.col(j) = su2_.tangentPlus(increment, global).groupInverse().groupMinus(i_q, global) / kNumericIncrement;
     }
 
     return J_n.isApprox(J_a, kNumericTolerance);
@@ -63,13 +64,14 @@ class SU2Tests : public testing::Test {
 
   [[nodiscard]] auto checkGroupPlusJacobian(const bool global) const -> bool {
     const auto other_su2 = SU2::Random();
-    const auto su2 = su2_ * other_su2;
+    const auto su2 = su2_.groupPlus(other_su2);
 
     SU2Jacobian J_lhs_a, J_lhs_n, J_rhs_a, J_rhs_n;
     su2_.groupPlus(other_su2, J_lhs_a.data(), J_rhs_a.data(), global);
     for (auto j = 0; j < SU2Tangent::kNumParameters; ++j) {
-      J_lhs_n.col(j) = NumericGroupMinus(NumericGroupPlus(su2_, global, j).groupPlus(other_su2), su2, global);
-      J_rhs_n.col(j) = NumericGroupMinus(su2_.groupPlus(NumericGroupPlus(other_su2, global, j)), su2, global);
+      const SU2Tangent increment = kNumericIncrement * SU2Tangent::Unit(j);
+      J_lhs_n.col(j) = su2_.tangentPlus(increment, global).groupPlus(other_su2).groupMinus(su2, global) / kNumericIncrement;
+      J_rhs_n.col(j) = su2_.groupPlus(other_su2.tangentPlus(increment, global)).groupMinus(su2, global) / kNumericIncrement;
     }
 
     return J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) && J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
@@ -83,7 +85,8 @@ class SU2Tests : public testing::Test {
     const auto output = su2_.vectorPlus(input);
     su2_.vectorPlus(input, J_a.data(), J_v_a.data(), global);
     for (auto j = 0; j < SU2Tangent::kNumParameters; ++j) {
-      J_n.col(j) = (NumericGroupPlus(su2_, global, j).vectorPlus(input) - output) / kNumericIncrement;
+      const SU2Tangent increment = kNumericIncrement * SU2Tangent::Unit(j);
+      J_n.col(j) = (su2_.tangentPlus(increment, global).vectorPlus(input) - output) / kNumericIncrement;
     }
     for (auto j = 0; j < Vector::kNumParameters; ++j) {
       J_v_n.col(j) = (su2_.vectorPlus(input + kNumericIncrement * Vector::Unit(j)) - output) / kNumericIncrement;
@@ -105,9 +108,10 @@ class SU2Tests : public testing::Test {
 
     SU2Jacobian J_l_n, J_e_n;
     for (auto j = 0; j < SU2Tangent::kNumParameters; ++j) {
-      const auto d_tangent = SU2Tangent{tangent + kNumericIncrement * SU2Tangent::Unit(j)};
-      J_l_n.col(j) = (NumericGroupPlus(su2_, global, j).toTangent() - tangent) / kNumericIncrement;
-      J_e_n.col(j) = NumericGroupMinus(d_tangent.toManifold(), su2_, global);
+      const SU2Tangent increment = kNumericIncrement * SU2Tangent::Unit(j);
+      const SU2Tangent d_tangent = tangent + increment;
+      J_l_n.col(j) = (su2_.tangentPlus(increment, global).toTangent() - tangent) / kNumericIncrement;
+      J_e_n.col(j) = d_tangent.toManifold().groupMinus(su2_, global) / kNumericIncrement;
     }
 
     return su2.isApprox(su2_, kNumericTolerance) && (J_l_a * J_e_a).isIdentity(kNumericTolerance) && J_l_n.isApprox(J_l_a, kNumericTolerance) &&
@@ -115,16 +119,6 @@ class SU2Tests : public testing::Test {
   }
 
   SU2 su2_;
-
- private:
-  static auto NumericGroupPlus(const SU2& su2, const bool global, const Eigen::Index i) -> SU2 {
-    const auto tau = SU2Tangent{kNumericIncrement * SU2Tangent::Unit(i)};
-    return (global) ? tau.toManifold() * su2 : su2 * tau.toManifold();
-  }
-
-  static auto NumericGroupMinus(const SU2& d_su2, const SU2& su2, const bool global) -> SU2Tangent {
-    return ((global) ? d_su2.groupPlus(su2.groupInverse()) : su2.groupInverse().groupPlus(d_su2)).toTangent() / kNumericIncrement;
-  }
 };
 
 TEST_F(SU2Tests, GroupInverse) {

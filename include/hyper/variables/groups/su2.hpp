@@ -14,6 +14,9 @@
 namespace hyper::variables {
 
 template <typename TDerived>
+class SU2TangentBase;
+
+template <typename TDerived>
 class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, Variable<DerivedScalar_t<TDerived>>, ConstVariable<DerivedScalar_t<TDerived>>> {
  public:
   // Definitions.
@@ -24,6 +27,7 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
   using Base::Base;
   using Base::operator*;
 
+  using Index = Eigen::Index;
   using Translation = Cartesian<Scalar, 3>;
 
   // Constants.
@@ -133,6 +137,16 @@ class SU2Base : public QuaternionBase<TDerived> {
   template <typename TOtherDerived_>
   auto groupPlus(const SU2Base<TOtherDerived_>& other, Scalar* raw_J_this = nullptr, Scalar* raw_J_other = nullptr, bool global = kDefaultDerivativesAreGlobal) const
       -> SU2<Scalar>;
+
+  template <typename TOtherDerived_>
+  auto groupMinus(const SU2Base<TOtherDerived_>& other, const bool global) -> Tangent<SU2<Scalar>> const {
+    return ((global) ? groupPlus(other.groupInverse()) : other.groupInverse().groupPlus(*this)).toTangent();
+  }
+
+  template <typename TOtherDerived_>
+  auto tangentPlus(const SU2TangentBase<TOtherDerived_>& other, const bool global) const -> SU2<Scalar> {
+    return (global) ? other.toManifold() * (*this) : (*this) * other.toManifold();
+  }
 
   /// Vector plus.
   /// \tparam TOtherDerived_ Other derived type.
