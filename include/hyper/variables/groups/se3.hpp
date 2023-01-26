@@ -9,6 +9,9 @@
 namespace hyper::variables {
 
 template <typename TDerived>
+class SE3TangentBase;
+
+template <typename TDerived>
 class SE3Base : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, Variable<DerivedScalar_t<TDerived>>, ConstVariable<DerivedScalar_t<TDerived>>> {
  public:
   // Definitions.
@@ -98,23 +101,17 @@ class SE3Base : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDe
   auto groupPlus(const SE3Base<TOtherDerived_>& other, Scalar* raw_J_this = nullptr, Scalar* raw_J_other = nullptr, bool global = kDefaultDerivativesAreGlobal,
                  bool coupled = kDefaultDerivativesAreCoupled) const -> SE3<Scalar>;
 
+  template <typename TOtherDerived_>
+  auto groupMinus(const SE3Base<TOtherDerived_>& other, bool global, bool coupled) const -> Tangent<SE3<Scalar>>;
+
   /// Numeric group increment.
   /// \param i Index to increment (in tangent space).
   /// \param delta Numerical increment to use.
   /// \param global Global Jacobian flag.
   /// \param coupled Coupled Jacobian flag.
   /// \return Group element.
-  auto numericGroupPlus(const Index& i, const Scalar& delta, bool global = kDefaultDerivativesAreGlobal, bool coupled = kDefaultDerivativesAreCoupled) const -> SE3<Scalar>;
-
-  ///
-  /// \tparam TOtherDerived_ Other derived type.
-  /// \param other
-  /// \param delta
-  /// \param global
-  /// \param coupled
-  /// \return
   template <typename TOtherDerived_>
-  auto numericGroupMinus(const SE3Base<TOtherDerived_>& other, const Scalar& delta, const bool global, const bool coupled) const -> Tangent<SE3<Scalar>>;
+  auto tangentPlus(const SE3TangentBase<TOtherDerived_>& tangent, bool global = kDefaultDerivativesAreGlobal, bool coupled = kDefaultDerivativesAreCoupled) const -> SE3<Scalar>;
 
   /// Vector plus.
   /// \tparam TOtherDerived_ Other derived type.
@@ -414,47 +411,43 @@ auto SE3Base<TDerived>::groupPlus(const SE3Base<TOtherDerived_>& other, Scalar* 
 }
 
 template <typename TDerived>
-auto SE3Base<TDerived>::numericGroupPlus(const Index& i, const Scalar& delta, const bool global, const bool coupled) const -> SE3<Scalar> {
-  // Definitions.
-  using Tangent = Tangent<SE3<Scalar>>;
-
-  const auto tau = Tangent{delta * Tangent::Unit(i)};
-
+template <typename TOtherDerived_>
+auto SE3Base<TDerived>::groupMinus(const SE3Base<TOtherDerived_>& other, const bool global, const bool coupled) const -> Tangent<SE3<Scalar>> {
   if (coupled) {
     if (global) {
-      return tau.toManifold().groupPlus(*this);
+      return this->groupPlus(other.groupInverse()).toTangent();
     } else {
-      return this->groupPlus(tau.toManifold());
+      return other.groupInverse().groupPlus(*this).toTangent();
     }
   } else {
     if (global) {
-      return {tau.angular().toManifold().groupPlus(rotation()), translation() + tau.linear()};
+      Tangent<SE3<Scalar>> tangent;
+      tangent.angular() = rotation().groupPlus(other.rotation().groupInverse()).toTangent();
+      tangent.linear() = (translation() - other.translation());
+      return tangent;
     } else {
-      return {rotation().groupPlus(tau.angular().toManifold()), translation() + tau.linear()};
+      Tangent<SE3<Scalar>> tangent;
+      tangent.angular() = other.rotation().groupInverse().groupPlus(rotation()).toTangent();
+      tangent.linear() = translation() - other.translation();
+      return tangent;
     }
   }
 }
 
 template <typename TDerived>
 template <typename TOtherDerived_>
-auto SE3Base<TDerived>::numericGroupMinus(const SE3Base<TOtherDerived_>& other, const Scalar& delta, const bool global, const bool coupled) const -> Tangent<SE3<Scalar>> {
+auto SE3Base<TDerived>::tangentPlus(const SE3TangentBase<TOtherDerived_>& tangent, const bool global, const bool coupled) const -> SE3<Scalar> {
   if (coupled) {
     if (global) {
-      return this->groupPlus(other.groupInverse()).toTangent() / delta;
+      return tangent.toManifold().groupPlus(*this);
     } else {
-      return other.groupInverse().groupPlus(*this).toTangent() / delta;
+      return this->groupPlus(tangent.toManifold());
     }
   } else {
     if (global) {
-      Tangent<SE3<Scalar>> tangent;
-      tangent.angular() = rotation().groupPlus(other.rotation().groupInverse()).toTangent() / delta;
-      tangent.linear() = (translation() - other.translation()) / delta;
-      return tangent;
+      return {tangent.angular().toManifold().groupPlus(rotation()), translation() + tangent.linear()};
     } else {
-      Tangent<SE3<Scalar>> tangent;
-      tangent.angular() = other.rotation().groupInverse().groupPlus(rotation()).toTangent() / delta;
-      tangent.linear() = (translation() - other.translation()) / delta;
-      return tangent;
+      return {rotation().groupPlus(tangent.angular().toManifold()), translation() + tangent.linear()};
     }
   }
 }
