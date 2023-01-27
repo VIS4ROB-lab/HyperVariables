@@ -77,10 +77,10 @@ class SE3Base : public CartesianBase<TDerived> {
   auto translation() { return Eigen::Map<TranslationWithConstIfNotLvalue>{this->data() + kTranslationOffset}; }
 
   /// Group inverse.
-  /// \param J_this Jacobian (optional).
+  /// \param J_this Jacobian w.r.t. this.
   /// \param global Global Jacobian flag.
   /// \param coupled Coupled Jacobian flag.
-  /// \return Inverse group element.
+  /// \return Group element.
   auto gInv(Scalar* J_this = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> SE3<Scalar> {
     const Rotation i_rotation = rotation().gInv();
     const Translation i_translation = Scalar{-1} * (i_rotation.act(translation()));
@@ -123,10 +123,10 @@ class SE3Base : public CartesianBase<TDerived> {
   }
 
   /// Group plus.
-  /// \tparam TOther_ Other derived type.
-  /// \param other Other input.
-  /// \param J_this Jacobian w.r.t. to this element (optional).
-  /// \param J_other Jacobian w.r.t. to other element (optional).
+  /// \tparam TOther_ Other type.
+  /// \param other Other element.
+  /// \param J_this Jacobian w.r.t. this.
+  /// \param J_other Jacobian w.r.t. other.
   /// \param global Global Jacobian flag.
   /// \param coupled Coupled Jacobian flag.
   /// \return Group element.
@@ -196,54 +196,8 @@ class SE3Base : public CartesianBase<TDerived> {
     return {R_this_R_other, R_this_t_other + this->translation()};
   }
 
-  /// Numeric group increment.
-  /// \param i Index to increment (in tangent space).
-  /// \param delta Numerical increment to use.
-  /// \param global Global Jacobian flag.
-  /// \param coupled Coupled Jacobian flag.
-  /// \return Group element.
-  template <typename TOther_>
-  auto tPlus(const SE3TangentBase<TOther_>& tangent, bool global = kGlobal, bool coupled = kCoupled) const -> SE3<Scalar> {
-    if (coupled) {
-      if (global) {
-        return tangent.gExp().gPlus(*this);
-      } else {
-        return this->gPlus(tangent.gExp());
-      }
-    } else {
-      if (global) {
-        return {tangent.angular().gExp().gPlus(rotation()), translation() + tangent.linear()};
-      } else {
-        return {rotation().gPlus(tangent.angular().gExp()), translation() + tangent.linear()};
-      }
-    }
-  }
-
-  template <typename TOther_>
-  auto tMinus(const SE3Base<TOther_>& other, bool global, bool coupled) const -> Tangent {
-    if (coupled) {
-      if (global) {
-        return this->gPlus(other.gInv()).gLog();
-      } else {
-        return other.gInv().gPlus(*this).gLog();
-      }
-    } else {
-      if (global) {
-        Tangent tangent;
-        tangent.angular() = rotation().gPlus(other.rotation().gInv()).gLog();
-        tangent.linear() = (translation() - other.translation());
-        return tangent;
-      } else {
-        Tangent tangent;
-        tangent.angular() = other.rotation().gInv().gPlus(rotation()).gLog();
-        tangent.linear() = translation() - other.translation();
-        return tangent;
-      }
-    }
-  }
-
-  /// Conversion to tangent element.
-  /// \param J_this Input Jacobian (if requested).
+  /// Group logarithm (SE3 -> SE3 tangent).
+  /// \param J_this Jacobian w.r.t. this.
   /// \param global Global Jacobian flag.
   /// \param coupled Coupled Jacobian flag.
   /// \return Tangent element.
@@ -283,20 +237,70 @@ class SE3Base : public CartesianBase<TDerived> {
     return tangent;
   }
 
-  /// Vector plus.
-  /// \tparam TOther_ Other derived type.
-  /// \param v Input vector.
-  /// \param J_this This input Jacobian (if requested).
-  /// \param J_v Point input Jacobian (if requested).
+  /// Tangent plus.
+  /// \tparam Other_ Other type.
+  /// \param other Other element.
   /// \param global Global Jacobian flag.
   /// \param coupled Coupled Jacobian flag.
-  /// \return Additive element.
+  /// \return Group element.
   template <typename TOther_>
-  auto act(const Eigen::MatrixBase<TOther_>& v, Scalar* J_this = nullptr, Scalar* J_v = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> Translation {
+  auto tPlus(const SE3TangentBase<TOther_>& other, bool global = kGlobal, bool coupled = kCoupled) const -> SE3<Scalar> {
+    if (coupled) {
+      if (global) {
+        return other.gExp().gPlus(*this);
+      } else {
+        return this->gPlus(other.gExp());
+      }
+    } else {
+      if (global) {
+        return {other.angular().gExp().gPlus(rotation()), translation() + other.linear()};
+      } else {
+        return {rotation().gPlus(other.angular().gExp()), translation() + other.linear()};
+      }
+    }
+  }
+
+  /// Tangent minus.
+  /// \tparam Other_ Other type.
+  /// \param other Other element.
+  /// \param global Global Jacobian flag.
+  /// \param coupled Coupled Jacobian flag.
+  /// \return Tangent element.
+  template <typename TOther_>
+  auto tMinus(const SE3Base<TOther_>& other, bool global, bool coupled) const -> Tangent {
+    if (coupled) {
+      if (global) {
+        return this->gPlus(other.gInv()).gLog();
+      } else {
+        return other.gInv().gPlus(*this).gLog();
+      }
+    } else {
+      Tangent tangent;
+      if (global) {
+        tangent.angular() = rotation().gPlus(other.rotation().gInv()).gLog();
+        tangent.linear() = (translation() - other.translation());
+      } else {
+        tangent.angular() = other.rotation().gInv().gPlus(rotation()).gLog();
+        tangent.linear() = translation() - other.translation();
+      }
+      return tangent;
+    }
+  }
+
+  /// Group action.
+  /// \tparam TOther_ Other type.
+  /// \param other Other vector.
+  /// \param J_this Jacobian w.r.t. this.
+  /// \param J_other Jacobian w.r.t. other.
+  /// \param global Global Jacobian flag.
+  /// \param coupled Coupled Jacobian flag.
+  /// \return Vector.
+  template <typename TOther_>
+  auto act(const Eigen::MatrixBase<TOther_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> Translation {
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TOther_, 3)
 
     const auto R_this = this->rotation().matrix();
-    const Translation R_this_v = R_this * v;
+    const Translation R_this_v = R_this * other;
     Translation output = R_this_v + translation();
 
     if (J_this) {
@@ -308,7 +312,7 @@ class SE3Base : public CartesianBase<TDerived> {
           Tangent::template LinearJacobian<Translation::kNumParameters>(J, 0).setIdentity();
 
         } else {
-          Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this * v.hat();
+          Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this * other.hat();
           Tangent::template LinearJacobian<Translation::kNumParameters>(J, 0).noalias() = R_this;
         }
       } else {
@@ -316,14 +320,14 @@ class SE3Base : public CartesianBase<TDerived> {
           Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this_v.hat();
           Tangent::template LinearJacobian<Translation::kNumParameters>(J, 0).setIdentity();
         } else {
-          Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this * v.hat();
+          Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this * other.hat();
           Tangent::template LinearJacobian<Translation::kNumParameters>(J, 0).setIdentity();
         }
       }
     }
 
-    if (J_v) {
-      Eigen::Map<JacobianNM<Translation>>{J_v}.noalias() = R_this;
+    if (J_other) {
+      Eigen::Map<JacobianNM<Translation>>{J_other}.noalias() = R_this;
     }
 
     return output;
@@ -341,29 +345,11 @@ class SE3 final : public SE3Base<SE3<TScalar>> {
     this->translation().setZero();
   }
 
-  /// Constructor from address.
-  /// \param other Input address.
-  explicit SE3(const TScalar* other) : Base{other} {}
-
-  /// Copy constructor.
-  /// \tparam TOther_ Other derived type.
-  /// \param other Other input instance.
-  template <typename TOther_>
-  SE3(const SE3Base<TOther_>& other) : Base{other} {}  // NOLINT
-
-  /// Assignment operator.
-  /// \tparam TOther_ Other dervied type.
-  /// \param other Other input instance.
-  /// \return This instance.
-  template <typename TOther_>
-  auto operator=(const SE3Base<TOther_>& other) -> SE3& {
-    Base::operator=(other);
-    return *this;
-  }
+  HYPER_INHERIT_ASSIGNMENT_OPERATORS(SE3)
 
   /// Constructor from rotation and translation.
   /// \tparam TDerived_ Derived type.
-  /// \tparam TOther_ Other derived type.
+  /// \tparam TOther_ Other type.
   /// \param rotation Input rotation.
   /// \param translation Input translation.
   template <typename TDerived_, typename TOther_>
@@ -426,11 +412,11 @@ class SE3TangentBase : public CartesianBase<TDerived> {
   /// \return Linear tangent.
   auto linear() -> Eigen::Map<LinearWithConstIfNotLvalue> { return Eigen::Map<LinearWithConstIfNotLvalue>{this->data() + kLinearOffset}; }
 
-  /// Converts this to a manifold element.
-  /// \param J_this Input Jacobian (if requested).
-  /// \param global Request global Jacobians flag.
-  /// \param coupled Compute SE3 instead of SU2 x R3 Jacobians.
-  /// \return Manifold element.
+  /// Group exponential (SE3 tangent -> SE3).
+  /// \param J_this Jacobian w.r.t. this.
+  /// \param global Global Jacobian flag.
+  /// \param coupled Coupled Jacobian flag.
+  /// \return Group element.
   auto gExp(Scalar* J_this = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> SE3<Scalar> {
     SE3<Scalar> se3;
 

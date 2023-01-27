@@ -81,7 +81,7 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
     return Base::operator*(other);
   }
 
-  /// Group logarithm (group element -> group element).
+  /// Group logarithm (quaternion -> quaternion).
   /// \return Group element.
   [[nodiscard]] auto glog() const -> Quaternion<Scalar> {
     const auto nv2 = this->vec().squaredNorm();
@@ -96,7 +96,7 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
     return {std::log(nq), a * this->x(), a * this->y(), a * this->z()};
   }
 
-  /// Group exponential (group element -> group element).
+  /// Group exponential (quaternion -> quaternion).
   /// \return Group element.
   [[nodiscard]] auto gexp() const -> Quaternion<Scalar> {
     const auto nv2 = this->vec().squaredNorm();
@@ -200,7 +200,7 @@ class SU2Base : public QuaternionBase<TDerived> {
     return (*this) * other;
   }
 
-  /// Group logarithm (group element -> tangent element).
+  /// Group logarithm (SU2 -> SU2 tangent).
   /// \param J_this Jacobian w.r.t. this.
   /// \param global Global Jacobian flag.
   /// \return Tangent element.
@@ -237,7 +237,7 @@ class SU2Base : public QuaternionBase<TDerived> {
     return tangent;
   }
 
-  /// Group exponential (group element -> group element).
+  /// Group exponential (SU2 -> quaternion).
   /// \return Group element.
   [[nodiscard]] auto gExp() const -> Quaternion<Scalar> { return Base::gExp(); }
 
