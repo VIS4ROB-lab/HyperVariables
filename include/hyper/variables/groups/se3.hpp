@@ -339,13 +339,17 @@ class SE3 final : public SE3Base<SE3<TScalar>> {
  public:
   using Base = SE3Base<SE3<TScalar>>;
 
+  HYPER_INHERIT_ASSIGNMENT_OPERATORS(SE3)
+
   /// Default constructor.
   SE3() {
     this->rotation().setIdentity();
     this->translation().setZero();
   }
 
-  HYPER_INHERIT_ASSIGNMENT_OPERATORS(SE3)
+  /// Constructor from pointer.
+  /// \param other Pointer.
+  explicit SE3(const TScalar* other) : Base{other} {}
 
   /// Constructor from rotation and translation.
   /// \tparam TDerived_ Derived type.
