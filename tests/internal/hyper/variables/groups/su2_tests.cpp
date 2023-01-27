@@ -10,8 +10,8 @@ namespace hyper::variables::tests {
 class QuaternionTests : public testing::Test {
  protected:
   // Constants.
-  static constexpr auto kNumIterations = 10;
-  static constexpr auto kNumericTolerance = 1e-7;
+  static constexpr auto kItr = 10;
+  static constexpr auto kTol = 1e-7;
 
   // Definitions.
   using Scalar = double;
@@ -22,14 +22,14 @@ class QuaternionTests : public testing::Test {
   [[nodiscard]] auto checkGroupExponentials() const -> bool {
     const auto qle = q_.glog().gexp();
     const auto qel = q_.gexp().glog();
-    return qle.isApprox(q_, kNumericTolerance) && qel.isApprox(q_, kNumericTolerance);
+    return qle.isApprox(q_, kTol) && qel.isApprox(q_, kTol);
   }
 
   Quaternion q_;
 };
 
 TEST_F(QuaternionTests, GroupExponentials) {
-  for (auto i = 0; i < kNumIterations; ++i) {
+  for (auto i = 0; i < kItr; ++i) {
     q_ = Random();
     EXPECT_TRUE(checkGroupExponentials());
   }
@@ -38,9 +38,9 @@ TEST_F(QuaternionTests, GroupExponentials) {
 class SU2Tests : public testing::Test {
  protected:
   // Constants.
-  static constexpr auto kNumIterations = 10;
-  static constexpr auto kNumericIncrement = 1e-7;
-  static constexpr auto kNumericTolerance = 1e-7;
+  static constexpr auto kItr = 10;
+  static constexpr auto kInc = 1e-7;
+  static constexpr auto kTol = 1e-7;
 
   // Definitions.
   using Scalar = double;
@@ -55,11 +55,11 @@ class SU2Tests : public testing::Test {
     SU2Jacobian J_a, J_n;
     const auto i_q = su2_.gInv(J_a.data(), global);
     for (auto j = 0; j < SU2Tangent::kNumParameters; ++j) {
-      const SU2Tangent increment = kNumericIncrement * SU2Tangent::Unit(j);
-      J_n.col(j) = su2_.tPlus(increment, global).gInv().tMinus(i_q, global) / kNumericIncrement;
+      const SU2Tangent increment = kInc * SU2Tangent::Unit(j);
+      J_n.col(j) = su2_.tPlus(increment, global).gInv().tMinus(i_q, global) / kInc;
     }
 
-    return J_n.isApprox(J_a, kNumericTolerance);
+    return J_n.isApprox(J_a, kTol);
   }
 
   [[nodiscard]] auto checkGroupPlusJacobian(const bool global) const -> bool {
@@ -69,12 +69,12 @@ class SU2Tests : public testing::Test {
     SU2Jacobian J_lhs_a, J_lhs_n, J_rhs_a, J_rhs_n;
     su2_.gPlus(other_su2, J_lhs_a.data(), J_rhs_a.data(), global);
     for (auto j = 0; j < SU2Tangent::kNumParameters; ++j) {
-      const SU2Tangent increment = kNumericIncrement * SU2Tangent::Unit(j);
-      J_lhs_n.col(j) = su2_.tPlus(increment, global).gPlus(other_su2).tMinus(su2, global) / kNumericIncrement;
-      J_rhs_n.col(j) = su2_.gPlus(other_su2.tPlus(increment, global)).tMinus(su2, global) / kNumericIncrement;
+      const SU2Tangent increment = kInc * SU2Tangent::Unit(j);
+      J_lhs_n.col(j) = su2_.tPlus(increment, global).gPlus(other_su2).tMinus(su2, global) / kInc;
+      J_rhs_n.col(j) = su2_.gPlus(other_su2.tPlus(increment, global)).tMinus(su2, global) / kInc;
     }
 
-    return J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) && J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
+    return J_lhs_n.isApprox(J_lhs_a, kTol) && J_rhs_n.isApprox(J_rhs_a, kTol);
   }
 
   [[nodiscard]] auto checkVectorPlusJacobian(const bool global) const -> bool {
@@ -85,20 +85,20 @@ class SU2Tests : public testing::Test {
     const auto output = su2_.act(input);
     su2_.act(input, J_a.data(), J_v_a.data(), global);
     for (auto j = 0; j < SU2Tangent::kNumParameters; ++j) {
-      const SU2Tangent increment = kNumericIncrement * SU2Tangent::Unit(j);
-      J_n.col(j) = (su2_.tPlus(increment, global).act(input) - output) / kNumericIncrement;
+      const SU2Tangent increment = kInc * SU2Tangent::Unit(j);
+      J_n.col(j) = (su2_.tPlus(increment, global).act(input) - output) / kInc;
     }
     for (auto j = 0; j < Vector::kNumParameters; ++j) {
-      J_v_n.col(j) = (su2_.act(input + kNumericIncrement * Vector::Unit(j)) - output) / kNumericIncrement;
+      J_v_n.col(j) = (su2_.act(input + kInc * Vector::Unit(j)) - output) / kInc;
     }
 
-    return J_n.isApprox(J_a, kNumericTolerance) && J_v_n.isApprox(J_v_a, kNumericTolerance);
+    return J_n.isApprox(J_a, kTol) && J_v_n.isApprox(J_v_a, kTol);
   }
 
   [[nodiscard]] auto checkGroupExponentials() const -> bool {
     const auto qle = su2_.gLog().gExp();
     const auto qel = su2_.gexp().glog();
-    return qle.isApprox(su2_, kNumericTolerance) && qel.isApprox(su2_, kNumericTolerance);
+    return qle.isApprox(su2_, kTol) && qel.isApprox(su2_, kTol);
   }
 
   [[nodiscard]] auto checkGroupExponentialsJacobians(const bool global) const -> bool {
@@ -108,21 +108,20 @@ class SU2Tests : public testing::Test {
 
     SU2Jacobian J_l_n, J_e_n;
     for (auto j = 0; j < SU2Tangent::kNumParameters; ++j) {
-      const SU2Tangent increment = kNumericIncrement * SU2Tangent::Unit(j);
+      const SU2Tangent increment = kInc * SU2Tangent::Unit(j);
       const SU2Tangent d_tangent = tangent + increment;
-      J_l_n.col(j) = (su2_.tPlus(increment, global).gLog() - tangent) / kNumericIncrement;
-      J_e_n.col(j) = d_tangent.gExp().tMinus(su2_, global) / kNumericIncrement;
+      J_l_n.col(j) = (su2_.tPlus(increment, global).gLog() - tangent) / kInc;
+      J_e_n.col(j) = d_tangent.gExp().tMinus(su2_, global) / kInc;
     }
 
-    return su2.isApprox(su2_, kNumericTolerance) && (J_l_a * J_e_a).isIdentity(kNumericTolerance) && J_l_n.isApprox(J_l_a, kNumericTolerance) &&
-           J_e_n.isApprox(J_e_a, kNumericTolerance);
+    return su2.isApprox(su2_, kTol) && (J_l_a * J_e_a).isIdentity(kTol) && J_l_n.isApprox(J_l_a, kTol) && J_e_n.isApprox(J_e_a, kTol);
   }
 
   SU2 su2_;
 };
 
 TEST_F(SU2Tests, GroupInverse) {
-  for (auto i = 0; i < kNumIterations; ++i) {
+  for (auto i = 0; i < kItr; ++i) {
     su2_ = SU2::Random();
     EXPECT_TRUE(checkGroupInverseJacobian(true));
     EXPECT_TRUE(checkGroupInverseJacobian(false));
@@ -130,7 +129,7 @@ TEST_F(SU2Tests, GroupInverse) {
 }
 
 TEST_F(SU2Tests, GroupPlus) {
-  for (auto i = 0; i < kNumIterations; ++i) {
+  for (auto i = 0; i < kItr; ++i) {
     su2_ = SU2::Random();
     EXPECT_TRUE(checkGroupPlusJacobian(true));
     EXPECT_TRUE(checkGroupPlusJacobian(false));
@@ -138,7 +137,7 @@ TEST_F(SU2Tests, GroupPlus) {
 }
 
 TEST_F(SU2Tests, VectorPlus) {
-  for (auto i = 0; i < kNumIterations; ++i) {
+  for (auto i = 0; i < kItr; ++i) {
     su2_ = SU2::Random();
     EXPECT_TRUE(checkVectorPlusJacobian(true));
     EXPECT_TRUE(checkVectorPlusJacobian(false));
@@ -146,7 +145,7 @@ TEST_F(SU2Tests, VectorPlus) {
 }
 
 TEST_F(SU2Tests, GroupExponentials) {
-  for (auto i = 0; i < kNumIterations; ++i) {
+  for (auto i = 0; i < kItr; ++i) {
     su2_ = SU2::Random();
     EXPECT_TRUE(checkGroupExponentials());
     EXPECT_TRUE(checkGroupExponentialsJacobians(true));
