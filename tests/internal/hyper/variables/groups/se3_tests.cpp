@@ -21,16 +21,16 @@ class SE3Tests : public testing::Test {
   using SE3Jacobian = variables::JacobianNM<SE3Tangent>;
 
   [[nodiscard]] auto checkGroupInverse() const -> bool {
-    return (se3_.groupInverse().groupInverse()).isApprox(se3_, kNumericTolerance) && (se3_.groupInverse().groupPlus(se3_)).isApprox(SE3::Identity(), kNumericTolerance) &&
-           (se3_.groupPlus(se3_.groupInverse())).isApprox(SE3::Identity(), kNumericTolerance);
+    return (se3_.gInv().gInv()).isApprox(se3_, kNumericTolerance) && (se3_.gInv().gPlus(se3_)).isApprox(SE3::Identity(), kNumericTolerance) &&
+           (se3_.gPlus(se3_.gInv())).isApprox(SE3::Identity(), kNumericTolerance);
   }
 
   [[nodiscard]] auto checkGroupInverseJacobian(const bool global, const bool coupled) const -> bool {
     SE3Jacobian J_a, J_n;
-    const auto i_se3 = se3_.groupInverse(J_a.data(), global, coupled);
+    const auto i_se3 = se3_.gInv(J_a.data(), global, coupled);
     for (auto j = 0; j < SE3Tangent::kNumParameters; ++j) {
       const SE3Tangent increment = kNumericIncrement * SE3Tangent::Unit(j);
-      J_n.col(j) = se3_.tangentPlus(increment, global, coupled).groupInverse().groupMinus(i_se3, global, coupled) / kNumericIncrement;
+      J_n.col(j) = se3_.tPlus(increment, global, coupled).gInv().tMinus(i_se3, global, coupled) / kNumericIncrement;
     }
 
     return J_n.isApprox(J_a, kNumericTolerance);
@@ -40,11 +40,11 @@ class SE3Tests : public testing::Test {
     const auto other_se3 = SE3::Random();
 
     SE3Jacobian J_lhs_a, J_lhs_n, J_rhs_a, J_rhs_n;
-    const auto se3 = se3_.groupPlus(other_se3, J_lhs_a.data(), J_rhs_a.data(), global, coupled);
+    const auto se3 = se3_.gPlus(other_se3, J_lhs_a.data(), J_rhs_a.data(), global, coupled);
     for (auto j = 0; j < SE3Tangent::kNumParameters; ++j) {
       const SE3Tangent increment = kNumericIncrement * SE3Tangent::Unit(j);
-      J_lhs_n.col(j) = se3_.tangentPlus(increment, global, coupled).groupPlus(other_se3).groupMinus(se3, global, coupled) / kNumericIncrement;
-      J_rhs_n.col(j) = se3_.groupPlus(other_se3.tangentPlus(increment, global, coupled)).groupMinus(se3, global, coupled) / kNumericIncrement;
+      J_lhs_n.col(j) = se3_.tPlus(increment, global, coupled).gPlus(other_se3).tMinus(se3, global, coupled) / kNumericIncrement;
+      J_rhs_n.col(j) = se3_.gPlus(other_se3.tPlus(increment, global, coupled)).tMinus(se3, global, coupled) / kNumericIncrement;
     }
 
     return J_lhs_n.isApprox(J_lhs_a, kNumericTolerance) && J_rhs_n.isApprox(J_rhs_a, kNumericTolerance);
@@ -56,17 +56,17 @@ class SE3Tests : public testing::Test {
 
     JacobianNM<Vector, SE3Tangent> J_l_a, J_r_a, J_l_n, J_r_n;
     JacobianNM<Vector> J_l_p_a, J_r_p_a, J_p_n;
-    const auto output = se3_.vectorPlus(input);
-    se3_.vectorPlus(input, J_l_a.data(), J_l_p_a.data(), coupled, true);
-    se3_.vectorPlus(input, J_r_a.data(), J_r_p_a.data(), coupled, false);
+    const auto output = se3_.act(input);
+    se3_.act(input, J_l_a.data(), J_l_p_a.data(), coupled, true);
+    se3_.act(input, J_r_a.data(), J_r_p_a.data(), coupled, false);
     for (auto j = 0; j < SE3Tangent::kNumParameters; ++j) {
       const SE3Tangent increment = kNumericIncrement * SE3Tangent::Unit(j);
-      J_l_n.col(j) = (se3_.tangentPlus(increment, coupled, true).vectorPlus(input) - output) / kNumericIncrement;
-      J_r_n.col(j) = (se3_.tangentPlus(increment, coupled, false).vectorPlus(input) - output) / kNumericIncrement;
+      J_l_n.col(j) = (se3_.tPlus(increment, coupled, true).act(input) - output) / kNumericIncrement;
+      J_r_n.col(j) = (se3_.tPlus(increment, coupled, false).act(input) - output) / kNumericIncrement;
     }
 
     for (auto j = 0; j < Vector::kNumParameters; ++j) {
-      J_p_n.col(j) = (se3_.vectorPlus(input + kNumericIncrement * Vector::Unit(j)) - output) / kNumericIncrement;
+      J_p_n.col(j) = (se3_.act(input + kNumericIncrement * Vector::Unit(j)) - output) / kNumericIncrement;
     }
 
     return J_l_n.isApprox(J_l_a, kNumericTolerance) && J_r_n.isApprox(J_r_a, kNumericTolerance) && J_p_n.isApprox(J_l_p_a, kNumericTolerance) &&
@@ -87,8 +87,8 @@ class SE3Tests : public testing::Test {
     for (auto j = 0; j < SE3Tangent::kNumParameters; ++j) {
       const SE3Tangent increment = SE3Tangent{kNumericIncrement * SE3Tangent::Unit(j)};
       const SE3Tangent d_tangent = tangent + increment;
-      J_l_n.col(j) = (se3_.tangentPlus(increment, global, coupled).toTangent() - tangent) / kNumericIncrement;
-      J_e_n.col(j) = d_tangent.toManifold().groupMinus(se3_, global, coupled) / kNumericIncrement;
+      J_l_n.col(j) = (se3_.tPlus(increment, global, coupled).toTangent() - tangent) / kNumericIncrement;
+      J_e_n.col(j) = d_tangent.toManifold().tMinus(se3_, global, coupled) / kNumericIncrement;
     }
 
     return se3.isApprox(se3_, kNumericTolerance) && (J_l_a * J_e_a).isIdentity(kNumericTolerance) && J_l_n.isApprox(J_l_a, kNumericTolerance) &&

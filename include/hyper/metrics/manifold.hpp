@@ -44,26 +44,26 @@ class ManifoldMetric<variables::SE3<TScalar>> final : public Metric<TScalar> {
     if (J_lhs || J_rhs) {
       if (J_lhs && J_rhs) {
         Jacobian J_t_p, J_p_l, J_p_ir, J_ir_r;
-        const auto i_rhs = rhs_.groupInverse(J_ir_r.data(), global, coupled);
-        const auto lhs_plus_i_rhs = lhs_.groupPlus(i_rhs, J_p_l.data(), J_p_ir.data(), global, coupled);
+        const auto i_rhs = rhs_.gInv(J_ir_r.data(), global, coupled);
+        const auto lhs_plus_i_rhs = lhs_.gPlus(i_rhs, J_p_l.data(), J_p_ir.data(), global, coupled);
         output_ = lhs_plus_i_rhs.toTangent(J_t_p.data(), global, coupled);
         Eigen::Map<Jacobian>{J_lhs}.noalias() = J_t_p.lazyProduct(J_p_l);
         Eigen::Map<Jacobian>{J_rhs}.noalias() = J_t_p.lazyProduct(J_p_ir.lazyProduct(J_ir_r));
       } else if (J_lhs) {
         Jacobian J_t_p, J_p_l;
-        const auto i_rhs = rhs_.groupInverse(nullptr, global, coupled);
-        const auto lhs_plus_i_rhs = lhs_.groupPlus(i_rhs, J_p_l.data(), nullptr, global, coupled);
+        const auto i_rhs = rhs_.gInv(nullptr, global, coupled);
+        const auto lhs_plus_i_rhs = lhs_.gPlus(i_rhs, J_p_l.data(), nullptr, global, coupled);
         output_ = lhs_plus_i_rhs.toTangent(J_t_p.data(), global, coupled);
         Eigen::Map<Jacobian>{J_lhs}.noalias() = J_t_p.lazyProduct(J_p_l);
       } else {
         Jacobian J_t_p, J_p_ir, J_ir_r;
-        const auto i_rhs = rhs_.groupInverse(J_ir_r.data(), global, coupled);
-        const auto lhs_plus_i_rhs = lhs_.groupPlus(i_rhs, nullptr, J_p_ir.data(), global, coupled);
+        const auto i_rhs = rhs_.gInv(J_ir_r.data(), global, coupled);
+        const auto lhs_plus_i_rhs = lhs_.gPlus(i_rhs, nullptr, J_p_ir.data(), global, coupled);
         output_ = lhs_plus_i_rhs.toTangent(J_t_p.data(), global, coupled);
         Eigen::Map<Jacobian>{J_rhs}.noalias() = J_t_p.lazyProduct(J_p_ir.lazyProduct(J_ir_r));
       }
     } else {
-      output_ = lhs_.groupPlus(rhs_.groupInverse()).toTangent();
+      output_ = lhs_.gPlus(rhs_.gInv()).toTangent();
     }
   }
 

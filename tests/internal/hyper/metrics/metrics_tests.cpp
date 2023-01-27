@@ -84,15 +84,15 @@ class MetricsTests : public testing::Test {
 
     if (coupled) {
       if (global) {
-        return tau.toManifold().groupPlus(se3);
+        return tau.toManifold().gPlus(se3);
       } else {
-        return se3.groupPlus(tau.toManifold());
+        return se3.gPlus(tau.toManifold());
       }
     } else {
       if (global) {
-        return {tau.angular().toManifold().groupPlus(se3.rotation()), se3.translation() + tau.linear()};
+        return {tau.angular().toManifold().gPlus(se3.rotation()), se3.translation() + tau.linear()};
       } else {
-        return {se3.rotation().groupPlus(tau.angular().toManifold()), se3.translation() + tau.linear()};
+        return {se3.rotation().gPlus(tau.angular().toManifold()), se3.translation() + tau.linear()};
       }
     }
   }
