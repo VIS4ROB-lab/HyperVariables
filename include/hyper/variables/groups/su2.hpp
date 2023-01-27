@@ -138,7 +138,6 @@ class SU2Base : public QuaternionBase<TDerived> {
   using Translation = typename Base::Translation;
 
   using Tangent = variables::Tangent<SU2<Scalar>>;
-  using Jacobian = variables::JacobianNM<Tangent>;
 
   static constexpr auto kAlpha = Scalar{2.0};
   static constexpr auto kiAlpha = Scalar{1} / kAlpha;
@@ -167,9 +166,9 @@ class SU2Base : public QuaternionBase<TDerived> {
     const auto i_su2 = this->conjugate();
     if (J_this) {
       if (global) {
-        Eigen::Map<Jacobian>{J_this}.noalias() = Scalar{-1} * i_su2.matrix();
+        Eigen::Map<JacobianNM<Tangent>>{J_this}.noalias() = Scalar{-1} * i_su2.matrix();
       } else {
-        Eigen::Map<Jacobian>{J_this}.noalias() = Scalar{-1} * this->matrix();
+        Eigen::Map<JacobianNM<Tangent>>{J_this}.noalias() = Scalar{-1} * this->matrix();
       }
     }
     return i_su2;
@@ -186,16 +185,16 @@ class SU2Base : public QuaternionBase<TDerived> {
   auto gPlus(const SU2Base<Other_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr, bool global = kGlobal) const -> SU2<Scalar> {
     if (J_this) {
       if (global) {
-        Eigen::Map<Jacobian>{J_this}.setIdentity();
+        Eigen::Map<JacobianNM<Tangent>>{J_this}.setIdentity();
       } else {
-        Eigen::Map<Jacobian>{J_this}.noalias() = other.inverse().matrix();
+        Eigen::Map<JacobianNM<Tangent>>{J_this}.noalias() = other.inverse().matrix();
       }
     }
     if (J_other) {
       if (global) {
-        Eigen::Map<Jacobian>{J_other}.noalias() = this->matrix();
+        Eigen::Map<JacobianNM<Tangent>>{J_other}.noalias() = this->matrix();
       } else {
-        Eigen::Map<Jacobian>{J_other}.setIdentity();
+        Eigen::Map<JacobianNM<Tangent>>{J_other}.setIdentity();
       }
     }
     return (*this) * other;
@@ -222,15 +221,15 @@ class SU2Base : public QuaternionBase<TDerived> {
       const auto nw = kAlpha * a * nv;
       const auto nw3 = nw * nw2;
       if (nw3 < Eigen::NumTraits<Scalar>::epsilon()) {
-        Eigen::Map<Jacobian>{J_this}.setIdentity();
+        Eigen::Map<JacobianNM<Tangent>>{J_this}.setIdentity();
       } else {
         const auto Wx = tangent.hat();
         if (global) {
-          Eigen::Map<Jacobian>{J_this}.noalias() =
-              Jacobian::Identity() - Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
+          Eigen::Map<JacobianNM<Tangent>>{J_this}.noalias() =
+              JacobianNM<Tangent>::Identity() - Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
         } else {
-          Eigen::Map<Jacobian>{J_this}.noalias() =
-              Jacobian::Identity() + Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
+          Eigen::Map<JacobianNM<Tangent>>{J_this}.noalias() =
+              JacobianNM<Tangent>::Identity() + Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
         }
       }
     }
