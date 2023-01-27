@@ -21,13 +21,13 @@ class ManifoldMetric<variables::SE3<TScalar>> final : public Metric<TScalar> {
   static constexpr auto kInputDim = Input::kNumParameters;
   static constexpr auto kOutputDim = Output::kNumParameters;
 
-  static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_MANIFOLD_DERIVATIVES;
-  static constexpr auto kDefaultDerivativesAreCoupled = HYPER_DEFAULT_TO_COUPLED_MANIFOLD_DERIVATIVES;
+  static constexpr auto kGlobal = HYPER_DEFAULT_TO_GLOBAL_MANIFOLD_DERIVATIVES;
+  static constexpr auto kCoupled = HYPER_DEFAULT_TO_COUPLED_MANIFOLD_DERIVATIVES;
 
   /// Default constructor.
   /// \param global Request global Jacobians flag.
   /// \param coupled Compute SE3 instead of SU2 x R3 Jacobians.
-  explicit ManifoldMetric(const bool global = kDefaultDerivativesAreGlobal, const bool coupled = kDefaultDerivativesAreCoupled) : global_{global}, coupled_{coupled} {}
+  explicit ManifoldMetric(const bool global = kGlobal, const bool coupled = kCoupled) : global_{global}, coupled_{coupled} {}
 
   /// Evaluates the distance between elements.
   /// \param lhs Left element/input vector.
@@ -35,8 +35,8 @@ class ManifoldMetric<variables::SE3<TScalar>> final : public Metric<TScalar> {
   /// \param output Distance between elements.
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
-  static auto Distance(const TScalar* lhs, const TScalar* rhs, TScalar* output, TScalar* J_lhs = nullptr, TScalar* J_rhs = nullptr,
-                       const bool global = kDefaultDerivativesAreGlobal, const bool coupled = kDefaultDerivativesAreCoupled) -> void {
+  static auto Distance(const TScalar* lhs, const TScalar* rhs, TScalar* output, TScalar* J_lhs = nullptr, TScalar* J_rhs = nullptr, const bool global = kGlobal,
+                       const bool coupled = kCoupled) -> void {
     const auto lhs_ = Eigen::Map<const Input>{lhs};
     const auto rhs_ = Eigen::Map<const Input>{rhs};
     auto output_ = Eigen::Map<Output>{output};
@@ -73,8 +73,8 @@ class ManifoldMetric<variables::SE3<TScalar>> final : public Metric<TScalar> {
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
   /// \return Distance between elements.
-  static auto Distance(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, TScalar* J_lhs = nullptr, TScalar* J_rhs = nullptr,
-                       const bool global = kDefaultDerivativesAreGlobal, const bool coupled = kDefaultDerivativesAreCoupled) -> Output {
+  static auto Distance(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, TScalar* J_lhs = nullptr, TScalar* J_rhs = nullptr, const bool global = kGlobal,
+                       const bool coupled = kCoupled) -> Output {
     Output output;
     Distance(lhs.data(), rhs.data(), output.data(), J_lhs, J_rhs, global, coupled);
     return output;

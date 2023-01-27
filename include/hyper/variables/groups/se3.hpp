@@ -33,20 +33,20 @@ class SE3Base : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDe
   static constexpr auto kNumTranslationParameters = 3;
   static constexpr auto kNumParameters = kNumRotationParameters + kNumTranslationParameters;
 
-  static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_MANIFOLD_DERIVATIVES;
-  static constexpr auto kDefaultDerivativesAreCoupled = HYPER_DEFAULT_TO_COUPLED_MANIFOLD_DERIVATIVES;
+  static constexpr auto kGlobal = HYPER_DEFAULT_TO_GLOBAL_MANIFOLD_DERIVATIVES;
+  static constexpr auto kCoupled = HYPER_DEFAULT_TO_COUPLED_MANIFOLD_DERIVATIVES;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SE3Base)
 
   /// Rotation Jacobian accessor/modifier.
-  template <int NumRows, typename TMatrix>
-  static auto RotationJacobian(TMatrix& matrix, const Index& row) {
+  template <int NumRows, typename TDerived_>
+  static inline auto RotationJacobian(Eigen::MatrixBase<TDerived_>& matrix, const Index& row) {
     return matrix.template block<NumRows, kNumRotationParameters>(row, kRotationOffset);
   }
 
   /// Translation Jacobian accessor/modifier.
-  template <int NumRows, typename TMatrix>
-  static auto TranslationJacobian(TMatrix& matrix, const Index& row) {
+  template <int NumRows, typename TDerived_>
+  static inline auto TranslationJacobian(Eigen::MatrixBase<TDerived_>& matrix, const Index& row) {
     return matrix.template block<NumRows, kNumTranslationParameters>(row, kTranslationOffset);
   }
 
@@ -83,26 +83,25 @@ class SE3Base : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDe
   auto translation() -> Eigen::Map<TranslationWithConstIfNotLvalue>;
 
   /// Group inverse.
-  /// \param raw_J_this Jacobian (optional).
+  /// \param J_this Jacobian (optional).
   /// \param global Global Jacobian flag.
   /// \param coupled Coupled Jacobian flag.
   /// \return Inverse group element.
-  auto groupInverse(Scalar* raw_J_this = nullptr, bool global = kDefaultDerivativesAreGlobal, bool coupled = kDefaultDerivativesAreCoupled) const -> SE3<Scalar>;
+  auto groupInverse(Scalar* J_this = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> SE3<Scalar>;
 
   /// Group plus.
-  /// \tparam TOtherDerived_ Other derived type.
+  /// \tparam TOther_ Other derived type.
   /// \param other Other input.
-  /// \param raw_J_this Jacobian w.r.t. to this element (optional).
-  /// \param raw_J_other Jacobian w.r.t. to other element (optional).
+  /// \param J_this Jacobian w.r.t. to this element (optional).
+  /// \param J_other Jacobian w.r.t. to other element (optional).
   /// \param global Global Jacobian flag.
   /// \param coupled Coupled Jacobian flag.
   /// \return Group element.
-  template <typename TOtherDerived_>
-  auto groupPlus(const SE3Base<TOtherDerived_>& other, Scalar* raw_J_this = nullptr, Scalar* raw_J_other = nullptr, bool global = kDefaultDerivativesAreGlobal,
-                 bool coupled = kDefaultDerivativesAreCoupled) const -> SE3<Scalar>;
+  template <typename TOther_>
+  auto groupPlus(const SE3Base<TOther_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> SE3<Scalar>;
 
-  template <typename TOtherDerived_>
-  auto groupMinus(const SE3Base<TOtherDerived_>& other, bool global, bool coupled) const -> Tangent<SE3<Scalar>>;
+  template <typename TOther_>
+  auto groupMinus(const SE3Base<TOther_>& other, bool global, bool coupled) const -> Tangent<SE3<Scalar>>;
 
   /// Numeric group increment.
   /// \param i Index to increment (in tangent space).
@@ -110,27 +109,26 @@ class SE3Base : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDe
   /// \param global Global Jacobian flag.
   /// \param coupled Coupled Jacobian flag.
   /// \return Group element.
-  template <typename TOtherDerived_>
-  auto tangentPlus(const SE3TangentBase<TOtherDerived_>& tangent, bool global = kDefaultDerivativesAreGlobal, bool coupled = kDefaultDerivativesAreCoupled) const -> SE3<Scalar>;
+  template <typename TOther_>
+  auto tangentPlus(const SE3TangentBase<TOther_>& tangent, bool global = kGlobal, bool coupled = kCoupled) const -> SE3<Scalar>;
 
   /// Vector plus.
-  /// \tparam TOtherDerived_ Other derived type.
+  /// \tparam TOther_ Other derived type.
   /// \param v Input vector.
-  /// \param raw_J_this This input Jacobian (if requested).
-  /// \param raw_J_v Point input Jacobian (if requested).
+  /// \param J_this This input Jacobian (if requested).
+  /// \param J_v Point input Jacobian (if requested).
   /// \param global Global Jacobian flag.
   /// \param coupled Coupled Jacobian flag.
   /// \return Additive element.
-  template <typename TOtherDerived_>
-  auto vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, Scalar* raw_J_this = nullptr, Scalar* raw_J_v = nullptr, bool global = kDefaultDerivativesAreGlobal,
-                  bool coupled = kDefaultDerivativesAreCoupled) const -> Translation;
+  template <typename TOther_>
+  auto vectorPlus(const Eigen::MatrixBase<TOther_>& v, Scalar* J_this = nullptr, Scalar* J_v = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> Translation;
 
   /// Conversion to tangent element.
   /// \param raw_J Input Jacobian (if requested).
   /// \param global Global Jacobian flag.
   /// \param coupled Coupled Jacobian flag.
   /// \return Tangent element.
-  auto toTangent(Scalar* raw_J = nullptr, bool global = kDefaultDerivativesAreGlobal, bool coupled = kDefaultDerivativesAreCoupled) const -> Tangent<SE3<Scalar>>;
+  auto toTangent(Scalar* raw_J = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> Tangent<SE3<Scalar>>;
 };
 
 template <typename TScalar>
@@ -149,29 +147,29 @@ class SE3 final : public SE3Base<SE3<TScalar>> {
   explicit SE3(const TScalar* other) : Base{other} {}
 
   /// Copy constructor.
-  /// \tparam TOtherDerived_ Other derived type.
+  /// \tparam TOther_ Other derived type.
   /// \param other Other input instance.
-  template <typename TOtherDerived_>
-  SE3(const SE3Base<TOtherDerived_>& other)  // NOLINT
+  template <typename TOther_>
+  SE3(const SE3Base<TOther_>& other)  // NOLINT
       : Base{other} {}
 
   /// Assignment operator.
-  /// \tparam TOtherDerived_ Other dervied type.
+  /// \tparam TOther_ Other dervied type.
   /// \param other Other input instance.
   /// \return This instance.
-  template <typename TOtherDerived_>
-  auto operator=(const SE3Base<TOtherDerived_>& other) -> SE3& {
+  template <typename TOther_>
+  auto operator=(const SE3Base<TOther_>& other) -> SE3& {
     Base::operator=(other);
     return *this;
   }
 
   /// Constructor from rotation and translation.
   /// \tparam TDerived_ Derived type.
-  /// \tparam TOtherDerived_ Other derived type.
+  /// \tparam TOther_ Other derived type.
   /// \param rotation Input rotation.
   /// \param translation Input translation.
-  template <typename TDerived_, typename TOtherDerived_>
-  SE3(const SU2Base<TDerived_>& rotation, const Eigen::MatrixBase<TOtherDerived_>& translation) {
+  template <typename TDerived_, typename TOther_>
+  SE3(const SU2Base<TDerived_>& rotation, const Eigen::MatrixBase<TOther_>& translation) {
     this->rotation().coeffs().noalias() = rotation.coeffs();
     this->translation().noalias() = translation;
   }
@@ -197,8 +195,8 @@ class SE3TangentBase : public CartesianBase<TDerived> {
   static constexpr auto kLinearOffset = kAngularOffset + kNumAngularParameters;
   static constexpr auto kNumLinearParameters = 3;
 
-  static constexpr auto kDefaultDerivativesAreGlobal = HYPER_DEFAULT_TO_GLOBAL_MANIFOLD_DERIVATIVES;
-  static constexpr auto kDefaultDerivativesAreCoupled = HYPER_DEFAULT_TO_COUPLED_MANIFOLD_DERIVATIVES;
+  static constexpr auto kGlobal = HYPER_DEFAULT_TO_GLOBAL_MANIFOLD_DERIVATIVES;
+  static constexpr auto kCoupled = HYPER_DEFAULT_TO_COUPLED_MANIFOLD_DERIVATIVES;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SE3TangentBase)
 
@@ -231,11 +229,11 @@ class SE3TangentBase : public CartesianBase<TDerived> {
   auto linear() -> Eigen::Map<LinearWithConstIfNotLvalue> { return Eigen::Map<LinearWithConstIfNotLvalue>{this->data() + kLinearOffset}; }
 
   /// Converts this to a manifold element.
-  /// \param raw_J Input Jacobian (if requested).
+  /// \param J_this Input Jacobian (if requested).
   /// \param global Request global Jacobians flag.
   /// \param coupled Compute SE3 instead of SU2 x R3 Jacobians.
   /// \return Manifold element.
-  auto toManifold(Scalar* raw_J = nullptr, bool global = kDefaultDerivativesAreGlobal, bool coupled = kDefaultDerivativesAreCoupled) const -> SE3<Scalar>;
+  auto toManifold(Scalar* J_this = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> SE3<Scalar>;
 };
 
 template <typename TScalar>
@@ -295,14 +293,14 @@ auto SE3Base<TDerived>::translation() -> Eigen::Map<TranslationWithConstIfNotLva
 }
 
 template <typename TDerived>
-auto SE3Base<TDerived>::groupInverse(Scalar* raw_J, const bool global, const bool coupled) const -> SE3<Scalar> {
+auto SE3Base<TDerived>::groupInverse(Scalar* J_this, const bool global, const bool coupled) const -> SE3<Scalar> {
   const auto i_rotation = rotation().groupInverse();
   const Translation i_translation = Scalar{-1} * (i_rotation.vectorPlus(translation()));
   auto output = SE3<Scalar>{i_rotation, i_translation};
 
-  if (raw_J) {
+  if (J_this) {
     using Tangent = Tangent<SE3<Scalar>>;
-    auto J = Eigen::Map<JacobianNM<Tangent>>{raw_J};
+    auto J = Eigen::Map<JacobianNM<Tangent>>{J_this};
 
     if (coupled) {
       if (global) {
@@ -339,15 +337,15 @@ auto SE3Base<TDerived>::groupInverse(Scalar* raw_J, const bool global, const boo
 }
 
 template <typename TDerived>
-template <typename TOtherDerived_>
-auto SE3Base<TDerived>::groupPlus(const SE3Base<TOtherDerived_>& other, Scalar* raw_J_this, Scalar* raw_J_other, const bool global, const bool coupled) const -> SE3<Scalar> {
+template <typename TOther_>
+auto SE3Base<TDerived>::groupPlus(const SE3Base<TOther_>& other, Scalar* J_this, Scalar* J_other, const bool global, const bool coupled) const -> SE3<Scalar> {
   const auto R_this_R_other = rotation().groupPlus(other.rotation());
   const auto R_this_t_other = rotation().vectorPlus(other.translation());
   auto output = SE3<Scalar>{R_this_R_other, R_this_t_other + this->translation()};
 
-  if (raw_J_this) {
+  if (J_this) {
     using Tangent = Tangent<SE3<Scalar>>;
-    auto J = Eigen::Map<JacobianNM<Tangent>>{raw_J_this};
+    auto J = Eigen::Map<JacobianNM<Tangent>>{J_this};
 
     if (coupled) {
       if (global) {
@@ -376,9 +374,9 @@ auto SE3Base<TDerived>::groupPlus(const SE3Base<TOtherDerived_>& other, Scalar* 
     }
   }
 
-  if (raw_J_other) {
+  if (J_other) {
     using Tangent = Tangent<SE3<Scalar>>;
-    auto J = Eigen::Map<JacobianNM<Tangent>>{raw_J_other};
+    auto J = Eigen::Map<JacobianNM<Tangent>>{J_other};
 
     if (coupled) {
       if (global) {
@@ -411,8 +409,8 @@ auto SE3Base<TDerived>::groupPlus(const SE3Base<TOtherDerived_>& other, Scalar* 
 }
 
 template <typename TDerived>
-template <typename TOtherDerived_>
-auto SE3Base<TDerived>::groupMinus(const SE3Base<TOtherDerived_>& other, const bool global, const bool coupled) const -> Tangent<SE3<Scalar>> {
+template <typename TOther_>
+auto SE3Base<TDerived>::groupMinus(const SE3Base<TOther_>& other, const bool global, const bool coupled) const -> Tangent<SE3<Scalar>> {
   if (coupled) {
     if (global) {
       return this->groupPlus(other.groupInverse()).toTangent();
@@ -435,8 +433,8 @@ auto SE3Base<TDerived>::groupMinus(const SE3Base<TOtherDerived_>& other, const b
 }
 
 template <typename TDerived>
-template <typename TOtherDerived_>
-auto SE3Base<TDerived>::tangentPlus(const SE3TangentBase<TOtherDerived_>& tangent, const bool global, const bool coupled) const -> SE3<Scalar> {
+template <typename TOther_>
+auto SE3Base<TDerived>::tangentPlus(const SE3TangentBase<TOther_>& tangent, const bool global, const bool coupled) const -> SE3<Scalar> {
   if (coupled) {
     if (global) {
       return tangent.toManifold().groupPlus(*this);
@@ -453,17 +451,17 @@ auto SE3Base<TDerived>::tangentPlus(const SE3TangentBase<TOtherDerived_>& tangen
 }
 
 template <typename TDerived>
-template <typename TOtherDerived_>
-auto SE3Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, Scalar* raw_J_this, Scalar* raw_J_v, const bool global, const bool coupled) const -> Translation {
-  EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TOtherDerived_, 3)
+template <typename TOther_>
+auto SE3Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOther_>& v, Scalar* J_this, Scalar* J_v, const bool global, const bool coupled) const -> Translation {
+  EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TOther_, 3)
 
   const auto R_this = this->rotation().matrix();
   const Translation R_this_v = R_this * v;
   Translation output = R_this_v + translation();
 
-  if (raw_J_this) {
+  if (J_this) {
     using Tangent = Tangent<SE3<Scalar>>;
-    auto J = Eigen::Map<JacobianNM<Translation, Tangent>>{raw_J_this};
+    auto J = Eigen::Map<JacobianNM<Translation, Tangent>>{J_this};
 
     if (coupled) {
       if (global) {
@@ -485,24 +483,24 @@ auto SE3Base<TDerived>::vectorPlus(const Eigen::MatrixBase<TOtherDerived_>& v, S
     }
   }
 
-  if (raw_J_v) {
-    Eigen::Map<JacobianNM<Translation>>{raw_J_v}.noalias() = R_this;
+  if (J_v) {
+    Eigen::Map<JacobianNM<Translation>>{J_v}.noalias() = R_this;
   }
 
   return output;
 }
 
 template <typename TDerived>
-auto SE3Base<TDerived>::toTangent(Scalar* raw_J, const bool global, const bool coupled) const -> Tangent<SE3<Scalar>> {
+auto SE3Base<TDerived>::toTangent(Scalar* J_this, const bool global, const bool coupled) const -> Tangent<SE3<Scalar>> {
   Tangent<SE3<Scalar>> output;
 
-  if (raw_J) {
+  if (J_this) {
     JacobianNM<Tangent<SU2<Scalar>>> J_r;
     output.angular().noalias() = rotation().toTangent(J_r.data(), global);
     output.linear().noalias() = translation();
 
     using Tangent = Tangent<SE3<Scalar>>;
-    auto J = Eigen::Map<JacobianNM<Tangent>>{raw_J};
+    auto J = Eigen::Map<JacobianNM<Tangent>>{J_this};
 
     if (coupled) {
       if (global) {
@@ -531,16 +529,16 @@ auto SE3Base<TDerived>::toTangent(Scalar* raw_J, const bool global, const bool c
 }
 
 template <typename TDerived>
-auto SE3TangentBase<TDerived>::toManifold(Scalar* raw_J, const bool global, const bool coupled) const -> SE3<Scalar> {
+auto SE3TangentBase<TDerived>::toManifold(Scalar* J_this, const bool global, const bool coupled) const -> SE3<Scalar> {
   SE3<Scalar> output;
 
-  if (raw_J) {
+  if (J_this) {
     JacobianNM<Tangent<SU2<Scalar>>> J_r;
     output.rotation() = angular().toManifold(J_r.data(), global);
     output.translation().noalias() = linear();
 
     using Tangent = Tangent<SE3<Scalar>>;
-    auto J = Eigen::Map<JacobianNM<Tangent>>{raw_J};
+    auto J = Eigen::Map<JacobianNM<Tangent>>{J_this};
 
     if (coupled) {
       if (global) {
