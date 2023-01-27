@@ -108,24 +108,6 @@ namespace hyper::variables {
     using Base = typename Eigen::Map<const typename Traits<Tangent<NAME<TScalar>>>::Base, TMapOptions>;   \
   };
 
-#define HYPER_DECLARE_ALGEBRA_MAP(NAME)                                                                                                   \
-  namespace Eigen {                                                                                                                       \
-  template <typename TScalar, int TMapOptions>                                                                                            \
-  class Map<Algebra<NAME<TScalar>>, TMapOptions> final : public NAME##TangentBase<Map<Algebra<NAME<TScalar>>, TMapOptions>> {             \
-   public:                                                                                                                                \
-    using Base = NAME##TangentBase<Map<Algebra<NAME<TScalar>>, TMapOptions>>;                                                             \
-    using Base::Base;                                                                                                                     \
-    HYPER_INHERIT_ASSIGNMENT_OPERATORS(Map)                                                                                               \
-  };                                                                                                                                      \
-                                                                                                                                          \
-  template <typename TScalar, int TMapOptions>                                                                                            \
-  class Map<const Algebra<NAME<TScalar>>, TMapOptions> final : public NAME##TangentBase<Map<const Algebra<NAME<TScalar>>, TMapOptions>> { \
-   public:                                                                                                                                \
-    using Base = NAME##TangentBase<Map<const Algebra<NAME<TScalar>>, TMapOptions>>;                                                       \
-    using Base::Base;                                                                                                                     \
-  };                                                                                                                                      \
-  }
-
 #define HYPER_DECLARE_TANGENT_MAP(NAME)                                                                                                   \
   namespace Eigen {                                                                                                                       \
   template <typename TScalar, int TMapOptions>                                                                                            \

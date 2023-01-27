@@ -15,26 +15,22 @@ struct JacobianAdapterImpl;
 
 template <typename TScalar>
 struct JacobianAdapterImpl<SU2<TScalar>> {
-  // Constants.
-  static constexpr auto kAlpha = TScalar{2.0};
-  static constexpr auto kiAlpha = 1 / kAlpha;
-
   // Definitions.
-  using Manifold = variables::SU2<TScalar>;
-  using Tangent = variables::Tangent<Manifold>;
+  using Group = variables::SU2<TScalar>;
+  using Tangent = variables::Tangent<Group>;
 
-  /// Adapter from manifold to tangent Jacobian.
+  /// Adapter from group to tangent Jacobian.
   /// \param values Values.
   /// \return Jacobian.
-  static auto project(const TScalar* values) -> JacobianNM<Manifold, Tangent> {
-    JacobianNM<Manifold, Tangent> J;
+  static auto project(const TScalar* values) -> JacobianNM<Group, Tangent> {
+    JacobianNM<Group, Tangent> J;
 
-    using Order = Manifold::Ordering;
+    using Order = Group::Ordering;
     TScalar tau[SU2<TScalar>::kNumParameters];
-    tau[Order::kW] = kiAlpha * values[Order::kW];
-    tau[Order::kX] = kiAlpha * values[Order::kX];
-    tau[Order::kY] = kiAlpha * values[Order::kY];
-    tau[Order::kZ] = kiAlpha * values[Order::kZ];
+    tau[Order::kW] = Group::kiAlpha * values[Order::kW];
+    tau[Order::kX] = Group::kiAlpha * values[Order::kX];
+    tau[Order::kY] = Group::kiAlpha * values[Order::kY];
+    tau[Order::kZ] = Group::kiAlpha * values[Order::kZ];
 
     J(Order::kX, 0) = tau[Order::kW];
     J(Order::kY, 0) = tau[Order::kZ];
@@ -54,18 +50,18 @@ struct JacobianAdapterImpl<SU2<TScalar>> {
     return J;
   }
 
-  /// Adapter from tangent to manifold Jacobian.
+  /// Adapter from tangent to group Jacobian.
   /// \param values Values.
   /// \return Jacobian.
-  static auto lift(const TScalar* values) -> JacobianNM<Tangent, Manifold> {
-    JacobianNM<Tangent, Manifold> J;
+  static auto lift(const TScalar* values) -> JacobianNM<Tangent, Group> {
+    JacobianNM<Tangent, Group> J;
 
-    using Order = Manifold::Ordering;
+    using Order = Group::Ordering;
     TScalar tau[SU2<TScalar>::kNumParameters];
-    tau[Order::kW] = kAlpha * values[Order::kW];
-    tau[Order::kX] = kAlpha * values[Order::kX];
-    tau[Order::kY] = kAlpha * values[Order::kY];
-    tau[Order::kZ] = kAlpha * values[Order::kZ];
+    tau[Order::kW] = Group::kAlpha * values[Order::kW];
+    tau[Order::kX] = Group::kAlpha * values[Order::kX];
+    tau[Order::kY] = Group::kAlpha * values[Order::kY];
+    tau[Order::kZ] = Group::kAlpha * values[Order::kZ];
 
     J(0, Order::kX) = tau[Order::kW];
     J(1, Order::kX) = -tau[Order::kZ];
@@ -90,32 +86,32 @@ struct JacobianAdapterImpl<SU2<TScalar>> {
 template <class TScalar>
 struct JacobianAdapterImpl<SE3<TScalar>> {
   // Definitions.
-  using Manifold = variables::SE3<TScalar>;
-  using Tangent = variables::Tangent<Manifold>;
+  using Group = variables::SE3<TScalar>;
+  using Tangent = variables::Tangent<Group>;
 
-  /// Adapter from manifold to tangent Jacobian.
+  /// Adapter from group to tangent Jacobian.
   /// \param values Values.
   /// \return Jacobian.
-  static auto project(const TScalar* values) -> JacobianNM<Manifold, Tangent> {
-    JacobianNM<Manifold, Tangent> J;
-    Tangent::template AngularJacobian<Manifold::kNumRotationParameters>(J, Manifold::kRotationOffset).noalias() =
-        JacobianAdapterImpl<SU2<TScalar>>::project(values + Manifold::kRotationOffset);
-    Tangent::template LinearJacobian<Manifold::kNumRotationParameters>(J, Manifold::kRotationOffset).setZero();
-    Tangent::template AngularJacobian<Manifold::kNumTranslationParameters>(J, Manifold::kTranslationOffset).setZero();
-    Tangent::template LinearJacobian<Manifold::kNumTranslationParameters>(J, Manifold::kTranslationOffset).setIdentity();
+  static auto project(const TScalar* values) -> JacobianNM<Group, Tangent> {
+    JacobianNM<Group, Tangent> J;
+    Tangent::template AngularJacobian<Group::kNumRotationParameters>(J, Group::kRotationOffset).noalias() =
+        JacobianAdapterImpl<SU2<TScalar>>::project(values + Group::kRotationOffset);
+    Tangent::template LinearJacobian<Group::kNumRotationParameters>(J, Group::kRotationOffset).setZero();
+    Tangent::template AngularJacobian<Group::kNumTranslationParameters>(J, Group::kTranslationOffset).setZero();
+    Tangent::template LinearJacobian<Group::kNumTranslationParameters>(J, Group::kTranslationOffset).setIdentity();
     return J;
   }
 
-  /// Adapter from tangent to manifold Jacobian.
+  /// Adapter from tangent to group Jacobian.
   /// \param values Values.
   /// \return Jacobian.
-  static auto lift(const TScalar* values) -> JacobianNM<Tangent, Manifold> {
-    JacobianNM<Tangent, Manifold> J;
-    Manifold::template RotationJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() =
-        JacobianAdapterImpl<SU2<TScalar>>::lift(values + Manifold::kRotationOffset);
-    Manifold::template TranslationJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-    Manifold::template RotationJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setZero();
-    Manifold::template TranslationJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setIdentity();
+  static auto lift(const TScalar* values) -> JacobianNM<Tangent, Group> {
+    JacobianNM<Tangent, Group> J;
+    Group::template RotationJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() =
+        JacobianAdapterImpl<SU2<TScalar>>::lift(values + Group::kRotationOffset);
+    Group::template TranslationJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
+    Group::template RotationJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setZero();
+    Group::template TranslationJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setIdentity();
     return J;
   }
 };

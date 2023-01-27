@@ -11,31 +11,31 @@ template <typename TVariable>
 class JacobianAdapterTests : public ::testing::Test {
  public:
   // Constants.
-  static constexpr auto kNumInnerIterations = 10;
+  static constexpr auto kItr = 10;
 
   // Definitions.
-  using Manifold = TVariable;
-  using Tangent = variables::Tangent<Manifold>;
-  // using ManifoldJacobian = variables::JacobianNM<Manifold>;
+  using Variable = TVariable;
+  using Tangent = variables::Tangent<Variable>;
+  // using VariableJacobian = variables::JacobianNM<Variable>;
   using TangentJacobian = variables::JacobianNM<Tangent>;
 
   /// Checks the adapter duality.
   /// \return True on success.
   auto checkDuality() -> bool {
-    manifold = Manifold::Random();
-    const auto J_l = JacobianAdapter<Manifold>(manifold.data());
-    const auto J_p = InverseJacobianAdapter<Manifold>(manifold.data());
+    variable = Variable::Random();
+    const auto J_l = JacobianAdapter<Variable>(variable.data());
+    const auto J_p = InverseJacobianAdapter<Variable>(variable.data());
     return (J_l * J_p).isApprox(TangentJacobian::Identity());
   }
 
-  Manifold manifold;
+  Variable variable;
 };
 
 using TestTypes = ::testing::Types<SU2<double>, SE3<double>>;
 TYPED_TEST_SUITE(JacobianAdapterTests, TestTypes);
 
 TYPED_TEST(JacobianAdapterTests, Duality) {
-  for (auto i = 0; i < TestFixture::kNumInnerIterations; ++i) {
+  for (auto i = 0; i < TestFixture::kItr; ++i) {
     EXPECT_TRUE(this->checkDuality());
   }
 }

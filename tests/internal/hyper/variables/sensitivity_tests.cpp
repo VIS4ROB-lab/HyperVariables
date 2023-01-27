@@ -10,10 +10,10 @@ namespace hyper::variables::tests {
 class SensitivityTests : public testing::Test {
  protected:
   // Constants.
-  static constexpr auto kNumOuterIterations = 5;
-  static constexpr auto kNumInnerIterations = 10;
-  static constexpr auto kNumericIncrement = 1e-6;
-  static constexpr auto kNumericTolerance = 1e-8;
+  static constexpr auto kOuterItr = 5;
+  static constexpr auto kInnerItr = 10;
+  static constexpr auto kInc = 1e-6;
+  static constexpr auto kTol = 1e-8;
 
   // Definitions.
   using Scalar = double;
@@ -31,12 +31,12 @@ class SensitivityTests : public testing::Test {
 
     InputJacobian J_n;
     for (auto j = 0; j < Sensitivity::kOrder; ++j) {
-      const Input d_input = input + kNumericIncrement * Input::Unit(j);
+      const Input d_input = input + kInc * Input::Unit(j);
       const auto d_output = sensitivity_.act(d_input, nullptr, nullptr);
-      J_n.col(j) = (d_output - output) / kNumericIncrement;
+      J_n.col(j) = (d_output - output) / kInc;
     }
 
-    return J_n.isApprox(J_a, kNumericTolerance);
+    return J_n.isApprox(J_a, kTol);
   }
 
   [[nodiscard]] auto checkParameterJacobian() const -> bool {
@@ -47,30 +47,30 @@ class SensitivityTests : public testing::Test {
 
     ParameterJacobian J_n;
     for (auto j = 0; j < sensitivity_.size(); ++j) {
-      const Sensitivity d_alignment = sensitivity_ + kNumericIncrement * Sensitivity::Unit(j);
+      const Sensitivity d_alignment = sensitivity_ + kInc * Sensitivity::Unit(j);
       const auto d_output = d_alignment.act(input, nullptr, nullptr);
-      J_n.col(j) = (d_output - output) / kNumericIncrement;
+      J_n.col(j) = (d_output - output) / kInc;
     }
 
-    return J_n.isApprox(J_a, kNumericTolerance);
+    return J_n.isApprox(J_a, kTol);
   }
 
   Sensitivity sensitivity_;
 };
 
 TEST_F(SensitivityTests, InputJacobian) {
-  for (auto i = 0; i < kNumOuterIterations; ++i) {
+  for (auto i = 0; i < kOuterItr; ++i) {
     sensitivity_.setRandom();
-    for (auto j = 0; j < kNumInnerIterations; ++j) {
+    for (auto j = 0; j < kInnerItr; ++j) {
       EXPECT_TRUE(checkInputJacobian());
     }
   }
 }
 
 TEST_F(SensitivityTests, ParameterJacobian) {
-  for (auto i = 0; i < kNumOuterIterations; ++i) {
+  for (auto i = 0; i < kOuterItr; ++i) {
     sensitivity_.setRandom();
-    for (auto j = 0; j < kNumInnerIterations; ++j) {
+    for (auto j = 0; j < kInnerItr; ++j) {
       EXPECT_TRUE(checkParameterJacobian());
     }
   }
