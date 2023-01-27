@@ -55,8 +55,8 @@ class SU2Tests : public testing::Test {
     SU2Jacobian J_a, J_n;
     const auto i_q = su2_.gInv(J_a.data(), global);
     for (auto j = 0; j < SU2Tangent::kNumParameters; ++j) {
-      const SU2Tangent increment = kInc * SU2Tangent::Unit(j);
-      J_n.col(j) = su2_.tPlus(increment, global).gInv().tMinus(i_q, global) / kInc;
+      const SU2Tangent inc = kInc * SU2Tangent::Unit(j);
+      J_n.col(j) = su2_.tPlus(inc, global).gInv().tMinus(i_q, global) / kInc;
     }
 
     return J_n.isApprox(J_a, kTol);
@@ -69,15 +69,15 @@ class SU2Tests : public testing::Test {
     SU2Jacobian J_lhs_a, J_lhs_n, J_rhs_a, J_rhs_n;
     su2_.gPlus(other_su2, J_lhs_a.data(), J_rhs_a.data(), global);
     for (auto j = 0; j < SU2Tangent::kNumParameters; ++j) {
-      const SU2Tangent increment = kInc * SU2Tangent::Unit(j);
-      J_lhs_n.col(j) = su2_.tPlus(increment, global).gPlus(other_su2).tMinus(su2, global) / kInc;
-      J_rhs_n.col(j) = su2_.gPlus(other_su2.tPlus(increment, global)).tMinus(su2, global) / kInc;
+      const SU2Tangent inc = kInc * SU2Tangent::Unit(j);
+      J_lhs_n.col(j) = su2_.tPlus(inc, global).gPlus(other_su2).tMinus(su2, global) / kInc;
+      J_rhs_n.col(j) = su2_.gPlus(other_su2.tPlus(inc, global)).tMinus(su2, global) / kInc;
     }
 
     return J_lhs_n.isApprox(J_lhs_a, kTol) && J_rhs_n.isApprox(J_rhs_a, kTol);
   }
 
-  [[nodiscard]] auto checkVectorPlusJacobian(const bool global) const -> bool {
+  [[nodiscard]] auto checkGroupActionJacobian(const bool global) const -> bool {
     const Vector input = Vector::Random();
 
     VectorSU2Jacobian J_a, J_n;
@@ -85,8 +85,8 @@ class SU2Tests : public testing::Test {
     const auto output = su2_.act(input);
     su2_.act(input, J_a.data(), J_v_a.data(), global);
     for (auto j = 0; j < SU2Tangent::kNumParameters; ++j) {
-      const SU2Tangent increment = kInc * SU2Tangent::Unit(j);
-      J_n.col(j) = (su2_.tPlus(increment, global).act(input) - output) / kInc;
+      const SU2Tangent inc = kInc * SU2Tangent::Unit(j);
+      J_n.col(j) = (su2_.tPlus(inc, global).act(input) - output) / kInc;
     }
     for (auto j = 0; j < Vector::kNumParameters; ++j) {
       J_v_n.col(j) = (su2_.act(input + kInc * Vector::Unit(j)) - output) / kInc;
@@ -108,9 +108,9 @@ class SU2Tests : public testing::Test {
 
     SU2Jacobian J_l_n, J_e_n;
     for (auto j = 0; j < SU2Tangent::kNumParameters; ++j) {
-      const SU2Tangent increment = kInc * SU2Tangent::Unit(j);
-      const SU2Tangent d_tangent = tangent + increment;
-      J_l_n.col(j) = (su2_.tPlus(increment, global).gLog() - tangent) / kInc;
+      const SU2Tangent inc = kInc * SU2Tangent::Unit(j);
+      const SU2Tangent d_tangent = tangent + inc;
+      J_l_n.col(j) = (su2_.tPlus(inc, global).gLog() - tangent) / kInc;
       J_e_n.col(j) = d_tangent.gExp().tMinus(su2_, global) / kInc;
     }
 
@@ -136,11 +136,11 @@ TEST_F(SU2Tests, GroupPlus) {
   }
 }
 
-TEST_F(SU2Tests, VectorPlus) {
+TEST_F(SU2Tests, GroupAction) {
   for (auto i = 0; i < kItr; ++i) {
     su2_ = SU2::Random();
-    EXPECT_TRUE(checkVectorPlusJacobian(true));
-    EXPECT_TRUE(checkVectorPlusJacobian(false));
+    EXPECT_TRUE(checkGroupActionJacobian(true));
+    EXPECT_TRUE(checkGroupActionJacobian(false));
   }
 }
 

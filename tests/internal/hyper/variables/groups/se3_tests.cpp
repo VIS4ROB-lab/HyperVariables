@@ -28,8 +28,8 @@ class SE3Tests : public testing::Test {
     SE3Jacobian J_a, J_n;
     const auto i_se3 = se3_.gInv(J_a.data(), global, coupled);
     for (auto j = 0; j < SE3Tangent::kNumParameters; ++j) {
-      const SE3Tangent increment = kInc * SE3Tangent::Unit(j);
-      J_n.col(j) = se3_.tPlus(increment, global, coupled).gInv().tMinus(i_se3, global, coupled) / kInc;
+      const SE3Tangent inc = kInc * SE3Tangent::Unit(j);
+      J_n.col(j) = se3_.tPlus(inc, global, coupled).gInv().tMinus(i_se3, global, coupled) / kInc;
     }
 
     return J_n.isApprox(J_a, kTol);
@@ -41,15 +41,15 @@ class SE3Tests : public testing::Test {
     SE3Jacobian J_lhs_a, J_lhs_n, J_rhs_a, J_rhs_n;
     const auto se3 = se3_.gPlus(other_se3, J_lhs_a.data(), J_rhs_a.data(), global, coupled);
     for (auto j = 0; j < SE3Tangent::kNumParameters; ++j) {
-      const SE3Tangent increment = kInc * SE3Tangent::Unit(j);
-      J_lhs_n.col(j) = se3_.tPlus(increment, global, coupled).gPlus(other_se3).tMinus(se3, global, coupled) / kInc;
-      J_rhs_n.col(j) = se3_.gPlus(other_se3.tPlus(increment, global, coupled)).tMinus(se3, global, coupled) / kInc;
+      const SE3Tangent inc = kInc * SE3Tangent::Unit(j);
+      J_lhs_n.col(j) = se3_.tPlus(inc, global, coupled).gPlus(other_se3).tMinus(se3, global, coupled) / kInc;
+      J_rhs_n.col(j) = se3_.gPlus(other_se3.tPlus(inc, global, coupled)).tMinus(se3, global, coupled) / kInc;
     }
 
     return J_lhs_n.isApprox(J_lhs_a, kTol) && J_rhs_n.isApprox(J_rhs_a, kTol);
   }
 
-  [[nodiscard]] auto checkVectorPlusJacobian(const bool coupled) const -> bool {
+  [[nodiscard]] auto checkGroupActionJacobian(const bool coupled) const -> bool {
     using Vector = SE3::Translation;
     const Vector input = Vector::Random();
 
@@ -59,9 +59,9 @@ class SE3Tests : public testing::Test {
     se3_.act(input, J_l_a.data(), J_l_p_a.data(), coupled, true);
     se3_.act(input, J_r_a.data(), J_r_p_a.data(), coupled, false);
     for (auto j = 0; j < SE3Tangent::kNumParameters; ++j) {
-      const SE3Tangent increment = kInc * SE3Tangent::Unit(j);
-      J_l_n.col(j) = (se3_.tPlus(increment, coupled, true).act(input) - output) / kInc;
-      J_r_n.col(j) = (se3_.tPlus(increment, coupled, false).act(input) - output) / kInc;
+      const SE3Tangent inc = kInc * SE3Tangent::Unit(j);
+      J_l_n.col(j) = (se3_.tPlus(inc, coupled, true).act(input) - output) / kInc;
+      J_r_n.col(j) = (se3_.tPlus(inc, coupled, false).act(input) - output) / kInc;
     }
 
     for (auto j = 0; j < Vector::kNumParameters; ++j) {
@@ -83,9 +83,9 @@ class SE3Tests : public testing::Test {
 
     SE3Jacobian J_l_n, J_e_n;
     for (auto j = 0; j < SE3Tangent::kNumParameters; ++j) {
-      const SE3Tangent increment = SE3Tangent{kInc * SE3Tangent::Unit(j)};
-      const SE3Tangent d_tangent = tangent + increment;
-      J_l_n.col(j) = (se3_.tPlus(increment, global, coupled).gLog() - tangent) / kInc;
+      const SE3Tangent inc = SE3Tangent{kInc * SE3Tangent::Unit(j)};
+      const SE3Tangent d_tangent = tangent + inc;
+      J_l_n.col(j) = (se3_.tPlus(inc, global, coupled).gLog() - tangent) / kInc;
       J_e_n.col(j) = d_tangent.gExp().tMinus(se3_, global, coupled) / kInc;
     }
 
@@ -116,11 +116,11 @@ TEST_F(SE3Tests, GroupPlus) {
   }
 }
 
-TEST_F(SE3Tests, VectorPlus) {
+TEST_F(SE3Tests, GroupAction) {
   for (auto i = 0; i < kItr; ++i) {
     se3_ = SE3::Random();
-    EXPECT_TRUE(checkVectorPlusJacobian(false));
-    EXPECT_TRUE(checkVectorPlusJacobian(true));
+    EXPECT_TRUE(checkGroupActionJacobian(false));
+    EXPECT_TRUE(checkGroupActionJacobian(true));
   }
 }
 

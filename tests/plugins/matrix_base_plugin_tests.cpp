@@ -8,7 +8,7 @@
 namespace hyper::tests {
 
 TEST(MatrixBasePluginTests, HatVeeDuality) {
-  constexpr auto kNumericTolerance = 1e-12;
+  constexpr auto kTol = 1e-12;
 
   using Scalar = double;
   using Vector = Eigen::Matrix<Scalar, 3, 1>;
@@ -20,10 +20,10 @@ TEST(MatrixBasePluginTests, HatVeeDuality) {
   const auto ux = u.hat();
   const auto vx = v.hat();
 
-  EXPECT_TRUE(ux.isApprox(Scalar{-1} * ux.transpose(), kNumericTolerance));
-  EXPECT_TRUE(ux.vee().isApprox(u, kNumericTolerance));
-  EXPECT_TRUE(uxv.isApprox(ux * v, kNumericTolerance));
-  EXPECT_TRUE(uxv.hat().isApprox(ux * vx - vx * ux, kNumericTolerance));
+  EXPECT_TRUE(ux.isApprox(Scalar{-1} * ux.transpose(), kTol));
+  EXPECT_TRUE(ux.vee().isApprox(u, kTol));
+  EXPECT_TRUE(uxv.isApprox(ux * v, kTol));
+  EXPECT_TRUE(uxv.hat().isApprox(ux * vx - vx * ux, kTol));
 }
 
-} // namespace hyper::tests
+}  // namespace hyper::tests

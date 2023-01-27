@@ -17,8 +17,6 @@ class MetricsTests : public testing::Test {
   // Definitions.
   using Scalar = double;
   using Index = Eigen::Index;
-  using SE3 = variables::SE3<Scalar>;
-  using SE3Tangent = variables::Tangent<SE3>;
 
   [[nodiscard]] static auto CheckCartesianMetric() -> bool {
     using Metric = metrics::CartesianMetric<Scalar, 3>;
@@ -31,7 +29,7 @@ class MetricsTests : public testing::Test {
 
     Jacobian J_lhs_a, J_rhs_a, J_lhs_n, J_rhs_n;
     const auto f = Metric::Distance(u, v, J_lhs_a.data(), J_rhs_a.data());
-    for (auto i = Eigen::Index{0}; i < Input::kNumParameters; ++i) {
+    for (auto i = Index{0}; i < Input::kNumParameters; ++i) {
       J_lhs_n.col(i) = (Metric::Distance(u + kInc * Input::Unit(i), v) - f) / kInc;
       J_rhs_n.col(i) = (Metric::Distance(u, v + kInc * Input::Unit(i)) - f) / kInc;
     }
@@ -50,7 +48,7 @@ class MetricsTests : public testing::Test {
 
     Jacobian J_lhs_a, J_rhs_a, J_lhs_n, J_rhs_n;
     const auto f = Metric::Distance(u, v, J_lhs_a.data(), J_rhs_a.data());
-    for (auto i = Eigen::Index{0}; i < Input::kNumParameters; ++i) {
+    for (auto i = Index{0}; i < Input::kNumParameters; ++i) {
       J_lhs_n.col(i) = (Metric::Distance(u + kInc * Input::Unit(i), v) - f) / kInc;
       J_rhs_n.col(i) = (Metric::Distance(u, v + kInc * Input::Unit(i)) - f) / kInc;
     }
@@ -59,7 +57,9 @@ class MetricsTests : public testing::Test {
   }
 
   [[nodiscard]] static auto CheckManifoldMetric(const bool global, const bool coupled) -> bool {
-    using Metric = metrics::ManifoldMetric<SE3>;
+    using Variable = variables::SE3<Scalar>;
+    using Tangent = variables::Tangent<Variable>;
+    using Metric = metrics::ManifoldMetric<Variable>;
     using Input = Metric::Input;
     using Output = Metric::Output;
     using Jacobian = Metric::Jacobian;
@@ -69,31 +69,13 @@ class MetricsTests : public testing::Test {
 
     Jacobian J_lhs_a, J_rhs_a, J_lhs_n, J_rhs_n;
     const auto f = Metric::Distance(u, v, J_lhs_a.data(), J_rhs_a.data(), global, coupled);
-    for (auto i = Eigen::Index{0}; i < Output::kNumParameters; ++i) {
-      J_lhs_n.col(i) = (Metric::Distance(SE3NumericGroupPlus(u, global, coupled, i), v) - f) / kInc;
-      J_rhs_n.col(i) = (Metric::Distance(u, SE3NumericGroupPlus(v, global, coupled, i)) - f) / kInc;
+    for (auto i = Index{0}; i < Output::kNumParameters; ++i) {
+      const Tangent inc = kInc * Tangent::Unit(i);
+      J_lhs_n.col(i) = (Metric::Distance(u.tPlus(inc, global, coupled), v) - f) / kInc;
+      J_rhs_n.col(i) = (Metric::Distance(u, v.tPlus(inc, global, coupled)) - f) / kInc;
     }
 
     return J_lhs_n.isApprox(J_lhs_a, kTol) && J_rhs_n.isApprox(J_rhs_a, kTol);
-  }
-
- private:
-  static auto SE3NumericGroupPlus(const Eigen::Ref<const SE3>& se3, const bool global, const bool coupled, const Index i) -> SE3 {
-    const auto tau = SE3Tangent{kInc * SE3Tangent::Unit(i)};
-
-    if (coupled) {
-      if (global) {
-        return tau.gExp().gPlus(se3);
-      } else {
-        return se3.gPlus(tau.gExp());
-      }
-    } else {
-      if (global) {
-        return {tau.angular().gExp().gPlus(se3.rotation()), se3.translation() + tau.linear()};
-      } else {
-        return {se3.rotation().gPlus(tau.angular().gExp()), se3.translation() + tau.linear()};
-      }
-    }
   }
 };
 
