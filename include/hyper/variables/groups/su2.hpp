@@ -92,8 +92,7 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
     const auto nq = std::sqrt(nq2);
 
     DLOG_IF(FATAL, nq < Eigen::NumTraits<Scalar>::epsilon()) << "Quaternion norm is zero.";
-    const auto a = (nv < Eigen::NumTraits<Scalar>::epsilon()) ? (Scalar{1} / nq + Scalar{1 / (6 * nq * nq2)} * (nq2 - w2)) : (std::atan2(nv, this->w()) / nv);
-
+    const auto a = (nv < Eigen::NumTraits<Scalar>::epsilon()) ? (Scalar{1} / nq) : (std::atan2(nv, this->w()) / nv);
     return {std::log(nq), a * this->x(), a * this->y(), a * this->z()};
   }
 
@@ -103,19 +102,18 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
     const auto nv2 = this->vec().squaredNorm();
     const auto nv = std::sqrt(nv2);
 
-    Scalar sinv, cnv;
+    Scalar s, c;
     if (nv < Eigen::NumTraits<Scalar>::epsilon()) {
-      sinv = Scalar{1};
-      cnv = Scalar{1};
+      s = Scalar{1};
+      c = Scalar{1};
     } else {
-      sinv = std::sin(nv) / nv;
-      cnv = std::cos(nv);
+      s = std::sin(nv) / nv;
+      c = std::cos(nv);
     }
 
-    const auto ew = std::exp(this->w());
-    const auto a = ew * sinv;
-
-    return {ew * cnv, a * this->x(), a * this->y(), a * this->z()};
+    const auto exp = std::exp(this->w());
+    const auto a = exp * s;
+    return {c * exp, a * this->x(), a * this->y(), a * this->z()};
   }
 
   /// Group action.
@@ -138,6 +136,12 @@ class SU2Base : public QuaternionBase<TDerived> {
   using Base::operator*;
 
   using Translation = typename Base::Translation;
+
+  using Tangent = variables::Tangent<SU2<Scalar>>;
+  using Jacobian = variables::JacobianNM<Tangent>;
+
+  static constexpr auto kAlpha = 2;
+  static constexpr auto kiAlpha = 0.5;
 
   static constexpr auto kGlobal = HYPER_DEFAULT_TO_GLOBAL_MANIFOLD_DERIVATIVES;
 
@@ -162,11 +166,10 @@ class SU2Base : public QuaternionBase<TDerived> {
   [[nodiscard]] auto gInv(Scalar* J_this = nullptr, bool global = kGlobal) const -> SU2<Scalar> {
     const auto i_su2 = this->conjugate();
     if (J_this) {
-      auto J = Eigen::Map<JacobianNM<Tangent<SU2<Scalar>>>>{J_this};
       if (global) {
-        J.noalias() = Scalar{-1} * i_su2.matrix();
+        Eigen::Map<Jacobian>{J_this}.noalias() = Scalar{-1} * i_su2.matrix();
       } else {
-        J.noalias() = Scalar{-1} * this->matrix();
+        Eigen::Map<Jacobian>{J_this}.noalias() = Scalar{-1} * this->matrix();
       }
     }
     return i_su2;
@@ -181,68 +184,58 @@ class SU2Base : public QuaternionBase<TDerived> {
   /// \return Group element.
   template <typename Other_>
   auto gPlus(const SU2Base<Other_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr, bool global = kGlobal) const -> SU2<Scalar> {
-    auto q = (*this) * other;
-
     if (J_this) {
-      auto J = Eigen::Map<JacobianNM<Tangent<SU2<Scalar>>>>{J_this};
       if (global) {
-        J.setIdentity();
+        Eigen::Map<Jacobian>{J_this}.setIdentity();
       } else {
-        J.noalias() = other.inverse().matrix();
+        Eigen::Map<Jacobian>{J_this}.noalias() = other.inverse().matrix();
       }
     }
-
     if (J_other) {
-      auto J = Eigen::Map<JacobianNM<Tangent<SU2<Scalar>>>>{J_other};
       if (global) {
-        J.noalias() = this->matrix();
+        Eigen::Map<Jacobian>{J_other}.noalias() = this->matrix();
       } else {
-        J.setIdentity();
+        Eigen::Map<Jacobian>{J_other}.setIdentity();
       }
     }
-
-    return q;
+    return (*this) * other;
   }
 
   /// Group logarithm (group element -> tangent element).
   /// \param J_this Jacobian w.r.t. this.
   /// \param global Global Jacobian flag.
   /// \return Tangent element.
-  [[nodiscard]] auto gLog(Scalar* J_this = nullptr, bool global = kGlobal) const -> Tangent<SU2<Scalar>> {
-    const auto v = this->vec();
-    const auto w = this->w();
-    const auto w2 = w * w;
-
-    const auto nv2 = v.squaredNorm();
-    const auto nv = std::sqrt(nv2);
-
+  [[nodiscard]] auto gLog(Scalar* J_this = nullptr, bool global = kGlobal) const -> Tangent {
+    const auto nv2 = this->vec().squaredNorm();
+    const auto w2 = this->w() * this->w();
     const auto nq2 = nv2 + w2;
+
+    const auto nv = std::sqrt(nv2);
     const auto nq = std::sqrt(nq2);
 
     DLOG_IF(FATAL, nq < Eigen::NumTraits<Scalar>::epsilon()) << "Quaternion norm is zero.";
-    const auto a = (nv < Eigen::NumTraits<Scalar>::epsilon()) ? (Scalar{1} / nq + Scalar{1 / (6 * nq * nq2)} * (nq2 - w2)) : (std::atan2(nv, w) / nv);
-
-    Tangent<SU2<Scalar>> t = Scalar{2} * a * v;
+    const auto a = (nv < Eigen::NumTraits<Scalar>::epsilon()) ? (Scalar{1} / nq) : (std::atan2(nv, this->w()) / nv);
+    Tangent tangent = kAlpha * a * this->vec();
 
     if (J_this) {
-      using Jacobian = JacobianNM<Tangent<SU2<Scalar>>>;
-      auto J = Eigen::Map<Jacobian>{J_this};
-      const auto nw2 = t.squaredNorm();
-      const auto nw = std::sqrt(nw2);
+      const auto nw2 = kAlpha * kAlpha * a * a * nv2;
+      const auto nw = kAlpha * a * nv;
       const auto nw3 = nw * nw2;
       if (nw3 < Eigen::NumTraits<Scalar>::epsilon()) {
-        J.setIdentity();
+        Eigen::Map<Jacobian>{J_this}.setIdentity();
       } else {
-        const auto Wx = t.hat();
+        const auto Wx = tangent.hat();
         if (global) {
-          J.noalias() = Jacobian::Identity() - Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
+          Eigen::Map<Jacobian>{J_this}.noalias() =
+              Jacobian::Identity() - Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
         } else {
-          J.noalias() = Jacobian::Identity() + Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
+          Eigen::Map<Jacobian>{J_this}.noalias() =
+              Jacobian::Identity() + Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
         }
       }
     }
 
-    return t;
+    return tangent;
   }
 
   /// Group exponential (group element -> group element).
@@ -265,7 +258,7 @@ class SU2Base : public QuaternionBase<TDerived> {
   /// \param global Global Jacobian flag.
   /// \return Tangent element.
   template <typename Other_>
-  auto tMinus(const SU2Base<Other_>& other, const bool global) const -> Tangent<SU2<Scalar>> {
+  auto tMinus(const SU2Base<Other_>& other, const bool global) const -> Tangent {
     return (global) ? gPlus(other.gInv()).gLog() : other.gInv().gPlus(*this).gLog();
   }
 
@@ -279,21 +272,16 @@ class SU2Base : public QuaternionBase<TDerived> {
   template <typename Other_>
   auto act(const Eigen::MatrixBase<Other_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr, bool global = kGlobal) const -> Translation {
     auto w = Base::act(other);
-
     if (J_this) {
-      using Tangent = Tangent<SU2<Scalar>>;
-      auto J = Eigen::Map<JacobianNM<Translation, Tangent>>{J_this};
       if (global) {
-        J.noalias() = Scalar{-1} * w.hat();
+        Eigen::Map<JacobianNM<Translation, Tangent>>{J_this}.noalias() = Scalar{-1} * w.hat();
       } else {
-        J.noalias() = Scalar{-1} * this->matrix() * other.hat();
+        Eigen::Map<JacobianNM<Translation, Tangent>>{J_this}.noalias() = Scalar{-1} * this->matrix() * other.hat();
       }
     }
-
     if (J_other) {
       Eigen::Map<JacobianNM<Translation>>{J_other}.noalias() = this->matrix();
     }
-
     return w;
   }
 };
@@ -343,42 +331,42 @@ class SU2TangentBase : public CartesianBase<TDerived> {
   /// \param global Global Jacobian flag.
   /// \return Group element.
   auto gExp(Scalar* J_this = nullptr, bool global = kGlobal) const -> SU2<Scalar> {
+    // Constants.
+    constexpr auto kiAlpha = SU2<Scalar>::kiAlpha;
 
-    const Tangent<SU2<Scalar>> v = Scalar{0.5} * (*this);
+    // Definitions.
+    using Jacobian = variables::JacobianNM<Tangent<SU2<Scalar>>>;
 
-    const auto nv2 = v.squaredNorm();
+    const auto nw2 = this->squaredNorm();
+    const auto nv2 = kiAlpha * kiAlpha * nw2;
     const auto nv = std::sqrt(nv2);
 
-    Scalar sinv, cnv;
+    Scalar s, c;
     if (nv < Eigen::NumTraits<Scalar>::epsilon()) {
-      sinv = Scalar{1};
-      cnv = Scalar{1};
+      s = Scalar{1};
+      c = Scalar{1};
     } else {
-      sinv = std::sin(nv) / nv;
-      cnv = std::cos(nv);
+      s = std::sin(nv) / nv;
+      c = std::cos(nv);
     }
 
-    const auto av = (sinv * v).eval();
-
     if (J_this) {
-      using Jacobian = JacobianNM<Tangent<SU2<Scalar>>>;
-      auto J = Eigen::Map<Jacobian>{J_this};
-      const auto nw2 = this->squaredNorm();
       const auto nw = std::sqrt(nw2);
       const auto nw3 = nw * nw2;
       if (nw3 < Eigen::NumTraits<Scalar>::epsilon()) {
-        J.setIdentity();
+        Eigen::Map<Jacobian>{J_this}.setIdentity();
       } else {
         const auto Wx = this->hat();
         if (global) {
-          J.noalias() = Jacobian::Identity() + (Scalar{1} - std::cos(nw)) / nw2 * Wx + (nw - std::sin(nw)) / nw3 * Wx * Wx;
+          Eigen::Map<Jacobian>{J_this}.noalias() = Jacobian::Identity() + (Scalar{1} - std::cos(nw)) / nw2 * Wx + (nw - std::sin(nw)) / nw3 * Wx * Wx;
         } else {
-          J.noalias() = Jacobian::Identity() - (Scalar{1} - std::cos(nw)) / nw2 * Wx + (nw - std::sin(nw)) / nw3 * Wx * Wx;
+          Eigen::Map<Jacobian>{J_this}.noalias() = Jacobian::Identity() - (Scalar{1} - std::cos(nw)) / nw2 * Wx + (nw - std::sin(nw)) / nw3 * Wx * Wx;
         }
       }
     }
 
-    return {cnv, av.x(), av.y(), av.z()};
+    const auto a = kiAlpha * s;
+    return {c, a * this->x(), a * this->y(), a * this->z()};
   }
 };
 
