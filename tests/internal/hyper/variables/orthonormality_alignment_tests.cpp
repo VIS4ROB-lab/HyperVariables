@@ -10,10 +10,10 @@ namespace hyper::variables::tests {
 class OrthonormalityAlignmentTests : public testing::Test {
  protected:
   // Constants.
-  static constexpr auto kNumOuterIterations = 5;
-  static constexpr auto kNumInnerIterations = 25;
-  static constexpr auto kNumericIncrement = 1e-6;
-  static constexpr auto kNumericTolerance = 1e-8;
+  static constexpr auto kOuterItr = 5;
+  static constexpr auto kInnerItr = 25;
+  static constexpr auto kInc = 1e-6;
+  static constexpr auto kTol = 1e-8;
 
   // Definitions.
   using Scalar = double;
@@ -27,7 +27,7 @@ class OrthonormalityAlignmentTests : public testing::Test {
     const auto S = alignment_.scalingMatrix();
     const auto A = alignment_.alignmentMatrix();
     const auto SA = alignment_.asMatrix();
-    return (S * A).isApprox(SA, kNumericTolerance);
+    return (S * A).isApprox(SA, kTol);
   }
 
   [[nodiscard]] auto checkInputJacobian() const -> bool {
@@ -38,12 +38,12 @@ class OrthonormalityAlignmentTests : public testing::Test {
 
     InputJacobian J_n;
     for (auto j = 0; j < Alignment::kOrder; ++j) {
-      const Input d_input = input + kNumericIncrement * Input::Unit(j);
+      const Input d_input = input + kInc * Input::Unit(j);
       const auto d_output = alignment_.act(d_input, nullptr, nullptr);
-      J_n.col(j) = (d_output - output) / kNumericIncrement;
+      J_n.col(j) = (d_output - output) / kInc;
     }
 
-    return J_n.isApprox(J_a, kNumericTolerance);
+    return J_n.isApprox(J_a, kTol);
   }
 
   [[nodiscard]] auto checkParameterJacobian() const -> bool {
@@ -54,37 +54,37 @@ class OrthonormalityAlignmentTests : public testing::Test {
 
     ParameterJacobian J_n;
     for (auto j = 0; j < alignment_.size(); ++j) {
-      const Alignment d_alignment = alignment_ + kNumericIncrement * Alignment::Unit(j);
+      const Alignment d_alignment = alignment_ + kInc * Alignment::Unit(j);
       const auto d_output = d_alignment.act(input, nullptr, nullptr);
-      J_n.col(j) = (d_output - output) / kNumericIncrement;
+      J_n.col(j) = (d_output - output) / kInc;
     }
 
-    return J_n.isApprox(J_a, kNumericTolerance);
+    return J_n.isApprox(J_a, kTol);
   }
 
   Alignment alignment_;
 };
 
 TEST_F(OrthonormalityAlignmentTests, Duality) {
-  for (auto i = 0; i < kNumOuterIterations; ++i) {
+  for (auto i = 0; i < kOuterItr; ++i) {
     alignment_.setRandom();
     EXPECT_TRUE(checkDuality());
   }
 }
 
 TEST_F(OrthonormalityAlignmentTests, InputJacobian) {
-  for (auto i = 0; i < kNumOuterIterations; ++i) {
+  for (auto i = 0; i < kOuterItr; ++i) {
     alignment_.setRandom();
-    for (auto j = 0; j < kNumInnerIterations; ++j) {
+    for (auto j = 0; j < kInnerItr; ++j) {
       EXPECT_TRUE(checkInputJacobian());
     }
   }
 }
 
 TEST_F(OrthonormalityAlignmentTests, ParameterJacobian) {
-  for (auto i = 0; i < kNumOuterIterations; ++i) {
+  for (auto i = 0; i < kOuterItr; ++i) {
     alignment_.setRandom();
-    for (auto j = 0; j < kNumInnerIterations; ++j) {
+    for (auto j = 0; j < kInnerItr; ++j) {
       EXPECT_TRUE(checkParameterJacobian());
     }
   }
