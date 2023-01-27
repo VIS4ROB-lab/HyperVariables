@@ -112,6 +112,13 @@ class SE3Base : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDe
   template <typename TOther_>
   auto tMinus(const SE3Base<TOther_>& other, bool global, bool coupled) const -> Tangent<SE3<Scalar>>;
 
+  /// Conversion to tangent element.
+  /// \param raw_J Input Jacobian (if requested).
+  /// \param global Global Jacobian flag.
+  /// \param coupled Coupled Jacobian flag.
+  /// \return Tangent element.
+  auto gLog(Scalar* raw_J = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> Tangent<SE3<Scalar>>;
+
   /// Vector plus.
   /// \tparam TOther_ Other derived type.
   /// \param v Input vector.
@@ -122,13 +129,6 @@ class SE3Base : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDe
   /// \return Additive element.
   template <typename TOther_>
   auto act(const Eigen::MatrixBase<TOther_>& v, Scalar* J_this = nullptr, Scalar* J_v = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> Translation;
-
-  /// Conversion to tangent element.
-  /// \param raw_J Input Jacobian (if requested).
-  /// \param global Global Jacobian flag.
-  /// \param coupled Coupled Jacobian flag.
-  /// \return Tangent element.
-  auto toTangent(Scalar* raw_J = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> Tangent<SE3<Scalar>>;
 };
 
 template <typename TScalar>
@@ -233,7 +233,7 @@ class SE3TangentBase : public CartesianBase<TDerived> {
   /// \param global Request global Jacobians flag.
   /// \param coupled Compute SE3 instead of SU2 x R3 Jacobians.
   /// \return Manifold element.
-  auto toManifold(Scalar* J_this = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> SE3<Scalar>;
+  auto gExp(Scalar* J_this = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> SE3<Scalar>;
 };
 
 template <typename TScalar>
@@ -413,9 +413,9 @@ template <typename TOther_>
 auto SE3Base<TDerived>::tMinus(const SE3Base<TOther_>& other, const bool global, const bool coupled) const -> Tangent<SE3<Scalar>> {
   if (coupled) {
     if (global) {
-      return this->gPlus(other.gInv()).toTangent();
+      return this->gPlus(other.gInv()).gLog();
     } else {
-      return other.gInv().gPlus(*this).toTangent();
+      return other.gInv().gPlus(*this).gLog();
     }
   } else {
     if (global) {
@@ -437,9 +437,9 @@ template <typename TOther_>
 auto SE3Base<TDerived>::tPlus(const SE3TangentBase<TOther_>& tangent, const bool global, const bool coupled) const -> SE3<Scalar> {
   if (coupled) {
     if (global) {
-      return tangent.toManifold().gPlus(*this);
+      return tangent.gExp().gPlus(*this);
     } else {
-      return this->gPlus(tangent.toManifold());
+      return this->gPlus(tangent.gExp());
     }
   } else {
     if (global) {
@@ -491,7 +491,7 @@ auto SE3Base<TDerived>::act(const Eigen::MatrixBase<TOther_>& v, Scalar* J_this,
 }
 
 template <typename TDerived>
-auto SE3Base<TDerived>::toTangent(Scalar* J_this, const bool global, const bool coupled) const -> Tangent<SE3<Scalar>> {
+auto SE3Base<TDerived>::gLog(Scalar* J_this, const bool global, const bool coupled) const -> Tangent<SE3<Scalar>> {
   Tangent<SE3<Scalar>> output;
 
   if (J_this) {
@@ -529,7 +529,7 @@ auto SE3Base<TDerived>::toTangent(Scalar* J_this, const bool global, const bool 
 }
 
 template <typename TDerived>
-auto SE3TangentBase<TDerived>::toManifold(Scalar* J_this, const bool global, const bool coupled) const -> SE3<Scalar> {
+auto SE3TangentBase<TDerived>::gExp(Scalar* J_this, const bool global, const bool coupled) const -> SE3<Scalar> {
   SE3<Scalar> output;
 
   if (J_this) {

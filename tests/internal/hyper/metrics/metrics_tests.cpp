@@ -84,9 +84,9 @@ class MetricsTests : public testing::Test {
 
     if (coupled) {
       if (global) {
-        return tau.toManifold().gPlus(se3);
+        return tau.gExp().gPlus(se3);
       } else {
-        return se3.gPlus(tau.toManifold());
+        return se3.gPlus(tau.gExp());
       }
     } else {
       if (global) {

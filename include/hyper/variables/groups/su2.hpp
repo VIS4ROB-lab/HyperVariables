@@ -140,8 +140,8 @@ class SU2Base : public QuaternionBase<TDerived> {
   using Tangent = variables::Tangent<SU2<Scalar>>;
   using Jacobian = variables::JacobianNM<Tangent>;
 
-  static constexpr auto kAlpha = 2;
-  static constexpr auto kiAlpha = 0.5;
+  static constexpr auto kAlpha = Scalar{2.0};
+  static constexpr auto kiAlpha = Scalar{1} / kAlpha;
 
   static constexpr auto kGlobal = HYPER_DEFAULT_TO_GLOBAL_MANIFOLD_DERIVATIVES;
 
