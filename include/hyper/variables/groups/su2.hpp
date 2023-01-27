@@ -36,63 +36,97 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
 
   // Ordering.
   struct Ordering {
-    static constexpr auto kW = 3;
-    static constexpr auto kX = 0;
-    static constexpr auto kY = 1;
-    static constexpr auto kZ = 2;
+    static constexpr Index kW = 3;
+    static constexpr Index kX = 0;
+    static constexpr Index kY = 1;
+    static constexpr Index kZ = 2;
   };
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(QuaternionBase)
 
-  /// Constructs an identity element.
+  /// Identity group element.
   /// \return Identity element.
   static auto Identity() -> Quaternion<Scalar> { return Base::Identity(); }
 
-  /// Constructs a random element.
+  /// Random group element.
   /// \return Random element.
   static auto Random() -> Quaternion<Scalar> { return Base::UnitRandom(); }
 
-  /// Data pointer accessor.
-  /// \return Data pointer.
-  [[nodiscard]] auto data() const -> const Scalar*;
+  /// Data accessor.
+  /// \return Data.
+  [[nodiscard]] auto data() const -> const Scalar* { return this->coeffs().data(); }
 
-  /// Data pointer modifier.
-  /// \return Data pointer.
-  [[nodiscard]] auto data() -> ScalarWithConstIfNotLvalue*;
-
-  /// Map as Eigen vector.
-  /// \return Vector.
-  auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final;
+  /// Data modifier.
+  /// \return Data.
+  [[nodiscard]] auto data() -> ScalarWithConstIfNotLvalue* { return this->coeffs().data(); }
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> final;
+  auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final { return this->coeffs(); }
+
+  /// Map as Eigen vector.
+  /// \return Vector.
+  auto asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> final { return this->coeffs(); }
 
   /// Group inverse.
   /// \return Inverse element.
-  [[nodiscard]] auto gInv() const -> Quaternion<Scalar>;
+  [[nodiscard]] auto gInv() const -> Quaternion<Scalar> { return this->inverse(); }
 
   /// Group plus.
-  /// \tparam Other_ Other derived type.
-  /// \param other Other input.
-  /// \return Additive element.
+  /// \tparam Other_ Other type.
+  /// \param other Other element.
+  /// \return Group element.
   template <typename Other_>
-  auto gPlus(const Eigen::QuaternionBase<Other_>& other) const -> Quaternion<Scalar>;
+  auto gPlus(const Eigen::QuaternionBase<Other_>& other) const -> Quaternion<Scalar> {
+    return Base::operator*(other);
+  }
 
-  /// Group logarithm.
-  /// \return Logarithmic element.
-  [[nodiscard]] auto gLog() const -> Quaternion<Scalar>;
+  /// Group logarithm (group element -> group element).
+  /// \return Group element.
+  [[nodiscard]] auto glog() const -> Quaternion<Scalar> {
+    const auto nv2 = this->vec().squaredNorm();
+    const auto w2 = this->w() * this->w();
+    const auto nq2 = nv2 + w2;
 
-  /// Group exponential.
-  /// \return Exponential element.
-  [[nodiscard]] auto gExp() const -> Quaternion<Scalar>;
+    const auto nv = std::sqrt(nv2);
+    const auto nq = std::sqrt(nq2);
 
-  /// Vector plus.
-  /// \tparam Other_ Other derived type.
-  /// \param v Input vector.
-  /// \return Additive element.
+    DLOG_IF(FATAL, nq < Eigen::NumTraits<Scalar>::epsilon()) << "Quaternion norm is zero.";
+    const auto a = (nv < Eigen::NumTraits<Scalar>::epsilon()) ? (Scalar{1} / nq + Scalar{1 / (6 * nq * nq2)} * (nq2 - w2)) : (std::atan2(nv, this->w()) / nv);
+
+    return {std::log(nq), a * this->x(), a * this->y(), a * this->z()};
+  }
+
+  /// Group exponential (group element -> group element).
+  /// \return Group element.
+  [[nodiscard]] auto gexp() const -> Quaternion<Scalar> {
+    const auto nv2 = this->vec().squaredNorm();
+    const auto nv = std::sqrt(nv2);
+
+    Scalar sinv, cnv;
+    if (nv < Eigen::NumTraits<Scalar>::epsilon()) {
+      sinv = Scalar{1};
+      cnv = Scalar{1};
+    } else {
+      sinv = std::sin(nv) / nv;
+      cnv = std::cos(nv);
+    }
+
+    const auto ew = std::exp(this->w());
+    const auto a = ew * sinv;
+
+    return {ew * cnv, a * this->x(), a * this->y(), a * this->z()};
+  }
+
+  /// Group action.
+  /// \tparam Other_ Other type.
+  /// \param other Other vector.
+  /// \return Vector.
   template <typename Other_>
-  auto act(const Eigen::MatrixBase<Other_>& v) const -> Translation;
+  auto act(const Eigen::MatrixBase<Other_>& other) const -> Translation {
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Other_, 3);
+    return *this * other;
+  }
 };
 
 template <typename TDerived>
@@ -109,98 +143,159 @@ class SU2Base : public QuaternionBase<TDerived> {
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SU2Base)
 
-  /// Constructs an identity element.
+  /// Identity group element.
   /// \return Identity element.
   static auto Identity() -> SU2<Scalar> { return Base::Identity(); }
 
-  /// Constructs a random element.
+  /// Random group element.
   /// \return Random element.
   static auto Random() -> SU2<Scalar> { return Base::UnitRandom(); }
 
   /// Group adjoint.
-  /// \return Adjoint.
+  /// \return Adjoint matrix.
   [[nodiscard]] auto gAdj() const { return this->matrix(); }
 
   /// Group inverse.
-  /// \param raw_J Input Jacobian (if requested).
-  /// \param global Request global Jacobians flag.
-  /// \return Inverse element.
-  [[nodiscard]] auto gInv(Scalar* raw_J = nullptr, bool global = kGlobal) const -> SU2<Scalar>;
+  /// \param J_this Jacobian w.r.t. this.
+  /// \param global Global Jacobian flag.
+  /// \return Inverse group element.
+  [[nodiscard]] auto gInv(Scalar* J_this = nullptr, bool global = kGlobal) const -> SU2<Scalar> {
+    const auto i_su2 = this->conjugate();
+    if (J_this) {
+      auto J = Eigen::Map<JacobianNM<Tangent<SU2<Scalar>>>>{J_this};
+      if (global) {
+        J.noalias() = Scalar{-1} * i_su2.matrix();
+      } else {
+        J.noalias() = Scalar{-1} * this->matrix();
+      }
+    }
+    return i_su2;
+  }
 
   /// Group plus.
-  /// \tparam Other_ Other derived type.
-  /// \param other Other input.
-  /// \param raw_J_this This input Jacobian (if requested).
-  /// \param raw_J_other Other input Jacobian (if requested).
-  /// \param global Request global Jacobians flag.
-  /// \return Additive element.
+  /// \tparam Other_ Other type.
+  /// \param other Other element.
+  /// \param J_this Jacobian w.r.t. this.
+  /// \param J_other Jacobian w.r.t. other.
+  /// \param global Global Jacobian flag.
+  /// \return Group element.
   template <typename Other_>
-  auto gPlus(const SU2Base<Other_>& other, Scalar* raw_J_this = nullptr, Scalar* raw_J_other = nullptr, bool global = kGlobal) const -> SU2<Scalar>;
+  auto gPlus(const SU2Base<Other_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr, bool global = kGlobal) const -> SU2<Scalar> {
+    auto q = (*this) * other;
 
+    if (J_this) {
+      auto J = Eigen::Map<JacobianNM<Tangent<SU2<Scalar>>>>{J_this};
+      if (global) {
+        J.setIdentity();
+      } else {
+        J.noalias() = other.inverse().matrix();
+      }
+    }
+
+    if (J_other) {
+      auto J = Eigen::Map<JacobianNM<Tangent<SU2<Scalar>>>>{J_other};
+      if (global) {
+        J.noalias() = this->matrix();
+      } else {
+        J.setIdentity();
+      }
+    }
+
+    return q;
+  }
+
+  /// Group logarithm (group element -> tangent element).
+  /// \param J_this Jacobian w.r.t. this.
+  /// \param global Global Jacobian flag.
+  /// \return Tangent element.
+  [[nodiscard]] auto gLog(Scalar* J_this = nullptr, bool global = kGlobal) const -> Tangent<SU2<Scalar>> {
+    const auto v = this->vec();
+    const auto w = this->w();
+    const auto w2 = w * w;
+
+    const auto nv2 = v.squaredNorm();
+    const auto nv = std::sqrt(nv2);
+
+    const auto nq2 = nv2 + w2;
+    const auto nq = std::sqrt(nq2);
+
+    DLOG_IF(FATAL, nq < Eigen::NumTraits<Scalar>::epsilon()) << "Quaternion norm is zero.";
+    const auto a = (nv < Eigen::NumTraits<Scalar>::epsilon()) ? (Scalar{1} / nq + Scalar{1 / (6 * nq * nq2)} * (nq2 - w2)) : (std::atan2(nv, w) / nv);
+
+    Tangent<SU2<Scalar>> t = Scalar{2} * a * v;
+
+    if (J_this) {
+      using Jacobian = JacobianNM<Tangent<SU2<Scalar>>>;
+      auto J = Eigen::Map<Jacobian>{J_this};
+      const auto nw2 = t.squaredNorm();
+      const auto nw = std::sqrt(nw2);
+      const auto nw3 = nw * nw2;
+      if (nw3 < Eigen::NumTraits<Scalar>::epsilon()) {
+        J.setIdentity();
+      } else {
+        const auto Wx = t.hat();
+        if (global) {
+          J.noalias() = Jacobian::Identity() - Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
+        } else {
+          J.noalias() = Jacobian::Identity() + Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
+        }
+      }
+    }
+
+    return t;
+  }
+
+  /// Group exponential (group element -> group element).
+  /// \return Group element.
+  [[nodiscard]] auto gExp() const -> Quaternion<Scalar> { return Base::gExp(); }
+
+  /// Tangent plus.
+  /// \tparam Other_ Other type.
+  /// \param other Other element.
+  /// \param global Global Jacobian flag.
+  /// \return Group element.
   template <typename Other_>
   auto tPlus(const SU2TangentBase<Other_>& other, const bool global) const -> SU2<Scalar> {
-    return (global) ? other.toManifold() * (*this) : (*this) * other.toManifold();
+    return (global) ? other.gExp().gPlus(*this) : (*this).gPlus(other.gExp());
   }
 
+  /// Tangent minus.
+  /// \tparam Other_ Other type.
+  /// \param other Other element.
+  /// \param global Global Jacobian flag.
+  /// \return Tangent element.
   template <typename Other_>
-  auto tMinus(const SU2Base<Other_>& other, const bool global) -> Tangent<SU2<Scalar>> const {
-    return ((global) ? gPlus(other.gInv()) : other.gInv().gPlus(*this)).toTangent();
+  auto tMinus(const SU2Base<Other_>& other, const bool global) const -> Tangent<SU2<Scalar>> {
+    return (global) ? gPlus(other.gInv()).gLog() : other.gInv().gPlus(*this).gLog();
   }
 
-  /// Vector plus.
-  /// \tparam Other_ Other derived type.
-  /// \param v Input vector.
-  /// \param raw_J_this This input Jacobian (if requested).
-  /// \param raw_J_vector Point input Jacobian (if requested).
-  /// \param global Request global Jacobians flag.
-  /// \return Additive element.
+  /// Group action.
+  /// \tparam Other_ Other type.
+  /// \param other Other vector.
+  /// \param J_this Jacobian w.r.t. this.
+  /// \param J_other Jacobian w.r.t. other.
+  /// \param global Global Jacobian flag.
+  /// \return Vector.
   template <typename Other_>
-  auto act(const Eigen::MatrixBase<Other_>& v, Scalar* raw_J_this = nullptr, Scalar* raw_J_vector = nullptr, bool global = kGlobal) const -> Translation;
+  auto act(const Eigen::MatrixBase<Other_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr, bool global = kGlobal) const -> Translation {
+    auto w = Base::act(other);
 
-  /// Group logarithm.
-  /// \return Logarithmic element.
-  [[nodiscard]] auto gLog() const -> Algebra<SU2<Scalar>>;
+    if (J_this) {
+      using Tangent = Tangent<SU2<Scalar>>;
+      auto J = Eigen::Map<JacobianNM<Translation, Tangent>>{J_this};
+      if (global) {
+        J.noalias() = Scalar{-1} * w.hat();
+      } else {
+        J.noalias() = Scalar{-1} * this->matrix() * other.hat();
+      }
+    }
 
-  /// Group exponential.
-  /// \return Exponential element.
-  [[nodiscard]] auto gExp() const -> Quaternion<Scalar>;
+    if (J_other) {
+      Eigen::Map<JacobianNM<Translation>>{J_other}.noalias() = this->matrix();
+    }
 
-  /// Conversion to tangent element.
-  /// \param raw_J_this Input Jacobian (if requested).
-  /// \param global Request global Jacobians flag.
-  /// \return Tangent element.
-  auto toTangent(Scalar* raw_J = nullptr, bool global = kGlobal) const -> Tangent<SU2<Scalar>>;
-};
-
-template <typename TDerived>
-class SU2AlgebraBase : public QuaternionBase<TDerived> {
- public:
-  using Base = QuaternionBase<TDerived>;
-  using Scalar = typename Base::Scalar;
-  using Base::Base;
-  using Base::operator*;
-
-  HYPER_INHERIT_ASSIGNMENT_OPERATORS(SU2AlgebraBase)
-
-  /// Constructs an identity element.
-  /// \return Identity element.
-  static auto Identity() -> Algebra<SU2<Scalar>>;
-
-  /// Constructs a random element.
-  /// \return Random element.
-  static auto Random() -> Algebra<SU2<Scalar>>;
-
-  /// Conjugate.
-  /// \return SU2 algebra.
-  [[nodiscard]] auto conjugate() const -> Algebra<SU2<Scalar>>;
-
-  /// Group exponential.
-  /// \return Exponential element.
-  [[nodiscard]] auto gExp() const -> SU2<Scalar>;
-
-  /// Conversion to tangent element.
-  /// \return Tangent element.
-  auto toTangent() const -> Tangent<SU2<Scalar>>;
+    return w;
+  }
 };
 
 template <typename TScalar>
@@ -222,30 +317,9 @@ class SU2 final : public SU2Base<SU2<TScalar>> {
 
   /// Perfect forwarding constructor.
   template <typename... TArgs>
-  SU2(TArgs&&... args)  // NOLINT
-      : Base{std::forward<TArgs>(args)...} {
-    // DCHECK(Eigen::internal::isApprox(this->norm(), TScalar{1}));
-  }
+  SU2(TArgs&&... args) : Base{std::forward<TArgs>(args)...} {}  // NOLINT
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SU2)
-};
-
-template <typename TScalar>
-class Algebra<SU2<TScalar>> final : public SU2AlgebraBase<Algebra<SU2<TScalar>>> {
- public:
-  using Base = SU2AlgebraBase<Algebra<SU2<TScalar>>>;
-
-  /// Default constructor.
-  Algebra() : Base{TScalar{0}, TScalar{0}, TScalar{0}, TScalar{0}} {}
-
-  /// Perfect forwarding constructor.
-  template <typename... TArgs>
-  Algebra(TArgs&&... args)  // NOLINT
-      : Base{std::forward<TArgs>(args)...} {
-    DCHECK(Eigen::internal::isApprox(TScalar{1} + this->w(), TScalar{1}));
-  }
-
-  HYPER_INHERIT_ASSIGNMENT_OPERATORS(Algebra)
 };
 
 template <typename TDerived>
@@ -264,15 +338,48 @@ class SU2TangentBase : public CartesianBase<TDerived> {
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SU2TangentBase)
 
-  /// Conversion to algebra element.
-  /// \return Algebra element.
-  auto toAlgebra() const -> Algebra<SU2<Scalar>>;
+  /// Group exponential (SU2 tangent -> SU2).
+  /// \param J_this Jacobian w.r.t. this.
+  /// \param global Global Jacobian flag.
+  /// \return Group element.
+  auto gExp(Scalar* J_this = nullptr, bool global = kGlobal) const -> SU2<Scalar> {
 
-  /// Conversion to manifold element.
-  /// \param raw_J_this Input Jacobian (if requested).
-  /// \param global Request global Jacobians flag.
-  /// \return Manifold element.
-  auto toManifold(Scalar* raw_J = nullptr, bool global = kGlobal) const -> SU2<Scalar>;
+    const Tangent<SU2<Scalar>> v = Scalar{0.5} * (*this);
+
+    const auto nv2 = v.squaredNorm();
+    const auto nv = std::sqrt(nv2);
+
+    Scalar sinv, cnv;
+    if (nv < Eigen::NumTraits<Scalar>::epsilon()) {
+      sinv = Scalar{1};
+      cnv = Scalar{1};
+    } else {
+      sinv = std::sin(nv) / nv;
+      cnv = std::cos(nv);
+    }
+
+    const auto av = (sinv * v).eval();
+
+    if (J_this) {
+      using Jacobian = JacobianNM<Tangent<SU2<Scalar>>>;
+      auto J = Eigen::Map<Jacobian>{J_this};
+      const auto nw2 = this->squaredNorm();
+      const auto nw = std::sqrt(nw2);
+      const auto nw3 = nw * nw2;
+      if (nw3 < Eigen::NumTraits<Scalar>::epsilon()) {
+        J.setIdentity();
+      } else {
+        const auto Wx = this->hat();
+        if (global) {
+          J.noalias() = Jacobian::Identity() + (Scalar{1} - std::cos(nw)) / nw2 * Wx + (nw - std::sin(nw)) / nw3 * Wx * Wx;
+        } else {
+          J.noalias() = Jacobian::Identity() - (Scalar{1} - std::cos(nw)) / nw2 * Wx + (nw - std::sin(nw)) / nw3 * Wx * Wx;
+        }
+      }
+    }
+
+    return {cnv, av.x(), av.y(), av.z()};
+  }
 };
 
 template <typename TScalar>
@@ -284,274 +391,8 @@ class Tangent<SU2<TScalar>> final : public SU2TangentBase<Tangent<SU2<TScalar>>>
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Tangent)
 };
 
-template <typename TDerived>
-auto QuaternionBase<TDerived>::data() const -> const Scalar* {
-  return this->coeffs().data();
-}
-
-template <typename TDerived>
-auto QuaternionBase<TDerived>::data() -> ScalarWithConstIfNotLvalue* {
-  return this->coeffs().data();
-}
-
-template <typename TDerived>
-auto QuaternionBase<TDerived>::asVector() const -> Eigen::Ref<const VectorX<Scalar>> {
-  return this->coeffs();
-}
-
-template <typename TDerived>
-auto QuaternionBase<TDerived>::asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> {
-  return this->coeffs();
-}
-
-template <typename TDerived>
-auto QuaternionBase<TDerived>::gInv() const -> Quaternion<Scalar> {
-  return this->inverse();
-}
-
-template <typename TDerived>
-template <typename Other_>
-auto QuaternionBase<TDerived>::gPlus(const Eigen::QuaternionBase<Other_>& other) const -> Quaternion<Scalar> {
-  return Base::operator*(other);
-}
-
-template <typename TDerived>
-auto QuaternionBase<TDerived>::gLog() const -> Quaternion<Scalar> {
-  const auto v = this->vec();
-  const auto w = this->w();
-  const auto w2 = w * w;
-
-  const auto nv2 = v.squaredNorm();
-  const auto nv = std::sqrt(nv2);
-
-  const auto nq2 = nv2 + w2;
-  const auto nq = std::sqrt(nq2);
-
-  DLOG_IF(FATAL, nq < Eigen::NumTraits<Scalar>::epsilon()) << "Quaternion norm is zero.";
-  const auto a = (nv < Eigen::NumTraits<Scalar>::epsilon()) ? (Scalar{1} / nq + Scalar{1 / (6 * nq * nq2)} * (nq2 - w2)) : (std::atan2(nv, w) / nv);
-  const auto av = (a * v).eval();
-  return {std::log(nq), av.x(), av.y(), av.z()};
-}
-
-template <typename TDerived>
-auto QuaternionBase<TDerived>::gExp() const -> Quaternion<Scalar> {
-  const auto v = this->vec();
-  const auto w = this->w();
-
-  const auto nv2 = v.squaredNorm();
-  const auto nv = std::sqrt(nv2);
-
-  Scalar sinv, cnv;
-  if (nv < Eigen::NumTraits<Scalar>::epsilon()) {
-    sinv = Scalar{1};
-    cnv = Scalar{1};
-  } else {
-    sinv = std::sin(nv) / nv;
-    cnv = std::cos(nv);
-  }
-
-  const auto ew = std::exp(w);
-  const auto a = ew * sinv;
-  const auto av = (a * v).eval();
-  return {ew * cnv, av.x(), av.y(), av.z()};
-}
-
-template <typename TDerived>
-template <typename Other_>
-auto QuaternionBase<TDerived>::act(const Eigen::MatrixBase<Other_>& v) const -> Translation {
-  EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Other_, 3);
-  return (*this) * v;
-}
-
-template <typename TDerived>
-auto SU2Base<TDerived>::gInv(Scalar* raw_J, const bool global) const -> SU2<Scalar> {
-  const auto i_q = this->conjugate();
-
-  if (raw_J) {
-    auto J = Eigen::Map<JacobianNM<Tangent<SU2<Scalar>>>>{raw_J};
-    if (global) {
-      J.noalias() = Scalar{-1} * i_q.matrix();
-    } else {
-      J.noalias() = Scalar{-1} * this->matrix();
-    }
-  }
-
-  return i_q;
-}
-
-template <typename TDerived>
-template <typename Other_>
-auto SU2Base<TDerived>::gPlus(const SU2Base<Other_>& other, Scalar* raw_J_this, Scalar* raw_J_other, const bool global) const -> SU2<Scalar> {
-  auto output = (*this) * other;
-
-  if (raw_J_this) {
-    auto J = Eigen::Map<JacobianNM<Tangent<SU2<Scalar>>>>{raw_J_this};
-    if (global) {
-      J.setIdentity();
-    } else {
-      J.noalias() = other.inverse().matrix();
-    }
-  }
-
-  if (raw_J_other) {
-    auto J = Eigen::Map<JacobianNM<Tangent<SU2<Scalar>>>>{raw_J_other};
-    if (global) {
-      J.noalias() = this->matrix();
-    } else {
-      J.setIdentity();
-    }
-  }
-
-  return output;
-}
-
-template <typename TDerived>
-template <typename Other_>
-auto SU2Base<TDerived>::act(const Eigen::MatrixBase<Other_>& v, Scalar* raw_J_this, Scalar* raw_J_vector, const bool global) const -> Translation {
-  auto output = Base::act(v);
-
-  if (raw_J_this) {
-    using Tangent = Tangent<SU2<Scalar>>;
-    auto J = Eigen::Map<JacobianNM<Translation, Tangent>>{raw_J_this};
-    if (global) {
-      J.noalias() = Scalar{-1} * output.hat();
-    } else {
-      J.noalias() = Scalar{-1} * this->matrix() * v.hat();
-    }
-  }
-
-  if (raw_J_vector) {
-    Eigen::Map<JacobianNM<Translation>>{raw_J_vector}.noalias() = this->matrix();
-  }
-
-  return output;
-}
-
-template <typename TDerived>
-auto SU2Base<TDerived>::gLog() const -> Algebra<SU2<Scalar>> {
-  const auto v = this->vec();
-  const auto w = this->w();
-  const auto w2 = w * w;
-
-  const auto nv2 = v.squaredNorm();
-  const auto nv = std::sqrt(nv2);
-
-  const auto nq2 = nv2 + w2;
-  const auto nq = std::sqrt(nq2);
-
-  DLOG_IF(FATAL, nq < Eigen::NumTraits<Scalar>::epsilon()) << "Quaternion norm is zero.";
-  const auto a = (nv < Eigen::NumTraits<Scalar>::epsilon()) ? (Scalar{1} / nq + Scalar{1 / (6 * nq * nq2)} * (nq2 - w2)) : (std::atan2(nv, w) / nv);
-  const auto av = (a * v).eval();
-
-  return {Scalar{0}, av.x(), av.y(), av.z()};
-}
-
-template <typename TDerived>
-auto SU2Base<TDerived>::gExp() const -> Quaternion<Scalar> {
-  return Base::gExp();
-}
-
-template <typename TDerived>
-auto SU2Base<TDerived>::toTangent(Scalar* raw_J, const bool global) const -> Tangent<SU2<Scalar>> {
-  auto output = gLog().toTangent();
-
-  if (raw_J) {
-    using Jacobian = JacobianNM<Tangent<SU2<Scalar>>>;
-    auto J = Eigen::Map<Jacobian>{raw_J};
-    const auto nw2 = output.squaredNorm();
-    const auto nw = std::sqrt(nw2);
-    const auto nw3 = nw * nw2;
-    if (nw3 < Eigen::NumTraits<Scalar>::epsilon()) {
-      J.setIdentity();
-    } else {
-      const auto Wx = output.hat();
-      if (global) {
-        J.noalias() = Jacobian::Identity() - Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
-      } else {
-        J.noalias() = Jacobian::Identity() + Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
-      }
-    }
-  }
-
-  return output;
-}
-
-template <typename TDerived>
-auto SU2AlgebraBase<TDerived>::Identity() -> Algebra<SU2<Scalar>> {
-  return {Scalar{0}, Scalar{0}, Scalar{0}, Scalar{0}};
-}
-
-template <typename TDerived>
-auto SU2AlgebraBase<TDerived>::Random() -> Algebra<SU2<SU2AlgebraBase::Scalar>> {
-  Algebra<SU2<Scalar>> algebra;
-  algebra.vec().setRandom();
-  algebra.w() = Scalar{0};
-  return algebra;
-}
-
-template <typename TDerived>
-auto SU2AlgebraBase<TDerived>::conjugate() const -> Algebra<SU2<Scalar>> {
-  return Base::conjugate();
-}
-
-template <typename TDerived>
-auto SU2AlgebraBase<TDerived>::gExp() const -> SU2<Scalar> {
-  const auto v = this->vec();
-
-  const auto nv2 = v.squaredNorm();
-  const auto nv = std::sqrt(nv2);
-
-  Scalar sinv, cnv;
-  if (nv < Eigen::NumTraits<Scalar>::epsilon()) {
-    sinv = Scalar{1};
-    cnv = Scalar{1};
-  } else {
-    sinv = std::sin(nv) / nv;
-    cnv = std::cos(nv);
-  }
-
-  const auto av = (sinv * v).eval();
-  return {cnv, av.x(), av.y(), av.z()};
-}
-
-template <typename TDerived>
-auto SU2AlgebraBase<TDerived>::toTangent() const -> Tangent<SU2<Scalar>> {
-  return Scalar{2} * this->vec();
-}
-
-template <typename TDerived>
-auto SU2TangentBase<TDerived>::toAlgebra() const -> Algebra<SU2<Scalar>> {
-  return {Scalar{0}, Scalar{0.5} * this->x(), Scalar{0.5} * this->y(), Scalar{0.5} * this->z()};
-}
-
-template <typename TDerived>
-auto SU2TangentBase<TDerived>::toManifold(Scalar* raw_J, const bool global) const -> SU2<Scalar> {
-  auto output = toAlgebra().gExp();
-
-  if (raw_J) {
-    using Jacobian = JacobianNM<Tangent<SU2<Scalar>>>;
-    auto J = Eigen::Map<Jacobian>{raw_J};
-    const auto nw2 = this->squaredNorm();
-    const auto nw = std::sqrt(nw2);
-    const auto nw3 = nw * nw2;
-    if (nw3 < Eigen::NumTraits<Scalar>::epsilon()) {
-      J.setIdentity();
-    } else {
-      const auto Wx = this->hat();
-      if (global) {
-        J.noalias() = Jacobian::Identity() + (Scalar{1} - std::cos(nw)) / nw2 * Wx + (nw - std::sin(nw)) / nw3 * Wx * Wx;
-      } else {
-        J.noalias() = Jacobian::Identity() - (Scalar{1} - std::cos(nw)) / nw2 * Wx + (nw - std::sin(nw)) / nw3 * Wx * Wx;
-      }
-    }
-  }
-
-  return output;
-}
-
 }  // namespace hyper::variables
 
 HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Quaternion)
 HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::SU2)
-HYPER_DECLARE_ALGEBRA_MAP(hyper::variables::SU2)
 HYPER_DECLARE_TANGENT_MAP(hyper::variables::SU2)

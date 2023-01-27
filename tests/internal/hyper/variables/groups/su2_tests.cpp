@@ -20,8 +20,8 @@ class QuaternionTests : public testing::Test {
   static auto Random() -> Quaternion { return Quaternion{Eigen::internal::random<Scalar>(0.5, 1.5) * Quaternion::UnitRandom().coeffs()}; }
 
   [[nodiscard]] auto checkGroupExponentials() const -> bool {
-    const auto qle = q_.gLog().gExp();
-    const auto qel = q_.gExp().gLog();
+    const auto qle = q_.glog().gexp();
+    const auto qel = q_.gexp().glog();
     return qle.isApprox(q_, kNumericTolerance) && qel.isApprox(q_, kNumericTolerance);
   }
 
@@ -97,21 +97,21 @@ class SU2Tests : public testing::Test {
 
   [[nodiscard]] auto checkGroupExponentials() const -> bool {
     const auto qle = su2_.gLog().gExp();
-    const auto qel = su2_.gExp().gLog();
+    const auto qel = su2_.gexp().glog();
     return qle.isApprox(su2_, kNumericTolerance) && qel.isApprox(su2_, kNumericTolerance);
   }
 
   [[nodiscard]] auto checkGroupExponentialsJacobians(const bool global) const -> bool {
     SU2Jacobian J_l_a, J_e_a;
-    const auto tangent = su2_.toTangent(J_l_a.data(), global);
-    const auto su2 = tangent.toManifold(J_e_a.data(), global);
+    const auto tangent = su2_.gLog(J_l_a.data(), global);
+    const auto su2 = tangent.gExp(J_e_a.data(), global);
 
     SU2Jacobian J_l_n, J_e_n;
     for (auto j = 0; j < SU2Tangent::kNumParameters; ++j) {
       const SU2Tangent increment = kNumericIncrement * SU2Tangent::Unit(j);
       const SU2Tangent d_tangent = tangent + increment;
-      J_l_n.col(j) = (su2_.tPlus(increment, global).toTangent() - tangent) / kNumericIncrement;
-      J_e_n.col(j) = d_tangent.toManifold().tMinus(su2_, global) / kNumericIncrement;
+      J_l_n.col(j) = (su2_.tPlus(increment, global).gLog() - tangent) / kNumericIncrement;
+      J_e_n.col(j) = d_tangent.gExp().tMinus(su2_, global) / kNumericIncrement;
     }
 
     return su2.isApprox(su2_, kNumericTolerance) && (J_l_a * J_e_a).isIdentity(kNumericTolerance) && J_l_n.isApprox(J_l_a, kNumericTolerance) &&

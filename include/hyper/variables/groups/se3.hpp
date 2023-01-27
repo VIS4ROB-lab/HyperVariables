@@ -420,12 +420,12 @@ auto SE3Base<TDerived>::tMinus(const SE3Base<TOther_>& other, const bool global,
   } else {
     if (global) {
       Tangent<SE3<Scalar>> tangent;
-      tangent.angular() = rotation().gPlus(other.rotation().gInv()).toTangent();
+      tangent.angular() = rotation().gPlus(other.rotation().gInv()).gLog();
       tangent.linear() = (translation() - other.translation());
       return tangent;
     } else {
       Tangent<SE3<Scalar>> tangent;
-      tangent.angular() = other.rotation().gInv().gPlus(rotation()).toTangent();
+      tangent.angular() = other.rotation().gInv().gPlus(rotation()).gLog();
       tangent.linear() = translation() - other.translation();
       return tangent;
     }
@@ -443,9 +443,9 @@ auto SE3Base<TDerived>::tPlus(const SE3TangentBase<TOther_>& tangent, const bool
     }
   } else {
     if (global) {
-      return {tangent.angular().toManifold().gPlus(rotation()), translation() + tangent.linear()};
+      return {tangent.angular().gExp().gPlus(rotation()), translation() + tangent.linear()};
     } else {
-      return {rotation().gPlus(tangent.angular().toManifold()), translation() + tangent.linear()};
+      return {rotation().gPlus(tangent.angular().gExp()), translation() + tangent.linear()};
     }
   }
 }
@@ -496,7 +496,7 @@ auto SE3Base<TDerived>::toTangent(Scalar* J_this, const bool global, const bool 
 
   if (J_this) {
     JacobianNM<Tangent<SU2<Scalar>>> J_r;
-    output.angular().noalias() = rotation().toTangent(J_r.data(), global);
+    output.angular().noalias() = rotation().gLog(J_r.data(), global);
     output.linear().noalias() = translation();
 
     using Tangent = Tangent<SE3<Scalar>>;
@@ -521,7 +521,7 @@ auto SE3Base<TDerived>::toTangent(Scalar* J_this, const bool global, const bool 
       Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setIdentity();
     }
   } else {
-    output.angular().noalias() = rotation().toTangent();
+    output.angular().noalias() = rotation().gLog();
     output.linear().noalias() = translation();
   }
 
@@ -534,7 +534,7 @@ auto SE3TangentBase<TDerived>::toManifold(Scalar* J_this, const bool global, con
 
   if (J_this) {
     JacobianNM<Tangent<SU2<Scalar>>> J_r;
-    output.rotation() = angular().toManifold(J_r.data(), global);
+    output.rotation() = angular().gExp(J_r.data(), global);
     output.translation().noalias() = linear();
 
     using Tangent = Tangent<SE3<Scalar>>;
@@ -559,7 +559,7 @@ auto SE3TangentBase<TDerived>::toManifold(Scalar* J_this, const bool global, con
       Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setIdentity();
     }
   } else {
-    output.rotation() = angular().toManifold();
+    output.rotation() = angular().gExp();
     output.translation().noalias() = linear();
   }
 

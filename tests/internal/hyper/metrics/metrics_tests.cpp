@@ -90,9 +90,9 @@ class MetricsTests : public testing::Test {
       }
     } else {
       if (global) {
-        return {tau.angular().toManifold().gPlus(se3.rotation()), se3.translation() + tau.linear()};
+        return {tau.angular().gExp().gPlus(se3.rotation()), se3.translation() + tau.linear()};
       } else {
-        return {se3.rotation().gPlus(tau.angular().toManifold()), se3.translation() + tau.linear()};
+        return {se3.rotation().gPlus(tau.angular().gExp()), se3.translation() + tau.linear()};
       }
     }
   }
