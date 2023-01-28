@@ -36,22 +36,6 @@ struct Traits<SE3<TScalar>> : Traits<Cartesian<TScalar, SU2<TScalar>::kNumParame
 
 HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::SE3)
 
-template <typename>
-class Tangent;
-
-template <typename TDerived>
-struct Traits<Tangent<TDerived>> : Traits<TDerived> {};
-
-template <typename TDerived, int TMapOptions>
-struct Traits<Eigen::Map<Tangent<TDerived>, TMapOptions>> : Traits<Tangent<TDerived>> {
-  using Base = typename Traits<Eigen::Map<TDerived, TMapOptions>>::Base;
-};
-
-template <typename TDerived, int TMapOptions>
-struct Traits<Eigen::Map<const Tangent<TDerived>, TMapOptions>> : Traits<Tangent<TDerived>> {
-  using Base = typename Traits<Eigen::Map<const TDerived, TMapOptions>>::Base;
-};
-
 template <typename TScalar>
 struct Traits<Tangent<SU2<TScalar>>> : Traits<Cartesian<TScalar, 3>> {};
 

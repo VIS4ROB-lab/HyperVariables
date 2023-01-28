@@ -11,7 +11,22 @@ namespace hyper::variables {
 namespace internal {
 
 template <typename TVariable>
-struct JacobianAdapterImpl;
+struct JacobianAdapterImpl {
+  // Definitions.
+  using Scalar = typename TVariable::Scalar;
+  using Group = TVariable;
+  using Tangent = variables::Tangent<Group>;
+
+  /// Adapter from group to tangent Jacobian.
+  /// \param values Values.
+  /// \return Jacobian.
+  static auto project(const Scalar* /* values */) -> JacobianNM<Group, Tangent> { return JacobianNM<Group, Tangent>::Identity(); }
+
+  /// Adapter from tangent to group Jacobian.
+  /// \param values Values.
+  /// \return Jacobian.
+  static auto lift(const Scalar* /* values */) -> JacobianNM<Tangent, Group> { return JacobianNM<Tangent, Group>::Identity(); }
+};
 
 template <typename TScalar>
 struct JacobianAdapterImpl<SU2<TScalar>> {

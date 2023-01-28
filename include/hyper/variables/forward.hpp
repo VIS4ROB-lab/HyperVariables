@@ -83,6 +83,22 @@ struct Traits<Sensitivity<TScalar, TOrder>> : public Traits<Cartesian<TScalar, T
 
 HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::Sensitivity, int)
 
+template <typename>
+class Tangent;
+
+template <typename TDerived>
+struct Traits<Tangent<TDerived>> : Traits<TDerived> {};
+
+template <typename TDerived, int TMapOptions>
+struct Traits<Eigen::Map<Tangent<TDerived>, TMapOptions>> : Traits<Tangent<TDerived>> {
+  using Base = typename Traits<Eigen::Map<TDerived, TMapOptions>>::Base;
+};
+
+template <typename TDerived, int TMapOptions>
+struct Traits<Eigen::Map<const Tangent<TDerived>, TMapOptions>> : Traits<Tangent<TDerived>> {
+  using Base = typename Traits<Eigen::Map<const TDerived, TMapOptions>>::Base;
+};
+
 template <typename TScalar>
 using Stamp = Cartesian<TScalar, 1>;
 

@@ -8,6 +8,9 @@
 namespace hyper::variables {
 
 template <typename TDerived>
+class CartesianTangentBase;
+
+template <typename TDerived>
 class CartesianBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, Variable<DerivedScalar_t<TDerived>>, ConstVariable<DerivedScalar_t<TDerived>>> {
  public:
   // Definitions.
@@ -28,6 +31,24 @@ class CartesianBase : public Traits<TDerived>::Base, public ConditionalConstBase
   /// Map as Eigen vector.
   /// \return Vector.
   auto asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> final { return *this; }
+
+  /// Tangent plus.
+  /// \tparam TOther_ Other type.
+  /// \param other Other element.
+  /// \return Cartesian.
+  template <typename TOther_>
+  auto tPlus(const CartesianTangentBase<TOther_>& other) const -> Cartesian<Scalar, kNumParameters> {
+    return *this + other;
+  }
+
+  /// Tangent minus.
+  /// \tparam TOther_ Other type.
+  /// \param other Other element.
+  /// \return Tangent.
+  template <typename TOther_>
+  auto tMinus(const CartesianBase<TOther_>& other) const -> Tangent<Cartesian<Scalar, kNumParameters>> {
+    return *this - other;
+  }
 };
 
 template <typename TScalar, int TNumParameters>
