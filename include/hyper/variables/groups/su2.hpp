@@ -247,7 +247,7 @@ class SU2Base : public QuaternionBase<TDerived> {
   /// \param global Global Jacobian flag.
   /// \return Group element.
   template <typename Other_>
-  auto tPlus(const SU2TangentBase<Other_>& other, const bool global) const -> SU2<Scalar> {
+  auto tPlus(const SU2TangentBase<Other_>& other, const bool global = kGlobal) const -> SU2<Scalar> {
     return (global) ? other.gExp().gPlus(*this) : (*this).gPlus(other.gExp());
   }
 
@@ -257,7 +257,7 @@ class SU2Base : public QuaternionBase<TDerived> {
   /// \param global Global Jacobian flag.
   /// \return Tangent element.
   template <typename Other_>
-  auto tMinus(const SU2Base<Other_>& other, const bool global) const -> Tangent {
+  auto tMinus(const SU2Base<Other_>& other, const bool global = kGlobal) const -> Tangent {
     return (global) ? gPlus(other.gInv()).gLog() : other.gInv().gPlus(*this).gLog();
   }
 
