@@ -12,13 +12,21 @@ class AbstractStamped : public Variable<TScalar> {
  public:
   using Scalar = std::remove_const_t<TScalar>;
 
+  /// Time accessor.
+  /// \return Time.
+  [[nodiscard]] virtual auto time() const -> const Scalar& = 0;
+
+  /// Time modifier.
+  /// \return Time.
+  virtual auto time() -> Scalar& = 0;
+
   /// Stamp accessor.
   /// \return Stamp.
-  [[nodiscard]] virtual auto stamp() const -> const Scalar& = 0;
+  [[nodiscard]] virtual auto stamp() const -> Eigen::Map<const Stamp<Scalar>> = 0;
 
   /// Stamp modifier.
   /// \return Stamp.
-  [[nodiscard]] virtual auto stamp() -> Scalar& = 0;
+  virtual auto stamp() -> Eigen::Map<Stamp<Scalar>> = 0;
 };
 
 template <typename TScalar>
@@ -26,13 +34,21 @@ class ConstAbstractStamped : public ConstVariable<TScalar> {
  public:
   using Scalar = std::remove_const_t<TScalar>;
 
+  /// Time accessor.
+  /// \return Time.
+  [[nodiscard]] virtual auto time() const -> const Scalar& = 0;
+
+  /// Time modifier.
+  /// \return Time.
+  virtual auto time() -> const Scalar& = 0;
+
   /// Stamp accessor.
   /// \return Stamp.
-  [[nodiscard]] virtual auto stamp() const -> const Scalar& = 0;
+  [[nodiscard]] virtual auto stamp() const -> Eigen::Map<const Stamp<Scalar>> = 0;
 
   /// Stamp modifier.
   /// \return Stamp.
-  [[nodiscard]] virtual auto stamp() -> const Scalar& = 0;
+  virtual auto stamp() -> Eigen::Map<const Stamp<Scalar>> = 0;
 };
 
 template <typename TDerived>
@@ -49,6 +65,9 @@ class StampedBase : public Traits<TDerived>::Base,
   using Variable = typename Traits<TDerived>::Variable;
   using VariableWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Variable>;
 
+  using Stamp = variables::Stamp<Scalar>;
+  using StampWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Stamp>;
+
   // Constants.
   static constexpr auto kVariableOffset = 0;
   static constexpr auto kNumVariableParameters = Variable::kNumParameters;
@@ -58,6 +77,15 @@ class StampedBase : public Traits<TDerived>::Base,
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(StampedBase)
 
+  /// Random group element.
+  /// \return Random element.
+  static auto Random() -> Stamped<Variable> {
+    Stamped<Variable> stamped_variable;
+    stamped_variable.stamp() = Stamp::Random();
+    stamped_variable.variable() = Variable::Random();
+    return stamped_variable;
+  }
+
   /// Map as Eigen vector.
   /// \return Vector.
   auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final { return *this; }
@@ -66,13 +94,21 @@ class StampedBase : public Traits<TDerived>::Base,
   /// \return Vector.
   auto asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> final { return *this; }
 
+  /// Time accessor.
+  /// \return Time.
+  [[nodiscard]] auto time() const -> const Scalar& final { return this->data()[kStampOffset]; }
+
+  /// Time modifier.
+  /// \return Time.
+  auto time() -> ScalarWithConstIfNotLvalue& final { return this->data()[kStampOffset]; }
+
   /// Stamp accessor.
   /// \return Stamp.
-  [[nodiscard]] auto stamp() const -> const Scalar& final { return this->data()[kStampOffset]; }
+  [[nodiscard]] auto stamp() const -> Eigen::Map<const Stamp> final { return Eigen::Map<const Stamp>{this->data() + kStampOffset}; }
 
   /// Stamp modifier.
   /// \return Stamp.
-  auto stamp() -> ScalarWithConstIfNotLvalue& { return this->data()[kStampOffset]; }
+  auto stamp() -> Eigen::Map<StampWithConstIfNotLvalue> final { return Eigen::Map<StampWithConstIfNotLvalue>{this->data() + kStampOffset}; }
 
   /// Variable accessor.
   /// \return Variable.
@@ -81,6 +117,26 @@ class StampedBase : public Traits<TDerived>::Base,
   /// Variable modifier.
   /// \return Variable.
   auto variable() -> Eigen::Map<VariableWithConstIfNotLvalue> { return Eigen::Map<VariableWithConstIfNotLvalue>{this->data() + kVariableOffset}; }
+
+  /// Tangent plus.
+  /// \param other Other element.
+  /// \return Cartesian.
+  auto tPlus(const Stamped<Tangent<Variable>>& other) const -> Stamped<Variable> {
+    Stamped<Variable> stamped_variable;
+    stamped_variable.stamp() = stamp() + other.stamp();
+    stamped_variable.variable() = variable().tPlus(other.variable());
+    return stamped_variable;
+  }
+
+  /// Tangent minus.
+  /// \param other Other element.
+  /// \return Tangent.
+  auto tMinus(const Stamped<Variable>& other) const -> Stamped<Tangent<Variable>> {
+    Stamped<Tangent<Variable>> stamped_tangent;
+    stamped_tangent.stamp() = stamp() - other.stamp();
+    stamped_tangent.variable() = variable().tMinus(other.variable());
+    return stamped_tangent;
+  }
 };
 
 template <typename TVariable>

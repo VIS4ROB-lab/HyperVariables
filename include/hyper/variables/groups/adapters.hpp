@@ -5,6 +5,7 @@
 
 #include "hyper/variables/groups/groups.hpp"
 #include "hyper/variables/jacobian.hpp"
+#include "hyper/variables/stamped.hpp"
 
 namespace hyper::variables {
 
@@ -17,15 +18,18 @@ struct JacobianAdapterImpl {
   using Group = TVariable;
   using Tangent = variables::Tangent<Group>;
 
+  using GroupToTangentJacobian = JacobianNM<Group, Tangent>;
+  using TangentToGroupJacobian = JacobianNM<Tangent, Group>;
+
   /// Adapter from group to tangent Jacobian.
   /// \param values Values.
   /// \return Jacobian.
-  static auto project(const Scalar* /* values */) -> JacobianNM<Group, Tangent> { return JacobianNM<Group, Tangent>::Identity(); }
+  static auto groupToTangentJacobian(const Scalar* /* values */) -> GroupToTangentJacobian { return GroupToTangentJacobian::Identity(); }
 
   /// Adapter from tangent to group Jacobian.
   /// \param values Values.
   /// \return Jacobian.
-  static auto lift(const Scalar* /* values */) -> JacobianNM<Tangent, Group> { return JacobianNM<Tangent, Group>::Identity(); }
+  static auto tangentToGroupJacobian(const Scalar* /* values */) -> TangentToGroupJacobian { return TangentToGroupJacobian::Identity(); }
 };
 
 template <typename TScalar>
@@ -34,11 +38,14 @@ struct JacobianAdapterImpl<SU2<TScalar>> {
   using Group = variables::SU2<TScalar>;
   using Tangent = variables::Tangent<Group>;
 
+  using GroupToTangentJacobian = JacobianNM<Group, Tangent>;
+  using TangentToGroupJacobian = JacobianNM<Tangent, Group>;
+
   /// Adapter from group to tangent Jacobian.
   /// \param values Values.
   /// \return Jacobian.
-  static auto project(const TScalar* values) -> JacobianNM<Group, Tangent> {
-    JacobianNM<Group, Tangent> J;
+  static auto groupToTangentJacobian(const TScalar* values) -> GroupToTangentJacobian {
+    GroupToTangentJacobian J;
 
     using Order = Group::Ordering;
     TScalar tau[SU2<TScalar>::kNumParameters];
@@ -68,8 +75,8 @@ struct JacobianAdapterImpl<SU2<TScalar>> {
   /// Adapter from tangent to group Jacobian.
   /// \param values Values.
   /// \return Jacobian.
-  static auto lift(const TScalar* values) -> JacobianNM<Tangent, Group> {
-    JacobianNM<Tangent, Group> J;
+  static auto tangentToGroupJacobian(const TScalar* values) -> TangentToGroupJacobian {
+    TangentToGroupJacobian J;
 
     using Order = Group::Ordering;
     TScalar tau[SU2<TScalar>::kNumParameters];
@@ -104,13 +111,16 @@ struct JacobianAdapterImpl<SE3<TScalar>> {
   using Group = variables::SE3<TScalar>;
   using Tangent = variables::Tangent<Group>;
 
+  using GroupToTangentJacobian = JacobianNM<Group, Tangent>;
+  using TangentToGroupJacobian = JacobianNM<Tangent, Group>;
+
   /// Adapter from group to tangent Jacobian.
   /// \param values Values.
   /// \return Jacobian.
-  static auto project(const TScalar* values) -> JacobianNM<Group, Tangent> {
-    JacobianNM<Group, Tangent> J;
+  static auto groupToTangentJacobian(const TScalar* values) -> GroupToTangentJacobian {
+    GroupToTangentJacobian J;
     Tangent::template AngularJacobian<Group::kNumRotationParameters>(J, Group::kRotationOffset).noalias() =
-        JacobianAdapterImpl<SU2<TScalar>>::project(values + Group::kRotationOffset);
+        JacobianAdapterImpl<SU2<TScalar>>::groupToTangentJacobian(values + Group::kRotationOffset);
     Tangent::template LinearJacobian<Group::kNumRotationParameters>(J, Group::kRotationOffset).setZero();
     Tangent::template AngularJacobian<Group::kNumTranslationParameters>(J, Group::kTranslationOffset).setZero();
     Tangent::template LinearJacobian<Group::kNumTranslationParameters>(J, Group::kTranslationOffset).setIdentity();
@@ -120,10 +130,10 @@ struct JacobianAdapterImpl<SE3<TScalar>> {
   /// Adapter from tangent to group Jacobian.
   /// \param values Values.
   /// \return Jacobian.
-  static auto lift(const TScalar* values) -> JacobianNM<Tangent, Group> {
-    JacobianNM<Tangent, Group> J;
+  static auto tangentToGroupJacobian(const TScalar* values) -> TangentToGroupJacobian {
+    TangentToGroupJacobian J;
     Group::template RotationJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() =
-        JacobianAdapterImpl<SU2<TScalar>>::lift(values + Group::kRotationOffset);
+        JacobianAdapterImpl<SU2<TScalar>>::tangentToGroupJacobian(values + Group::kRotationOffset);
     Group::template TranslationJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
     Group::template RotationJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setZero();
     Group::template TranslationJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setIdentity();
@@ -131,16 +141,54 @@ struct JacobianAdapterImpl<SE3<TScalar>> {
   }
 };
 
+template <class TVariable>
+struct JacobianAdapterImpl<Stamped<TVariable>> {
+  // Definitions.
+  using Scalar = typename TVariable::Scalar;
+  using Stamp = variables::Stamp<Scalar>;
+  using Group = variables::Stamped<TVariable>;
+  using Tangent = variables::Stamped<variables::Tangent<TVariable>>;
+
+  using GroupToTangentJacobian = JacobianNM<Group, Tangent>;
+  using TangentToGroupJacobian = JacobianNM<Tangent, Group>;
+
+  /// Adapter from stamped group to stamped tangent Jacobian.
+  /// \param values Values.
+  /// \return Jacobian.
+  static auto groupToTangentJacobian(const Scalar* values) -> GroupToTangentJacobian {
+    GroupToTangentJacobian J;
+    J.template block<TVariable::kNumParameters, variables::Tangent<TVariable>::kNumParameters>(Group::kVariableOffset, Tangent::kVariableOffset).noalias() =
+        JacobianAdapterImpl<TVariable>::groupToTangentJacobian(values + Group::kVariableOffset);
+    J.template block<Stamp::kNumParameters, variables::Tangent<TVariable>::kNumParameters>(Group::kStampOffset, Tangent::kVariableOffset).setZero();
+    J.template block<TVariable::kNumParameters, Stamp::kNumParameters>(Group::kVariableOffset, Tangent::kStampOffset).setZero();
+    J.template block<Stamp::kNumParameters, Stamp::kNumParameters>(Group::kStampOffset, Tangent::kStampOffset).setIdentity();
+    return J;
+  }
+
+  /// Adapter from stamped tangent to stamped group Jacobian.
+  /// \param values Values.
+  /// \return Jacobian.
+  static auto tangentToGroupJacobian(const Scalar* values) -> TangentToGroupJacobian {
+    TangentToGroupJacobian J;
+    J.template block<variables::Tangent<TVariable>::kNumParameters, TVariable::kNumParameters>(Tangent::kVariableOffset, Group::kVariableOffset).noalias() =
+        JacobianAdapterImpl<TVariable>::tangentToGroupJacobian(values + Group::kVariableOffset);
+    J.template block<variables::Tangent<TVariable>::kNumParameters, Stamp::kNumParameters>(Tangent::kVariableOffset, Group::kStampOffset).setZero();
+    J.template block<Stamp::kNumParameters, TVariable::kNumParameters>(Tangent::kStampOffset, Group::kVariableOffset).setZero();
+    J.template block<Stamp::kNumParameters, Stamp::kNumParameters>(Tangent::kStampOffset, Group::kStampOffset).setIdentity();
+    return J;
+  }
+};
+
 }  // namespace internal
 
 template <typename TVariable>
-inline auto JacobianAdapter(const typename TVariable::Scalar* values) -> JacobianNM<Tangent<TVariable>, TVariable> {
-  return internal::JacobianAdapterImpl<TVariable>::lift(values);
+inline auto JacobianAdapter(const typename TVariable::Scalar* values) -> internal::JacobianAdapterImpl<TVariable>::TangentToGroupJacobian {
+  return internal::JacobianAdapterImpl<TVariable>::tangentToGroupJacobian(values);
 }
 
 template <typename TVariable>
-inline auto InverseJacobianAdapter(const typename TVariable::Scalar* values) -> JacobianNM<TVariable, Tangent<TVariable>> {
-  return internal::JacobianAdapterImpl<TVariable>::project(values);
+inline auto InverseJacobianAdapter(const typename TVariable::Scalar* values) -> internal::JacobianAdapterImpl<TVariable>::GroupToTangentJacobian {
+  return internal::JacobianAdapterImpl<TVariable>::groupToTangentJacobian(values);
 }
 
 }  // namespace hyper::variables

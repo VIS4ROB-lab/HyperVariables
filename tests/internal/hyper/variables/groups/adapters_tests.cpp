@@ -15,9 +15,6 @@ class JacobianAdapterTests : public ::testing::Test {
 
   // Definitions.
   using Variable = TVariable;
-  using Tangent = variables::Tangent<Variable>;
-  // using VariableJacobian = variables::JacobianNM<Variable>;
-  using TangentJacobian = variables::JacobianNM<Tangent>;
 
   /// Checks the adapter duality.
   /// \return True on success.
@@ -25,13 +22,13 @@ class JacobianAdapterTests : public ::testing::Test {
     variable = Variable::Random();
     const auto J_l = JacobianAdapter<Variable>(variable.data());
     const auto J_p = InverseJacobianAdapter<Variable>(variable.data());
-    return (J_l * J_p).isApprox(TangentJacobian::Identity());
+    return (J_l * J_p).isIdentity();
   }
 
   Variable variable;
 };
 
-using TestTypes = ::testing::Types<SU2<double>, SE3<double>>;
+using TestTypes = ::testing::Types<SU2<double>, SE3<double>, Stamped<SU2<double>>, Stamped<SE3<double>>>;
 TYPED_TEST_SUITE(JacobianAdapterTests, TestTypes);
 
 TYPED_TEST(JacobianAdapterTests, Duality) {
