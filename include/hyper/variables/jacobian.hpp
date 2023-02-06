@@ -7,19 +7,19 @@
 
 namespace hyper::variables {
 
-template <typename TScalar, int TNumRows, int TNumCols = TNumRows, int TOptions = DefaultMatrixStorageOption(TNumRows, TNumCols)>
+template <typename TScalar, int TNumRows, int TNumCols = TNumRows, int TOptions = DefaultStorageOption(TNumRows, TNumCols)>
 using Jacobian = Matrix<TScalar, TNumRows, TNumCols, TOptions>;
 
-template <typename TDerived, typename TOtherDerived = TDerived, int TOptions = DefaultMatrixStorageOption(TDerived::SizeAtCompileTime, TOtherDerived::SizeAtCompileTime)>
+template <typename TDerived, typename TOtherDerived = TDerived, int TOptions = DefaultStorageOption(TDerived::SizeAtCompileTime, TOtherDerived::SizeAtCompileTime)>
 using JacobianNM = MatrixNN<TDerived, TOtherDerived, TOptions>;
 
-template <typename TDerived, int TOptions = DefaultMatrixStorageOption(TDerived::SizeAtCompileTime, Eigen::Dynamic)>
+template <typename TDerived, int TOptions = DefaultStorageOption(TDerived::SizeAtCompileTime, Eigen::Dynamic)>
 using JacobianNX = MatrixNX<TDerived, TOptions>;
 
-template <typename TOtherDerived, int TOptions = DefaultMatrixStorageOption(Eigen::Dynamic, TOtherDerived::SizeAtCompileTime)>
+template <typename TOtherDerived, int TOptions = DefaultStorageOption(Eigen::Dynamic, TOtherDerived::SizeAtCompileTime)>
 using JacobianXN = MatrixXN<TOtherDerived, TOptions>;
 
-template <typename TScalar, int TOptions = DefaultMatrixStorageOption(Eigen::Dynamic, Eigen::Dynamic)>
+template <typename TScalar, int TOptions = DefaultStorageOption(Eigen::Dynamic, Eigen::Dynamic)>
 using JacobianX = MatrixX<TScalar, TOptions>;
 
 }  // namespace hyper::variables

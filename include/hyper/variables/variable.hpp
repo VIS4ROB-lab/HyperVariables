@@ -15,8 +15,18 @@ class ConstVariable {
   // Definitions.
   using Scalar = TScalar;
 
+  using Index = Eigen::Index;
+
   /// Virtual default destructor.
   virtual ~ConstVariable() = default;
+
+  /// Retrieves the manifold size.
+  /// \return Manifold size.
+  [[nodiscard]] virtual auto manifoldSize() const -> Index = 0;
+
+  /// Retrieves the tangent size.
+  /// \return Tangent size.
+  [[nodiscard]] virtual auto tangentSize() const -> Index = 0;
 
   /// Map as Eigen vector.
   /// \return Vector.
@@ -33,8 +43,18 @@ class Variable {
   // Definitions.
   using Scalar = TScalar;
 
+  using Index = Eigen::Index;
+
   /// Virtual default destructor.
   virtual ~Variable() = default;
+
+  /// Retrieves the manifold size.
+  /// \return Manifold size.
+  [[nodiscard]] virtual auto manifoldSize() const -> Index = 0;
+
+  /// Retrieves the tangent size.
+  /// \return Tangent size.
+  [[nodiscard]] virtual auto tangentSize() const -> Index = 0;
 
   /// Map as Eigen vector.
   /// \return Vector.

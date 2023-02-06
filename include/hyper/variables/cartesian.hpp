@@ -19,10 +19,20 @@ class CartesianBase : public Traits<TDerived>::Base, public ConditionalConstBase
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
   using Base::Base;
 
+  using Index = Eigen::Index;
+
   // Constants.
   static constexpr auto kNumParameters = (int)Base::SizeAtCompileTime;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(CartesianBase)
+
+  /// Retrieves the manifold size.
+  /// \return Manifold size.
+  [[nodiscard]] auto manifoldSize() const -> Index override { return kNumParameters; }
+
+  /// Retrieves the tangent size.
+  /// \return Tangent size.
+  [[nodiscard]] auto tangentSize() const -> Index override { return kNumParameters; }
 
   /// Map as Eigen vector.
   /// \return Vector.

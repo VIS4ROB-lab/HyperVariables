@@ -62,6 +62,8 @@ class StampedBase : public Traits<TDerived>::Base,
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
   using Base::Base;
 
+  using Index = Eigen::Index;
+
   using Variable = typename Traits<TDerived>::Variable;
   using VariableWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Variable>;
 
@@ -85,6 +87,14 @@ class StampedBase : public Traits<TDerived>::Base,
     stamped_variable.variable() = Variable::Random();
     return stamped_variable;
   }
+
+  /// Retrieves the manifold size.
+  /// \return Manifold size.
+  [[nodiscard]] auto manifoldSize() const -> Index final { return Variable::kNumParameters + kNumStampParameters; }
+
+  /// Retrieves the tangent size.
+  /// \return Tangent size.
+  [[nodiscard]] auto tangentSize() const -> Index final { return Tangent<Variable>::kNumParameters + kNumStampParameters; }
 
   /// Map as Eigen vector.
   /// \return Vector.

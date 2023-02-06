@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include "hyper/variables/groups/adapters.hpp"
+#include "hyper/variables/adapters.hpp"
 
 namespace hyper::variables::tests {
 

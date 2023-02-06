@@ -118,10 +118,20 @@ class DistortionBase : public Traits<TDerived>::Base, public ConditionalConstBas
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
   using Base::Base;
 
+  using Index = Eigen::Index;
+
   // Constants.
   static constexpr auto kNumParameters = (int)Base::SizeAtCompileTime;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(DistortionBase)
+
+  /// Retrieves the manifold size.
+  /// \return Manifold size.
+  [[nodiscard]] auto manifoldSize() const -> Index final { return kNumParameters; }
+
+  /// Retrieves the tangent size.
+  /// \return Tangent size.
+  [[nodiscard]] auto tangentSize() const -> Index final { return kNumParameters; }
 
   /// Map as Eigen vector.
   /// \return Vector.
