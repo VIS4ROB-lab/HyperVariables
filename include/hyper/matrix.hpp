@@ -15,7 +15,7 @@ template <typename TScalar, int TNumRows, int TNumCols = TNumRows, int TOptions 
 using Matrix = Eigen::Matrix<TScalar, TNumRows, TNumCols, TOptions>;
 
 template <typename TDerived, typename TOtherDerived = TDerived, int TOptions = DefaultStorageOption(TDerived::SizeAtCompileTime, TOtherDerived::SizeAtCompileTime)>
-using MatrixNN = Matrix<typename TDerived::Scalar, TDerived::SizeAtCompileTime, TOtherDerived::SizeAtCompileTime, TOptions>;
+using MatrixNM = Matrix<typename TDerived::Scalar, TDerived::SizeAtCompileTime, TOtherDerived::SizeAtCompileTime, TOptions>;
 
 template <typename TDerived, int TOptions = DefaultStorageOption(TDerived::SizeAtCompileTime, Eigen::Dynamic)>
 using MatrixNX = Matrix<typename TDerived::Scalar, TDerived::SizeAtCompileTime, Eigen::Dynamic, TOptions>;

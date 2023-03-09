@@ -11,7 +11,7 @@ template <typename TScalar, int TNumRows, int TNumCols = TNumRows, int TOptions 
 using Jacobian = Matrix<TScalar, TNumRows, TNumCols, TOptions>;
 
 template <typename TDerived, typename TOtherDerived = TDerived, int TOptions = DefaultStorageOption(TDerived::SizeAtCompileTime, TOtherDerived::SizeAtCompileTime)>
-using JacobianNM = MatrixNN<TDerived, TOtherDerived, TOptions>;
+using JacobianNM = MatrixNM<TDerived, TOtherDerived, TOptions>;
 
 template <typename TDerived, int TOptions = DefaultStorageOption(TDerived::SizeAtCompileTime, Eigen::Dynamic)>
 using JacobianNX = MatrixNX<TDerived, TOptions>;

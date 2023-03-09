@@ -13,6 +13,9 @@ namespace hyper::metrics {
 template <typename TScalar>
 class Metric {
  public:
+  // Definitions.
+  using Scalar = TScalar;
+
   /// Default destructor.
   virtual ~Metric() = default;
 
