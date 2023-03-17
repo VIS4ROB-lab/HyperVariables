@@ -125,14 +125,6 @@ class DistortionBase : public Traits<TDerived>::Base, public ConditionalConstBas
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(DistortionBase)
 
-  /// Retrieves the manifold size.
-  /// \return Manifold size.
-  [[nodiscard]] auto manifoldSize() const -> Index final { return kNumParameters; }
-
-  /// Retrieves the tangent size.
-  /// \return Tangent size.
-  [[nodiscard]] auto tangentSize() const -> Index final { return kNumParameters; }
-
   /// Map as Eigen vector.
   /// \return Vector.
   auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final { return *this; }

@@ -9,16 +9,16 @@
 
 namespace hyper::metrics {
 
-template <typename TScalar, int TDim>
+template <typename TScalar, int TSize>
 class AngularMetric final : public Metric<TScalar> {
  public:
   // Constants.
-  static constexpr auto kInputDim = TDim;
-  static constexpr auto kOutputDim = 1;
+  static constexpr auto kInputSize = TSize;
+  static constexpr auto kOutputSize = 1;
 
   // Definitions.
-  using Input = variables::Cartesian<TScalar, kInputDim>;
-  using Output = variables::Cartesian<TScalar, kOutputDim>;
+  using Input = variables::Cartesian<TScalar, kInputSize>;
+  using Output = variables::Cartesian<TScalar, kOutputSize>;
   using Jacobian = variables::JacobianNM<Output, Input>;
 
   /// Evaluates the distance between elements.
@@ -71,13 +71,13 @@ class AngularMetric final : public Metric<TScalar> {
     return output;
   }
 
-  /// Retrieves the input dimension.
-  /// \return Input dimension.
-  [[nodiscard]] constexpr auto inputDim() const -> int final { return kInputDim; };
+  /// Retrieves the input size.
+  /// \return Input size.
+  [[nodiscard]] constexpr auto inputSize() const -> int final { return kInputSize; };
 
-  /// Retrieves the output dimension.
-  /// \return Output dimension.
-  [[nodiscard]] constexpr auto outputDim() const -> int final { return kOutputDim; };
+  /// Retrieves the output size.
+  /// \return Output size.
+  [[nodiscard]] constexpr auto outputSize() const -> int final { return kOutputSize; };
 
   /// Evaluates the distance between elements.
   /// \param lhs Left element/input vector.

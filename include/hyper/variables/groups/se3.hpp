@@ -60,14 +60,6 @@ class SE3Base : public CartesianBase<TDerived> {
   /// \return Random element.
   static auto Random() -> SE3<Scalar> { return {Rotation::Random(), Translation::Random()}; }
 
-  /// Retrieves the manifold size.
-  /// \return Manifold size.
-  [[nodiscard]] auto manifoldSize() const -> Index final { return kNumParameters; }
-
-  /// Retrieves the tangent size.
-  /// \return Tangent size.
-  [[nodiscard]] auto tangentSize() const -> Index final { return variables::Tangent<SE3<Scalar>>::kNumParameters; }
-
   /// Rotation accessor.
   /// \return Rotation.
   auto rotation() const { return Eigen::Map<const Rotation>{this->data() + kRotationOffset}; }

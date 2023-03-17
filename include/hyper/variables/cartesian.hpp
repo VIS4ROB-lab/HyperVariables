@@ -26,14 +26,6 @@ class CartesianBase : public Traits<TDerived>::Base, public ConditionalConstBase
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(CartesianBase)
 
-  /// Retrieves the manifold size.
-  /// \return Manifold size.
-  [[nodiscard]] auto manifoldSize() const -> Index override { return kNumParameters; }
-
-  /// Retrieves the tangent size.
-  /// \return Tangent size.
-  [[nodiscard]] auto tangentSize() const -> Index override { return kNumParameters; }
-
   /// Map as Eigen vector.
   /// \return Vector.
   auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final { return *this; }

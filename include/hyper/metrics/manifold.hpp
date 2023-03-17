@@ -18,8 +18,8 @@ class ManifoldMetric<variables::SE3<TScalar>> final : public Metric<TScalar> {
   using Jacobian = variables::JacobianNM<Output>;
 
   // Constants.
-  static constexpr auto kInputDim = Input::kNumParameters;
-  static constexpr auto kOutputDim = Output::kNumParameters;
+  static constexpr auto kInputSize = Input::kNumParameters;
+  static constexpr auto kOutputSize = Output::kNumParameters;
 
   static constexpr auto kGlobal = HYPER_DEFAULT_TO_GLOBAL_MANIFOLD_DERIVATIVES;
   static constexpr auto kCoupled = HYPER_DEFAULT_TO_COUPLED_MANIFOLD_DERIVATIVES;
@@ -80,13 +80,13 @@ class ManifoldMetric<variables::SE3<TScalar>> final : public Metric<TScalar> {
     return output;
   }
 
-  /// Retrieves the input dimension.
-  /// \return Input dimension.
-  [[nodiscard]] constexpr auto inputDim() const -> int final { return kInputDim; };
+  /// Retrieves the input size.
+  /// \return Input size.
+  [[nodiscard]] constexpr auto inputSize() const -> int final { return kInputSize; };
 
-  /// Retrieves the output dimension.
-  /// \return Output dimension.
-  [[nodiscard]] constexpr auto outputDim() const -> int final { return kOutputDim; };
+  /// Retrieves the output size.
+  /// \return Output size.
+  [[nodiscard]] constexpr auto outputSize() const -> int final { return kOutputSize; };
 
   /// Evaluates the distance between elements.
   /// \param lhs Left element/input vector.

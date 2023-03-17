@@ -19,13 +19,13 @@ class Metric {
   /// Default destructor.
   virtual ~Metric() = default;
 
-  /// Retrieves the input dimension.
-  /// \return Input dimension.
-  [[nodiscard]] virtual auto inputDim() const -> int = 0;
+  /// Retrieves the input size.
+  /// \return Input size.
+  [[nodiscard]] virtual auto inputSize() const -> int = 0;
 
-  /// Retrieves the output dimension.
-  /// \return Output dimension.
-  [[nodiscard]] virtual auto outputDim() const -> int = 0;
+  /// Retrieves the output size.
+  /// \return Output size.
+  [[nodiscard]] virtual auto outputSize() const -> int = 0;
 
   /// Evaluates the distance between elements.
   /// \param lhs Left element/input vector.

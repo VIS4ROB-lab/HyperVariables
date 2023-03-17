@@ -88,14 +88,6 @@ class StampedBase : public Traits<TDerived>::Base,
     return stamped_variable;
   }
 
-  /// Retrieves the manifold size.
-  /// \return Manifold size.
-  [[nodiscard]] auto manifoldSize() const -> Index final { return Variable::kNumParameters + kNumStampParameters; }
-
-  /// Retrieves the tangent size.
-  /// \return Tangent size.
-  [[nodiscard]] auto tangentSize() const -> Index final { return Tangent<Variable>::kNumParameters + kNumStampParameters; }
-
   /// Map as Eigen vector.
   /// \return Vector.
   auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final { return *this; }

@@ -60,14 +60,6 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
   /// \return Data.
   [[nodiscard]] auto data() -> ScalarWithConstIfNotLvalue* { return this->coeffs().data(); }
 
-  /// Retrieves the manifold size.
-  /// \return Manifold size.
-  [[nodiscard]] auto manifoldSize() const -> Index final { return kNumParameters; }
-
-  /// Retrieves the tangent size.
-  /// \return Tangent size.
-  [[nodiscard]] auto tangentSize() const -> Index final { return variables::Tangent<SU2<Scalar>>::kNumParameters; }
-
   /// Map as Eigen vector.
   /// \return Vector.
   auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final { return this->coeffs(); }
