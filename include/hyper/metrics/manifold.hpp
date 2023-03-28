@@ -37,26 +37,18 @@ class ManifoldMetric<variables::SE3<TScalar>> final : public Metric<TScalar> {
 
     if (!J_lhs && !J_rhs) {
       output_ = lhs_.gPlus(rhs_.gInv()).gLog();
-      return;
-    }
-    if (J_lhs && J_rhs) {
+    } else if (J_lhs && J_rhs) {
       Jacobian J_t_p, J_p_l, J_p_ir, J_ir_r;
-      const auto i_rhs = rhs_.gInv(J_ir_r.data());
-      const auto lhs_plus_i_rhs = lhs_.gPlus(i_rhs, J_p_l.data(), J_p_ir.data());
-      output_ = lhs_plus_i_rhs.gLog(J_t_p.data());
+      output_ = lhs_.gPlus(rhs_.gInv(J_ir_r.data()), J_p_l.data(), J_p_ir.data()).gLog(J_t_p.data());
       Eigen::Map<Jacobian>{J_lhs}.noalias() = J_t_p * J_p_l;
       Eigen::Map<Jacobian>{J_rhs}.noalias() = J_t_p * J_p_ir * J_ir_r;
     } else if (J_lhs) {
       Jacobian J_t_p, J_p_l;
-      const auto i_rhs = rhs_.gInv();
-      const auto lhs_plus_i_rhs = lhs_.gPlus(i_rhs, J_p_l.data());
-      output_ = lhs_plus_i_rhs.gLog(J_t_p.data());
+      output_ = lhs_.gPlus(rhs_.gInv(), J_p_l.data()).gLog(J_t_p.data());
       Eigen::Map<Jacobian>{J_lhs}.noalias() = J_t_p * J_p_l;
     } else {
       Jacobian J_t_p, J_p_ir, J_ir_r;
-      const auto i_rhs = rhs_.gInv(J_ir_r.data());
-      const auto lhs_plus_i_rhs = lhs_.gPlus(i_rhs, nullptr, J_p_ir.data());
-      output_ = lhs_plus_i_rhs.gLog(J_t_p.data());
+      output_ = lhs_.gPlus(rhs_.gInv(J_ir_r.data()), nullptr, J_p_ir.data()).gLog(J_t_p.data());
       Eigen::Map<Jacobian>{J_rhs}.noalias() = J_t_p * J_p_ir * J_ir_r;
     }
   }

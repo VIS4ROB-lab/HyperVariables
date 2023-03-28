@@ -47,13 +47,29 @@ struct JacobianAdapterImpl<SU2<TScalar>> {
   static auto groupToTangentJacobian(const TScalar* values) -> GroupToTangentJacobian {
     GroupToTangentJacobian J;
 
-    using Order = Group::Ordering;
+    using Order = typename Group::Order;
     TScalar tau[SU2<TScalar>::kNumParameters];
     tau[Order::kW] = Group::kiAlpha * values[Order::kW];
     tau[Order::kX] = Group::kiAlpha * values[Order::kX];
     tau[Order::kY] = Group::kiAlpha * values[Order::kY];
     tau[Order::kZ] = Group::kiAlpha * values[Order::kZ];
 
+#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+    J(Order::kX, 0) = tau[Order::kW];
+    J(Order::kY, 0) = -tau[Order::kZ];
+    J(Order::kZ, 0) = tau[Order::kY];
+    J(Order::kW, 0) = -tau[Order::kX];
+
+    J(Order::kX, 1) = tau[Order::kZ];
+    J(Order::kY, 1) = tau[Order::kW];
+    J(Order::kZ, 1) = -tau[Order::kX];
+    J(Order::kW, 1) = -tau[Order::kY];
+
+    J(Order::kX, 2) = -tau[Order::kY];
+    J(Order::kY, 2) = tau[Order::kX];
+    J(Order::kZ, 2) = tau[Order::kW];
+    J(Order::kW, 2) = -tau[Order::kZ];
+#else
     J(Order::kX, 0) = tau[Order::kW];
     J(Order::kY, 0) = tau[Order::kZ];
     J(Order::kZ, 0) = -tau[Order::kY];
@@ -68,7 +84,7 @@ struct JacobianAdapterImpl<SU2<TScalar>> {
     J(Order::kY, 2) = -tau[Order::kX];
     J(Order::kZ, 2) = tau[Order::kW];
     J(Order::kW, 2) = -tau[Order::kZ];
-
+#endif
     return J;
   }
 
@@ -78,13 +94,30 @@ struct JacobianAdapterImpl<SU2<TScalar>> {
   static auto tangentToGroupJacobian(const TScalar* values) -> TangentToGroupJacobian {
     TangentToGroupJacobian J;
 
-    using Order = Group::Ordering;
+    using Order = typename Group::Order;
     TScalar tau[SU2<TScalar>::kNumParameters];
     tau[Order::kW] = Group::kAlpha * values[Order::kW];
     tau[Order::kX] = Group::kAlpha * values[Order::kX];
     tau[Order::kY] = Group::kAlpha * values[Order::kY];
     tau[Order::kZ] = Group::kAlpha * values[Order::kZ];
 
+#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+    J(0, Order::kX) = tau[Order::kW];
+    J(1, Order::kX) = tau[Order::kZ];
+    J(2, Order::kX) = -tau[Order::kY];
+
+    J(0, Order::kY) = -tau[Order::kZ];
+    J(1, Order::kY) = tau[Order::kW];
+    J(2, Order::kY) = tau[Order::kX];
+
+    J(0, Order::kZ) = tau[Order::kY];
+    J(1, Order::kZ) = -tau[Order::kX];
+    J(2, Order::kZ) = tau[Order::kW];
+
+    J(0, Order::kW) = -tau[Order::kX];
+    J(1, Order::kW) = -tau[Order::kY];
+    J(2, Order::kW) = -tau[Order::kZ];
+#else
     J(0, Order::kX) = tau[Order::kW];
     J(1, Order::kX) = -tau[Order::kZ];
     J(2, Order::kX) = tau[Order::kY];
@@ -100,7 +133,7 @@ struct JacobianAdapterImpl<SU2<TScalar>> {
     J(0, Order::kW) = -tau[Order::kX];
     J(1, Order::kW) = -tau[Order::kY];
     J(2, Order::kW) = -tau[Order::kZ];
-
+#endif
     return J;
   }
 };

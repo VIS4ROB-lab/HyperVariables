@@ -34,12 +34,12 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
   static constexpr auto SizeAtCompileTime = (int)Base::Coefficients::SizeAtCompileTime;
   static constexpr auto kNumParameters = (int)Base::Coefficients::SizeAtCompileTime;
 
-  // Ordering.
-  struct Ordering {
-    static constexpr Index kW = 3;
-    static constexpr Index kX = 0;
-    static constexpr Index kY = 1;
-    static constexpr Index kZ = 2;
+  // Order.
+  struct Order {
+    static constexpr auto kW = 3;
+    static constexpr auto kX = 0;
+    static constexpr auto kY = 1;
+    static constexpr auto kZ = 2;
   };
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(QuaternionBase)
