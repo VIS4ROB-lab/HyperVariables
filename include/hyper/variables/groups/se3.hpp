@@ -35,9 +35,6 @@ class SE3Base : public CartesianBase<TDerived> {
   static constexpr auto kNumTranslationParameters = 3;
   static constexpr auto kNumParameters = kNumRotationParameters + kNumTranslationParameters;
 
-  static constexpr auto kGlobal = HYPER_DEFAULT_TO_GLOBAL_MANIFOLD_DERIVATIVES;
-  static constexpr auto kCoupled = HYPER_DEFAULT_TO_COUPLED_MANIFOLD_DERIVATIVES;
-
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SE3Base)
 
   /// Rotation Jacobian accessor/modifier.
@@ -78,48 +75,31 @@ class SE3Base : public CartesianBase<TDerived> {
 
   /// Group inverse.
   /// \param J_this Jacobian w.r.t. this.
-  /// \param global Global Jacobian flag.
-  /// \param coupled Coupled Jacobian flag.
   /// \return Group element.
-  auto gInv(Scalar* J_this = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> SE3<Scalar> {
+  auto gInv(Scalar* J_this = nullptr) const -> SE3<Scalar> {
     const Rotation i_rotation = rotation().gInv();
     const Translation i_translation = Scalar{-1} * (i_rotation.act(translation()));
+    SE3<Scalar> inv = {i_rotation, i_translation};
 
-    if (J_this) {
-      auto J = Eigen::Map<JacobianNM<Tangent>>{J_this};
-
-      if (coupled) {
-        if (global) {
-          const auto i_R_this = (Scalar{-1} * i_rotation.matrix()).eval();
-          Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = i_R_this;
-          Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = Scalar{-1} * i_R_this * translation().hat();
-          Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = i_R_this;
-        } else {
-          const auto R_this = (Scalar{-1} * rotation().matrix()).eval();
-          Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = R_this;
-          Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = translation().hat() * R_this;
-          Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = R_this;
-        }
-      } else {
-        if (global) {
-          const auto i_R_this = (Scalar{-1} * i_rotation.matrix()).eval();
-          Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = i_R_this;
-          Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = i_R_this * translation().hat();
-          Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = i_R_this;
-        } else {
-          const auto R_this = (Scalar{-1} * rotation().matrix()).eval();
-          Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = R_this;
-          Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = i_translation.hat();
-          Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = R_this.transpose();
-        }
-      }
+    if (!J_this) {
+      return inv;
     }
-
-    return {i_rotation, i_translation};
+#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+    auto J = Eigen::Map<JacobianNM<Tangent>>{J_this};
+    const auto i_R_this = (Scalar{-1} * i_rotation.matrix()).eval();
+    Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = i_R_this;
+    Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = i_R_this * translation().hat();
+    Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
+    Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = i_R_this;
+#else
+    auto J = Eigen::Map<JacobianNM<Tangent>>{J_this};
+    const auto R_this = (Scalar{-1} * rotation().matrix()).eval();
+    Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = R_this;
+    Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = i_translation.hat();
+    Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
+    Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = R_this.transpose();
+#endif
+    return inv;
   }
 
   /// Group plus.
@@ -127,164 +107,107 @@ class SE3Base : public CartesianBase<TDerived> {
   /// \param other Other element.
   /// \param J_this Jacobian w.r.t. this.
   /// \param J_other Jacobian w.r.t. other.
-  /// \param global Global Jacobian flag.
-  /// \param coupled Coupled Jacobian flag.
   /// \return Group element.
   template <typename TOther_>
-  auto gPlus(const SE3Base<TOther_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> SE3<Scalar> {
+  auto gPlus(const SE3Base<TOther_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr) const -> SE3<Scalar> {
     const auto R_this_R_other = rotation().gPlus(other.rotation());
     const auto R_this_t_other = rotation().act(other.translation());
+    SE3<Scalar> plus = {R_this_R_other, R_this_t_other + this->translation()};
 
+    if (!J_this && !J_other) {
+      return plus;
+    }
+#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
     if (J_this) {
       auto J = Eigen::Map<JacobianNM<Tangent>>{J_this};
-      if (coupled) {
-        if (global) {
-          J.setIdentity();
-        } else {
-          const auto i_R_other = other.rotation().gInv().matrix();
-          Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = i_R_other;
-          Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = Scalar{-1} * i_R_other * other.translation().hat();
-          Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = i_R_other;
-        }
-      } else {
-        if (global) {
-          Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setIdentity();
-          Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = Scalar{-1} * R_this_t_other.hat();
-          Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setIdentity();
-        } else {
-          const auto R_this = rotation().matrix();
-          const auto i_R_other = other.rotation().gInv().matrix();
-          Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = i_R_other;
-          Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = Scalar{-1} * R_this * other.translation().hat();
-          Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setIdentity();
-        }
-      }
+      Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setIdentity();
+      Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = Scalar{-1} * R_this_t_other.hat();
+      Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
+      Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setIdentity();
     }
-
     if (J_other) {
+      const auto R_this = this->rotation().matrix();
       auto J = Eigen::Map<JacobianNM<Tangent>>{J_other};
-      if (coupled) {
-        if (global) {
-          const auto R_this = this->rotation().matrix();
-          Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = R_this;
-          Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = this->translation().hat() * R_this;
-          Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = R_this;
-        } else {
-          J.setIdentity();
-        }
-      } else {
-        if (global) {
-          const auto R_this = this->rotation().matrix();
-          Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = R_this;
-          Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = R_this;
-        } else {
-          const auto R_this = this->rotation().matrix();
-          Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setIdentity();
-          Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = R_this;
-        }
-      }
+      Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = R_this;
+      Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setZero();
+      Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
+      Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = R_this;
     }
-
-    return {R_this_R_other, R_this_t_other + this->translation()};
+#else
+    if (J_this) {
+      const auto R_this = rotation().matrix();
+      const auto i_R_other = other.rotation().gInv().matrix();
+      auto J = Eigen::Map<JacobianNM<Tangent>>{J_this};
+      Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = i_R_other;
+      Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = Scalar{-1} * R_this * other.translation().hat();
+      Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
+      Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setIdentity();
+    }
+    if (J_other) {
+      const auto R_this = this->rotation().matrix();
+      auto J = Eigen::Map<JacobianNM<Tangent>>{J_other};
+      Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setIdentity();
+      Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setZero();
+      Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
+      Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = R_this;
+    }
+#endif
+    return plus;
   }
 
   /// Group logarithm (SE3 -> SE3 tangent).
   /// \param J_this Jacobian w.r.t. this.
-  /// \param global Global Jacobian flag.
-  /// \param coupled Coupled Jacobian flag.
   /// \return Tangent element.
-  auto gLog(Scalar* J_this = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> Tangent {
-    Tangent tangent;
-
-    if (J_this) {
-      JacobianNM<typename Rotation::Tangent> J_r;
-      tangent.angular().noalias() = rotation().gLog(J_r.data(), global);
-      tangent.linear().noalias() = translation();
-
-      auto J = Eigen::Map<JacobianNM<Tangent>>{J_this};
-
-      if (coupled) {
-        if (global) {
-          Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = J_r;
-          Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = Scalar{-1} * translation().hat();
-          Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setIdentity();
-        } else {
-          Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = J_r;
-          Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = rotation().matrix();
-        }
-      } else {
-        Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = J_r;
-        Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setZero();
-        Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-        Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setIdentity();
-      }
-    } else {
-      tangent.angular().noalias() = rotation().gLog();
-      tangent.linear().noalias() = translation();
+  auto gLog(Scalar* J_this = nullptr) const -> Tangent {
+    Tangent log;
+    if (!J_this) {
+      log.angular().noalias() = rotation().gLog();
+      log.linear().noalias() = translation();
+      return log;
     }
 
-    return tangent;
+    JacobianNM<typename Rotation::Tangent> J_log;
+    log.angular().noalias() = rotation().gLog(J_log.data());
+    log.linear().noalias() = translation();
+
+    auto J = Eigen::Map<JacobianNM<Tangent>>{J_this};
+    Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = J_log;
+    Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setZero();
+    Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
+    Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setIdentity();
+    return log;
   }
 
   /// Tangent plus.
   /// \tparam Other_ Other type.
   /// \param other Other element.
-  /// \param global Global Jacobian flag.
-  /// \param coupled Coupled Jacobian flag.
   /// \return Group element.
   template <typename TOther_>
-  auto tPlus(const SE3TangentBase<TOther_>& other, bool global = kGlobal, bool coupled = kCoupled) const -> SE3<Scalar> {
-    if (coupled) {
-      if (global) {
-        return other.gExp().gPlus(*this);
-      } else {
-        return this->gPlus(other.gExp());
-      }
-    } else {
-      if (global) {
-        return {other.angular().gExp().gPlus(rotation()), translation() + other.linear()};
-      } else {
-        return {rotation().gPlus(other.angular().gExp()), translation() + other.linear()};
-      }
-    }
+  auto tPlus(const SE3TangentBase<TOther_>& other) const -> SE3<Scalar> {
+#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+    return {other.angular().gExp().gPlus(rotation()), translation() + other.linear()};
+#else
+    return {rotation().gPlus(other.angular().gExp()), translation() + other.linear()};
+#endif
   }
 
   /// Tangent minus.
   /// \tparam Other_ Other type.
   /// \param other Other element.
-  /// \param global Global Jacobian flag.
-  /// \param coupled Coupled Jacobian flag.
   /// \return Tangent element.
   template <typename TOther_>
-  auto tMinus(const SE3Base<TOther_>& other, bool global = kGlobal, bool coupled = kCoupled) const -> Tangent {
-    if (coupled) {
-      if (global) {
-        return this->gPlus(other.gInv()).gLog();
-      } else {
-        return other.gInv().gPlus(*this).gLog();
-      }
-    } else {
-      Tangent tangent;
-      if (global) {
-        tangent.angular() = rotation().gPlus(other.rotation().gInv()).gLog();
-        tangent.linear() = (translation() - other.translation());
-      } else {
-        tangent.angular() = other.rotation().gInv().gPlus(rotation()).gLog();
-        tangent.linear() = translation() - other.translation();
-      }
-      return tangent;
-    }
+  auto tMinus(const SE3Base<TOther_>& other) const -> Tangent {
+#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+    Tangent minus;
+    minus.angular() = rotation().gPlus(other.rotation().gInv()).gLog();
+    minus.linear() = (translation() - other.translation());
+    return minus;
+#else
+    Tangent minus;
+    minus.angular() = other.rotation().gInv().gPlus(rotation()).gLog();
+    minus.linear() = translation() - other.translation();
+    return minus;
+#endif
   }
 
   /// Group action.
@@ -292,45 +215,33 @@ class SE3Base : public CartesianBase<TDerived> {
   /// \param other Other vector.
   /// \param J_this Jacobian w.r.t. this.
   /// \param J_other Jacobian w.r.t. other.
-  /// \param global Global Jacobian flag.
-  /// \param coupled Coupled Jacobian flag.
   /// \return Vector.
   template <typename TOther_>
-  auto act(const Eigen::MatrixBase<TOther_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> Translation {
+  auto act(const Eigen::MatrixBase<TOther_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr) const -> Translation {
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TOther_, 3)
 
     const auto R_this = this->rotation().matrix();
     const Translation R_this_v = R_this * other;
-    Translation output = R_this_v + translation();
+    Translation x = R_this_v + translation();
 
-    if (J_this) {
-      auto J = Eigen::Map<JacobianNM<Translation, Tangent>>{J_this};
-
-      if (coupled) {
-        if (global) {
-          Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * output.hat();
-          Tangent::template LinearJacobian<Translation::kNumParameters>(J, 0).setIdentity();
-
-        } else {
-          Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this * other.hat();
-          Tangent::template LinearJacobian<Translation::kNumParameters>(J, 0).noalias() = R_this;
-        }
-      } else {
-        if (global) {
-          Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this_v.hat();
-          Tangent::template LinearJacobian<Translation::kNumParameters>(J, 0).setIdentity();
-        } else {
-          Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this * other.hat();
-          Tangent::template LinearJacobian<Translation::kNumParameters>(J, 0).setIdentity();
-        }
-      }
+    if (!J_this && !J_other) {
+      return x;
     }
-
+    if (J_this) {
+#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+      auto J = Eigen::Map<JacobianNM<Translation, Tangent>>{J_this};
+      Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this_v.hat();
+      Tangent::template LinearJacobian<Translation::kNumParameters>(J, 0).setIdentity();
+#else
+      auto J = Eigen::Map<JacobianNM<Translation, Tangent>>{J_this};
+      Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this * other.hat();
+      Tangent::template LinearJacobian<Translation::kNumParameters>(J, 0).setIdentity();
+#endif
+    }
     if (J_other) {
       Eigen::Map<JacobianNM<Translation>>{J_other}.noalias() = R_this;
     }
-
-    return output;
+    return x;
   }
 };
 
@@ -383,9 +294,6 @@ class SE3TangentBase : public CartesianBase<TDerived> {
   static constexpr auto kLinearOffset = kAngularOffset + kNumAngularParameters;
   static constexpr auto kNumLinearParameters = 3;
 
-  static constexpr auto kGlobal = HYPER_DEFAULT_TO_GLOBAL_MANIFOLD_DERIVATIVES;
-  static constexpr auto kCoupled = HYPER_DEFAULT_TO_COUPLED_MANIFOLD_DERIVATIVES;
-
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SE3TangentBase)
 
   /// Angular Jacobian accessor/modifier.
@@ -418,44 +326,27 @@ class SE3TangentBase : public CartesianBase<TDerived> {
 
   /// Group exponential (SE3 tangent -> SE3).
   /// \param J_this Jacobian w.r.t. this.
-  /// \param global Global Jacobian flag.
-  /// \param coupled Coupled Jacobian flag.
   /// \return Group element.
-  auto gExp(Scalar* J_this = nullptr, bool global = kGlobal, bool coupled = kCoupled) const -> SE3<Scalar> {
-    SE3<Scalar> se3;
+  auto gExp(Scalar* J_this = nullptr) const -> SE3<Scalar> {
+    SE3<Scalar> exp;
 
-    if (J_this) {
-      JacobianNM<Tangent<SU2<Scalar>>> J_r;
-      se3.rotation() = angular().gExp(J_r.data(), global);
-      se3.translation().noalias() = linear();
-
-      using Tangent = Tangent<SE3<Scalar>>;
-      auto J = Eigen::Map<JacobianNM<Tangent>>{J_this};
-
-      if (coupled) {
-        if (global) {
-          Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = J_r;
-          Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = linear().hat() * J_r;
-          Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setIdentity();
-        } else {
-          Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = J_r;
-          Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-          Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).noalias() = se3.rotation().inverse().matrix();
-        }
-      } else {
-        Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = J_r;
-        Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setZero();
-        Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
-        Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setIdentity();
-      }
-    } else {
-      se3.rotation() = angular().gExp();
-      se3.translation().noalias() = linear();
+    if (!J_this) {
+      exp.rotation() = angular().gExp();
+      exp.translation().noalias() = linear();
+      return exp;
     }
 
-    return se3;
+    JacobianNM<Tangent<SU2<Scalar>>> J_exp;
+    exp.rotation() = angular().gExp(J_exp.data());
+    exp.translation().noalias() = linear();
+
+    using Tangent = Tangent<SE3<Scalar>>;
+    auto J = Eigen::Map<JacobianNM<Tangent>>{J_this};
+    Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).noalias() = J_exp;
+    Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setZero();
+    Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setZero();
+    Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(J, Tangent::kLinearOffset).setIdentity();
+    return exp;
   }
 };
 

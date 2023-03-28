@@ -43,20 +43,16 @@ auto CheckMetric<metrics::ManifoldMetric<variables::SE3<double>>>() -> void {
   Input u = Input::Random();
   Input v = Input::Random();
 
-  for (bool global : {false, true}) {
-    for (bool coupled : {false, true}) {
-      Jacobian J_lhs_a, J_rhs_a, J_lhs_n, J_rhs_n;
-      const auto fx = Metric::Distance(u, v, J_lhs_a.data(), J_rhs_a.data(), global, coupled);
-      for (int i = 0; i < Tangent::kNumParameters; ++i) {
-        const Tangent inc = kInc * Tangent::Unit(i);
-        J_lhs_n.col(i) = (Metric::Distance(u.tPlus(inc, global, coupled), v) - fx) / kInc;
-        J_rhs_n.col(i) = (Metric::Distance(u, v.tPlus(inc, global, coupled)) - fx) / kInc;
-      }
-
-      EXPECT_TRUE(J_lhs_n.isApprox(J_lhs_a, kTol));
-      EXPECT_TRUE(J_rhs_n.isApprox(J_rhs_a, kTol));
-    }
+  Jacobian J_lhs_a, J_rhs_a, J_lhs_n, J_rhs_n;
+  const auto fx = Metric::Distance(u, v, J_lhs_a.data(), J_rhs_a.data());
+  for (int i = 0; i < Tangent::kNumParameters; ++i) {
+    const Tangent inc = kInc * Tangent::Unit(i);
+    J_lhs_n.col(i) = (Metric::Distance(u.tPlus(inc), v) - fx) / kInc;
+    J_rhs_n.col(i) = (Metric::Distance(u, v.tPlus(inc)) - fx) / kInc;
   }
+
+  EXPECT_TRUE(J_lhs_n.isApprox(J_lhs_a, kTol));
+  EXPECT_TRUE(J_rhs_n.isApprox(J_rhs_a, kTol));
 }
 
 TEST(MetricsTests, Cartesian) {
