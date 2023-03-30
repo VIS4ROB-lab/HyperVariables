@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "hyper/variables/jacobian.hpp"
 #include "hyper/variables/variable.hpp"
 
 namespace hyper::variables {
@@ -19,7 +20,7 @@ class CartesianBase : public Traits<TDerived>::Base, public ConditionalConstBase
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
   using Base::Base;
 
-  using Index = Eigen::Index;
+  using Tangent = variables::Tangent<Cartesian<Scalar, (int)Base::SizeAtCompileTime>>;
 
   // Constants.
   static constexpr auto kNumParameters = (int)Base::SizeAtCompileTime;
@@ -33,6 +34,14 @@ class CartesianBase : public Traits<TDerived>::Base, public ConditionalConstBase
   /// Map as Eigen vector.
   /// \return Vector.
   auto asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> final { return *this; }
+
+  /// Casts this to its derived type.
+  /// \return Derived type.
+  auto derived() const -> const TDerived& { return static_cast<const TDerived&>(*this); }
+
+  /// Casts this to its derived type.
+  /// \return Derived type.
+  auto derived() -> TDerived& { return const_cast<TDerived&>(std::as_const(*this).derived()); }
 
   /// Tangent plus.
   /// \tparam TOther_ Other type.
@@ -48,8 +57,20 @@ class CartesianBase : public Traits<TDerived>::Base, public ConditionalConstBase
   /// \param other Other element.
   /// \return Tangent.
   template <typename TOther_>
-  auto tMinus(const CartesianBase<TOther_>& other) const -> Tangent<Cartesian<Scalar, kNumParameters>> {
+  auto tMinus(const CartesianBase<TOther_>& other) const -> Tangent {
     return *this - other;
+  }
+
+  /// Tangent plus Jacobian.
+  /// \return Jacobian.
+  auto tPlusJacobian() const -> Jacobian<Scalar, kNumParameters, Traits<Tangent>::kNumParameters> {
+    return Jacobian<Scalar, kNumParameters, Traits<Tangent>::kNumParameters>::Identity();
+  }
+
+  /// Tangent minus Jacobian.
+  /// \return Jacobian.
+  auto tMinusJacobian() const -> Jacobian<Scalar, Traits<Tangent>::kNumParameters, kNumParameters> {
+    return Jacobian<Scalar, Traits<Tangent>::kNumParameters, kNumParameters>::Identity();
   }
 };
 

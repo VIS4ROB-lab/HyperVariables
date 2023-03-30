@@ -19,7 +19,6 @@ class SensitivityBase : public CartesianBase<TDerived> {
   using Scalar = typename Base::Scalar;
   using Base::Base;
 
-  using Index = Eigen::Index;
   using OrderVector = hyper::Vector<Scalar, kOrder>;
   using OrderMatrix = hyper::Matrix<Scalar, kOrder, kOrder>;
 
@@ -53,9 +52,9 @@ class SensitivityBase : public CartesianBase<TDerived> {
       auto J = Eigen::Map<ParameterJacobian>{J_p};
       J.setZero();
 
-      Index k = 0;
-      for (Index i = 0; i < kOrder; ++i) {
-        for (Index j = 0; j < kOrder; ++j) {
+      auto k = 0;
+      for (auto i = 0; i < kOrder; ++i) {
+        for (auto j = 0; j < kOrder; ++j) {
           J(j, i * kOrder + j) = input[k];
         }
         ++k;

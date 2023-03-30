@@ -117,35 +117,37 @@ class SU2Tests : public testing::Test {
     return su2.isApprox(su2_, kTol) && (J_l_a * J_e_a).isIdentity(kTol) && J_l_n.isApprox(J_l_a, kTol) && J_e_n.isApprox(J_e_a, kTol);
   }
 
+  [[nodiscard]] auto checkTangentJacobian() const -> bool {
+    const auto J_a_plus = su2_.tPlusJacobian();
+    const auto J_a_minus = su2_.tMinusJacobian();
+
+    Eigen::Matrix<Scalar, 4, 3> J_n_plus;
+    for (auto j = 0; j < SU2Tangent::kNumParameters; ++j) {
+      const SU2Tangent d_t_su2 = kInc * SU2Tangent::Unit(j);
+      J_n_plus.col(j) = (su2_.tPlus(d_t_su2).asVector() - su2_.asVector()) / kInc;
+    }
+
+    return J_n_plus.isApprox(J_a_plus, kTol) && (J_a_minus * J_a_plus).isIdentity(kTol);
+  }
+
   SU2 su2_;
 };
 
-TEST_F(SU2Tests, GroupInverse) {
-  for (auto i = 0; i < kItr; ++i) {
-    su2_ = SU2::Random();
-    EXPECT_TRUE(checkGroupInverseJacobian());
-  }
-}
-
-TEST_F(SU2Tests, GroupPlus) {
-  for (auto i = 0; i < kItr; ++i) {
-    su2_ = SU2::Random();
-    EXPECT_TRUE(checkGroupPlusJacobian());
-  }
-}
-
-TEST_F(SU2Tests, GroupAction) {
-  for (auto i = 0; i < kItr; ++i) {
-    su2_ = SU2::Random();
-    EXPECT_TRUE(checkGroupActionJacobian());
-  }
-}
-
-TEST_F(SU2Tests, GroupExponentials) {
+TEST_F(SU2Tests, GroupOperators) {
   for (auto i = 0; i < kItr; ++i) {
     su2_ = SU2::Random();
     EXPECT_TRUE(checkGroupExponentials());
+    EXPECT_TRUE(checkGroupInverseJacobian());
+    EXPECT_TRUE(checkGroupPlusJacobian());
+    EXPECT_TRUE(checkGroupActionJacobian());
     EXPECT_TRUE(checkGroupExponentialsJacobians());
+  }
+}
+
+TEST_F(SU2Tests, TangentOperators) {
+  for (auto i = 0; i < kItr; ++i) {
+    su2_ = SU2::Random();
+    EXPECT_TRUE(checkTangentJacobian());
   }
 }
 

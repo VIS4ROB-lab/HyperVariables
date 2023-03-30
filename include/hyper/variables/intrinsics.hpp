@@ -27,7 +27,6 @@ class IntrinsicsBase : public CartesianBase<TDerived> {
   static constexpr auto kFocalOffsetY = kFocalOffset + 1;
   static constexpr auto kNumFocalParameters = 2;
 
-  // using Index = Eigen::Index;
   using Pixel = variables::Pixel<Scalar>;
 
   using Input = Pixel;

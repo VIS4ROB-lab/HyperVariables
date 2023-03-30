@@ -62,8 +62,6 @@ class StampedBase : public Traits<TDerived>::Base,
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
   using Base::Base;
 
-  using Index = Eigen::Index;
-
   using Variable = typename Traits<TDerived>::Variable;
   using VariableWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Variable>;
 
@@ -138,6 +136,28 @@ class StampedBase : public Traits<TDerived>::Base,
     stamped_tangent.stamp() = stamp() - other.stamp();
     stamped_tangent.variable() = variable().tMinus(other.variable());
     return stamped_tangent;
+  }
+
+  /// Tangent plus Jacobian.
+  /// \return Jacobian.
+  auto tPlusJacobian() const -> Jacobian<Scalar, kNumParameters, Tangent<Variable>::kNumParameters + kNumStampParameters> {
+    Jacobian<Scalar, kNumParameters, Tangent<Variable>::kNumParameters + 1> J;
+    J.template block<kNumVariableParameters, Tangent<Variable>::kNumParameters>(kVariableOffset, 0) = variable().tPlusJacobian();
+    J.template block<kNumStampParameters, Tangent<Variable>::kNumParameters>(kStampOffset, 0).setZero();
+    J.template block<kNumVariableParameters, kNumStampParameters>(kVariableOffset, Tangent<Variable>::kNumParameters).setZero();
+    J.template block<kNumStampParameters, kNumStampParameters>(kStampOffset, Tangent<Variable>::kNumParameters).setIdentity();
+    return J;
+  }
+
+  /// Tangent minus Jacobian.
+  /// \return Jacobian.
+  auto tMinusJacobian() const -> Jacobian<Scalar, Tangent<Variable>::kNumParameters + 1, kNumParameters> {
+    Jacobian<Scalar, Tangent<Variable>::kNumParameters + 1, kNumParameters> J;
+    J.template block<Tangent<Variable>::kNumParameters, kNumVariableParameters>(0, kVariableOffset) = variable().tMinusJacobian();
+    J.template block<kNumStampParameters, kNumVariableParameters>(Tangent<Variable>::kNumParameters, kVariableOffset).setZero();
+    J.template block<Tangent<Variable>::kNumParameters, kNumStampParameters>(0, kStampOffset).setZero();
+    J.template block<kNumStampParameters, kNumStampParameters>(Tangent<Variable>::kNumParameters, kStampOffset).setIdentity();
+    return J;
   }
 };
 

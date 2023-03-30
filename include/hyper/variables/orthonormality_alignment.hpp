@@ -21,7 +21,6 @@ class OrthonormalityAlignmentBase : public CartesianBase<TDerived> {
   using Scalar = typename Base::Scalar;
   using Base::Base;
 
-  using Index = Eigen::Index;
   using OrderVector = hyper::Vector<Scalar, kOrder>;
   using OrderMatrix = hyper::Matrix<Scalar, kOrder, kOrder>;
 
@@ -67,10 +66,10 @@ class OrthonormalityAlignmentBase : public CartesianBase<TDerived> {
   [[nodiscard]] auto asMatrix() const -> OrderMatrix {
     auto matrix = scalingMatrix();
 
-    Index i = 0;
+    auto i = 0;
     const auto off_diagonal_parameters = offDiagonalParameters();
-    for (Index j = 0; j < kOrder - 1; ++j) {
-      for (Index k = j + 1; k < kOrder; ++k) {
+    for (auto j = 0; j < kOrder - 1; ++j) {
+      for (auto k = j + 1; k < kOrder; ++k) {
         matrix(k, j) = off_diagonal_parameters[i];
         ++i;
       }
@@ -87,11 +86,11 @@ class OrthonormalityAlignmentBase : public CartesianBase<TDerived> {
   [[nodiscard]] auto alignmentMatrix() const -> OrderMatrix {
     OrderMatrix A = OrderMatrix::Identity();
 
-    Index i = 0;
+    auto i = 0;
     const auto i_diagonal_parameters = diagonalParameters().cwiseInverse().eval();
     const auto off_diagonal_parameters = offDiagonalParameters();
-    for (Index j = 0; j < kOrder - 1; ++j) {
-      for (Index k = j + 1; k < kOrder; ++k) {
+    for (auto j = 0; j < kOrder - 1; ++j) {
+      for (auto k = j + 1; k < kOrder; ++k) {
         A(k, j) = i_diagonal_parameters[k] * off_diagonal_parameters[i];
         ++i;
       }

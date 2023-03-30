@@ -5,7 +5,7 @@
 
 #include "hyper/variables/forward.hpp"
 
-#define HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES true
+#define HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES false
 
 namespace hyper::variables {
 

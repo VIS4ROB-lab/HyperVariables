@@ -26,6 +26,10 @@ class Cartesian;
 
 template <typename TScalar, int TNumParameters>
 struct Traits<Cartesian<TScalar, TNumParameters>> {
+  // Constants.
+  static constexpr auto kNumParameters = TNumParameters;
+
+  // Definitions.
   using Base = Eigen::Matrix<TScalar, TNumParameters, 1>;
 };
 

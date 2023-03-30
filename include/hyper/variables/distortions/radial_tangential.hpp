@@ -16,7 +16,6 @@ class RadialTangentialDistortionBase : public DistortionBase<TDerived> {
   using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
   using Base::Base;
 
-  using Index = Eigen::Index;
   using Pixel = variables::Pixel<Scalar>;
   using PixelJacobian = variables::JacobianNM<Pixel>;
   using PlainDistortion = typename Traits<TDerived>::PlainDistortion;
@@ -45,15 +44,15 @@ class RadialTangentialDistortionBase : public DistortionBase<TDerived> {
 
   /// Radial order accessor.
   /// \return Order.
-  [[nodiscard]] inline auto radialOrder() const -> Index { return this->size() - tangentialOrder(); }
+  [[nodiscard]] inline auto radialOrder() const -> int { return this->size() - tangentialOrder(); }
 
   /// Sets the radial order.
   /// \param order Input order.
-  inline auto setRadialOrder(const Index& order) -> void { this->resize(order + tangentialOrder()); }
+  inline auto setRadialOrder(int order) -> void { this->resize(order + tangentialOrder()); }
 
   /// Tangential order accessor.
   /// \return Order.
-  [[nodiscard]] inline auto tangentialOrder() const -> Index { return 2; }
+  [[nodiscard]] inline auto tangentialOrder() const -> int { return 2; }
 
   /// Radial parameters accessor.
   /// \return Radial parameters.

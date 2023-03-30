@@ -90,36 +90,38 @@ class SE3Tests : public testing::Test {
     return se3.isApprox(se3_, kTol) && (J_l_a * J_e_a).isIdentity(kTol) && J_l_n.isApprox(J_l_a, kTol) && J_e_n.isApprox(J_e_a, kTol);
   }
 
+  [[nodiscard]] auto checkTangentJacobian() const -> bool {
+    const auto J_a_plus = se3_.tPlusJacobian();
+    const auto J_a_minus = se3_.tMinusJacobian();
+
+    Eigen::Matrix<Scalar, 7, 6> J_n_plus;
+    for (auto j = 0; j < SE3Tangent::kNumParameters; ++j) {
+      const SE3Tangent d_t_su2 = kInc * SE3Tangent::Unit(j);
+      J_n_plus.col(j) = (se3_.tPlus(d_t_su2).asVector() - se3_.asVector()) / kInc;
+    }
+
+    return J_n_plus.isApprox(J_a_plus, kTol) && (J_a_minus * J_a_plus).isIdentity(kTol);
+  }
+
   SE3 se3_;
 };
 
-TEST_F(SE3Tests, GroupInverse) {
+TEST_F(SE3Tests, GroupOperators) {
   for (auto i = 0; i < kItr; ++i) {
     se3_ = SE3::Random();
     EXPECT_TRUE(checkGroupInverse());
-    EXPECT_TRUE(checkGroupInverseJacobian());
-  }
-}
-
-TEST_F(SE3Tests, GroupPlus) {
-  for (auto i = 0; i < kItr; ++i) {
-    se3_ = SE3::Random();
-    EXPECT_TRUE(checkGroupPlusJacobian());
-  }
-}
-
-TEST_F(SE3Tests, GroupAction) {
-  for (auto i = 0; i < kItr; ++i) {
-    se3_ = SE3::Random();
-    EXPECT_TRUE(checkGroupActionJacobian());
-  }
-}
-
-TEST_F(SE3Tests, GroupExponentials) {
-  for (auto i = 0; i < kItr; ++i) {
-    se3_ = SE3::Random();
     EXPECT_TRUE(checkGroupExponentials());
+    EXPECT_TRUE(checkGroupInverseJacobian());
+    EXPECT_TRUE(checkGroupPlusJacobian());
+    EXPECT_TRUE(checkGroupActionJacobian());
     EXPECT_TRUE(checkGroupExponentialsJacobians());
+  }
+}
+
+TEST_F(SE3Tests, TangentOperators) {
+  for (auto i = 0; i < kItr; ++i) {
+    se3_ = SE3::Random();
+    EXPECT_TRUE(checkTangentJacobian());
   }
 }
 

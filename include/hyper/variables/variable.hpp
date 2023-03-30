@@ -15,8 +15,6 @@ class ConstVariable {
   // Definitions.
   using Scalar = TScalar;
 
-  using Index = Eigen::Index;
-
   /// Virtual default destructor.
   virtual ~ConstVariable() = default;
 
@@ -34,8 +32,6 @@ class Variable {
  public:
   // Definitions.
   using Scalar = TScalar;
-
-  using Index = Eigen::Index;
 
   /// Virtual default destructor.
   virtual ~Variable() = default;

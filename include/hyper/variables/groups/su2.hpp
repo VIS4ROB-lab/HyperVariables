@@ -9,7 +9,6 @@
 #include "hyper/variables/groups/forward.hpp"
 
 #include "hyper/variables/cartesian.hpp"
-#include "hyper/variables/jacobian.hpp"
 
 namespace hyper::variables {
 
@@ -27,7 +26,6 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
   using Base::Base;
   using Base::operator*;
 
-  using Index = Eigen::Index;
   using Translation = Cartesian<Scalar, 3>;
 
   // Constants.
@@ -36,10 +34,10 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
 
   // Order.
   struct Order {
-    static constexpr auto kW = 3;
     static constexpr auto kX = 0;
     static constexpr auto kY = 1;
     static constexpr auto kZ = 2;
+    static constexpr auto kW = 3;
   };
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(QuaternionBase)
@@ -51,6 +49,20 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
   /// Random group element.
   /// \return Random element.
   static auto Random() -> Quaternion<Scalar> { return Base::UnitRandom(); }
+
+  /// Sets this to identity.
+  /// \return Derived type.
+  auto setIdentity() -> TDerived& {
+    *this = Identity();
+    return this->derived();
+  }
+
+  /// Sets this to random.
+  /// \return Derived type.
+  auto setRandom() -> TDerived& {
+    *this = Random();
+    return this->derived();
+  }
 
   /// Data accessor.
   /// \return Data.
@@ -67,6 +79,14 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
   /// Map as Eigen vector.
   /// \return Vector.
   auto asVector() -> Eigen::Ref<VectorXWithConstIfNotLvalue> final { return this->coeffs(); }
+
+  /// Casts this to its derived type.
+  /// \return Derived type.
+  auto derived() const -> const TDerived& { return static_cast<const TDerived&>(*this); }
+
+  /// Casts this to its derived type.
+  /// \return Derived type.
+  auto derived() -> TDerived& { return const_cast<TDerived&>(std::as_const(*this).derived()); }
 
   /// Group inverse.
   /// \return Inverse element.
@@ -136,6 +156,7 @@ class SU2Base : public QuaternionBase<TDerived> {
   using Base::operator*;
 
   using Translation = typename Base::Translation;
+  using Order = typename Base::Order;
 
   using Tangent = variables::Tangent<SU2<Scalar>>;
 
@@ -269,6 +290,96 @@ class SU2Base : public QuaternionBase<TDerived> {
 #else
     return other.gInv().gPlus(*this).gLog();
 #endif
+  }
+
+  /// Tangent plus Jacobian.
+  /// \return Jacobian.
+  auto tPlusJacobian() const -> Jacobian<Scalar, Base::kNumParameters, Traits<Tangent>::kNumParameters> {
+    Jacobian<Scalar, Base::kNumParameters, Traits<Tangent>::kNumParameters> J;
+    const auto ptr = this->data();
+    Scalar tau[Base::kNumParameters];
+    tau[Order::kW] = kiAlpha * ptr[Order::kW];
+    tau[Order::kX] = kiAlpha * ptr[Order::kX];
+    tau[Order::kY] = kiAlpha * ptr[Order::kY];
+    tau[Order::kZ] = kiAlpha * ptr[Order::kZ];
+#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+    J(Order::kX, 0) = tau[Order::kW];
+    J(Order::kY, 0) = -tau[Order::kZ];
+    J(Order::kZ, 0) = tau[Order::kY];
+    J(Order::kW, 0) = -tau[Order::kX];
+
+    J(Order::kX, 1) = tau[Order::kZ];
+    J(Order::kY, 1) = tau[Order::kW];
+    J(Order::kZ, 1) = -tau[Order::kX];
+    J(Order::kW, 1) = -tau[Order::kY];
+
+    J(Order::kX, 2) = -tau[Order::kY];
+    J(Order::kY, 2) = tau[Order::kX];
+    J(Order::kZ, 2) = tau[Order::kW];
+    J(Order::kW, 2) = -tau[Order::kZ];
+#else
+    J(Order::kX, 0) = tau[Order::kW];
+    J(Order::kY, 0) = tau[Order::kZ];
+    J(Order::kZ, 0) = -tau[Order::kY];
+    J(Order::kW, 0) = -tau[Order::kX];
+
+    J(Order::kX, 1) = -tau[Order::kZ];
+    J(Order::kY, 1) = tau[Order::kW];
+    J(Order::kZ, 1) = tau[Order::kX];
+    J(Order::kW, 1) = -tau[Order::kY];
+
+    J(Order::kX, 2) = tau[Order::kY];
+    J(Order::kY, 2) = -tau[Order::kX];
+    J(Order::kZ, 2) = tau[Order::kW];
+    J(Order::kW, 2) = -tau[Order::kZ];
+#endif
+    return J;
+  }
+
+  /// Tangent minus Jacobian.
+  /// \return Jacobian.
+  auto tMinusJacobian() const -> Jacobian<Scalar, Traits<Tangent>::kNumParameters, Base::kNumParameters> {
+    Jacobian<Scalar, Traits<Tangent>::kNumParameters, Base::kNumParameters> J;
+    const auto ptr = this->data();
+    Scalar tau[Base::kNumParameters];
+    tau[Order::kW] = kAlpha * ptr[Order::kW];
+    tau[Order::kX] = kAlpha * ptr[Order::kX];
+    tau[Order::kY] = kAlpha * ptr[Order::kY];
+    tau[Order::kZ] = kAlpha * ptr[Order::kZ];
+#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+    J(0, Order::kX) = tau[Order::kW];
+    J(1, Order::kX) = tau[Order::kZ];
+    J(2, Order::kX) = -tau[Order::kY];
+
+    J(0, Order::kY) = -tau[Order::kZ];
+    J(1, Order::kY) = tau[Order::kW];
+    J(2, Order::kY) = tau[Order::kX];
+
+    J(0, Order::kZ) = tau[Order::kY];
+    J(1, Order::kZ) = -tau[Order::kX];
+    J(2, Order::kZ) = tau[Order::kW];
+
+    J(0, Order::kW) = -tau[Order::kX];
+    J(1, Order::kW) = -tau[Order::kY];
+    J(2, Order::kW) = -tau[Order::kZ];
+#else
+    J(0, Order::kX) = tau[Order::kW];
+    J(1, Order::kX) = -tau[Order::kZ];
+    J(2, Order::kX) = tau[Order::kY];
+
+    J(0, Order::kY) = tau[Order::kZ];
+    J(1, Order::kY) = tau[Order::kW];
+    J(2, Order::kY) = -tau[Order::kX];
+
+    J(0, Order::kZ) = -tau[Order::kY];
+    J(1, Order::kZ) = tau[Order::kX];
+    J(2, Order::kZ) = tau[Order::kW];
+
+    J(0, Order::kW) = -tau[Order::kX];
+    J(1, Order::kW) = -tau[Order::kY];
+    J(2, Order::kW) = -tau[Order::kZ];
+#endif
+    return J;
   }
 
   /// Group action.
