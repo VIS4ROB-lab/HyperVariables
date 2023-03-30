@@ -5,9 +5,8 @@
 
 #ifdef HYPER_COMPILE_WITH_CERES
 
-#include "hyper/variables/groups/forward.hpp"
-
 #include "hyper/ceres/manifolds/variables/groups/su2.hpp"
+#include "hyper/variables/groups/se3.hpp"
 
 namespace hyper::ceres::manifolds {
 

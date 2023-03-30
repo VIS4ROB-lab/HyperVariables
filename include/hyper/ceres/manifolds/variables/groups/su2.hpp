@@ -5,9 +5,8 @@
 
 #ifdef HYPER_COMPILE_WITH_CERES
 
-#include "hyper/variables/groups/forward.hpp"
-
 #include "hyper/ceres/manifolds/wrapper.hpp"
+#include "hyper/variables/groups/su2.hpp"
 #include "hyper/variables/jacobian.hpp"
 
 namespace hyper::ceres::manifolds {
