@@ -48,7 +48,7 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
 
   /// Random group element.
   /// \return Random element.
-  static auto Random() -> Quaternion<Scalar> { return Base::UnitRandom(); }
+  static auto Random() -> Quaternion<Scalar> { return Eigen::Quaternion<Scalar>::UnitRandom(); }
 
   /// Sets this to identity.
   /// \return Derived type.
