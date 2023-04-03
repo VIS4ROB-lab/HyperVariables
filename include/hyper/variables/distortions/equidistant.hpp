@@ -16,7 +16,6 @@ class EquidistantDistortionBase : public DistortionBase<TDerived> {
   using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
   using Base::Base;
 
-  using Index = Eigen::Index;
   using Pixel = variables::Pixel<Scalar>;
   using PixelJacobian = variables::JacobianNM<Pixel>;
   using PlainDistortion = typename Traits<TDerived>::PlainDistortion;
@@ -43,11 +42,11 @@ class EquidistantDistortionBase : public DistortionBase<TDerived> {
 
   /// Order accessor.
   /// \return Order.
-  [[nodiscard]] inline auto order() const -> Index { return this->size(); }
+  [[nodiscard]] inline auto order() const -> int { return this->size(); }
 
   /// Sets the order.
   /// \param order Input order.
-  inline auto setOrder(const Index& order) -> void { this->resize(order); }
+  inline auto setOrder(int order) -> void { this->resize(order); }
 
   /// Perturbed distortion.
   /// \param scale Perturbation scale.

@@ -8,6 +8,7 @@
 #include <ceres/product_manifold.h>
 
 #include "hyper/ceres/manifolds/variables/euclidean.hpp"
+#include "hyper/variables/stamped.hpp"
 
 namespace hyper::ceres::manifolds {
 

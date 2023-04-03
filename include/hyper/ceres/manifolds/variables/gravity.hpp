@@ -6,6 +6,7 @@
 #ifdef HYPER_COMPILE_WITH_CERES
 
 #include "hyper/ceres/manifolds/variables/bearing.hpp"
+#include "hyper/variables/gravity.hpp"
 
 namespace hyper::ceres::manifolds {
 

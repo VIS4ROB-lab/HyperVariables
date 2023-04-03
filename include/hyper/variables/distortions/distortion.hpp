@@ -118,8 +118,6 @@ class DistortionBase : public Traits<TDerived>::Base, public ConditionalConstBas
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
   using Base::Base;
 
-  using Index = Eigen::Index;
-
   // Constants.
   static constexpr auto kNumParameters = (int)Base::SizeAtCompileTime;
 

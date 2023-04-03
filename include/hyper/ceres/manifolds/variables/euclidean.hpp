@@ -5,11 +5,8 @@
 
 #ifdef HYPER_COMPILE_WITH_CERES
 
-#include <numeric>
-
-#include "hyper/variables/forward.hpp"
-
 #include "hyper/ceres/manifolds/wrapper.hpp"
+#include "hyper/variables/cartesian.hpp"
 
 namespace hyper::ceres::manifolds {
 
