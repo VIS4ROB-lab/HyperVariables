@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "hyper/variables/jacobian.hpp"
+#include "hyper/jacobian.hpp"
 #include "hyper/variables/variable.hpp"
 
 namespace hyper::variables {
@@ -42,6 +42,42 @@ class CartesianBase : public Traits<TDerived>::Base, public ConditionalConstBase
   /// Casts this to its derived type.
   /// \return Derived type.
   auto derived() -> TDerived& { return const_cast<TDerived&>(std::as_const(*this).derived()); }
+
+  /// Group inverse.
+  /// \param J_this Jacobian w.r.t. this.
+  /// \return Group element.
+  auto gInv(Scalar* J_this = nullptr) const -> Cartesian<Scalar, kNumParameters> {
+    Cartesian<Scalar, kNumParameters> inv = Scalar{-1} * *this;
+
+    if (!J_this) {
+      return inv;
+    }
+
+    Eigen::Map<JacobianNM<Tangent>>{J_this} = Scalar{-1} * JacobianNM<Tangent>::Identity();
+    return inv;
+  }
+
+  /// Group plus.
+  /// \tparam TOther_ Other type.
+  /// \param other Other element.
+  /// \param J_this Jacobian w.r.t. this.
+  /// \param J_other Jacobian w.r.t. other.
+  /// \return Group element.
+  template <typename TOther_>
+  auto gPlus(const CartesianBase<TOther_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr) const -> Cartesian<Scalar, kNumParameters> {
+    Cartesian<Scalar, kNumParameters> plus = *this + other;
+
+    if (!J_this && !J_other) {
+      return plus;
+    }
+    if (J_this) {
+      Eigen::Map<JacobianNM<Tangent>>{J_this}.setIdentity();
+    }
+    if (J_other) {
+      Eigen::Map<JacobianNM<Tangent>>{J_other}.setIdentity();
+    }
+    return plus;
+  }
 
   /// Tangent plus.
   /// \tparam TOther_ Other type.

@@ -3,8 +3,8 @@
 
 #pragma once
 
+#include "hyper/jacobian.hpp"
 #include "hyper/variables/cartesian.hpp"
-#include "hyper/variables/jacobian.hpp"
 
 namespace hyper::variables {
 
@@ -25,8 +25,8 @@ class OrthonormalityAlignmentBase : public CartesianBase<TDerived> {
   using OrderMatrix = hyper::Matrix<Scalar, kOrder, kOrder>;
 
   using Input = OrderVector;
-  using InputJacobian = variables::JacobianNM<OrderVector>;
-  using ParameterJacobian = variables::JacobianNM<OrderVector, Base>;
+  using InputJacobian = hyper::JacobianNM<OrderVector>;
+  using ParameterJacobian = hyper::JacobianNM<OrderVector, Base>;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(OrthonormalityAlignmentBase)
 

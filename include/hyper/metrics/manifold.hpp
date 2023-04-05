@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include "hyper/jacobian.hpp"
 #include "hyper/metrics/metric.hpp"
-#include "hyper/variables/groups/groups.hpp"
-#include "hyper/variables/jacobian.hpp"
+#include "hyper/variables/se3.hpp"
 
 namespace hyper::metrics {
 
@@ -15,7 +15,7 @@ class ManifoldMetric<variables::SE3<TScalar>> final : public Metric<TScalar> {
   // Definitions.
   using Input = variables::SE3<TScalar>;
   using Output = variables::Tangent<Input>;
-  using Jacobian = variables::JacobianNM<Output>;
+  using Jacobian = hyper::JacobianNM<Output>;
 
   // Constants.
   static constexpr auto kInputSize = Input::kNumParameters;

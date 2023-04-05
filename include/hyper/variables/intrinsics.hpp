@@ -3,8 +3,8 @@
 
 #pragma once
 
+#include "hyper/jacobian.hpp"
 #include "hyper/variables/cartesian.hpp"
-#include "hyper/variables/jacobian.hpp"
 
 namespace hyper::variables {
 
@@ -30,8 +30,8 @@ class IntrinsicsBase : public CartesianBase<TDerived> {
   using Pixel = variables::Pixel<Scalar>;
 
   using Input = Pixel;
-  using InputJacobian = variables::JacobianNM<Pixel>;
-  using ParameterJacobian = variables::JacobianNM<Pixel, Base>;
+  using InputJacobian = hyper::JacobianNM<Pixel>;
+  using ParameterJacobian = hyper::JacobianNM<Pixel, Base>;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(IntrinsicsBase)
 

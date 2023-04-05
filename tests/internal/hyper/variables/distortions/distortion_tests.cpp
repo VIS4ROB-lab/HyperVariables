@@ -22,9 +22,9 @@ class DistortionTests : public testing::TestWithParam<Distortion<Scalar>*> {
 
   // Definitions.
   using Pixel = variables::Pixel<Scalar>;
-  using PixelJacobian = variables::JacobianNM<Pixel>;
+  using PixelJacobian = hyper::JacobianNM<Pixel>;
   using Distortion = variables::Distortion<Scalar>;
-  using DistortionJacobian = variables::JacobianNX<Pixel>;
+  using DistortionJacobian = hyper::JacobianNX<Pixel>;
 
   DistortionTests() : distortion_{nullptr} {}
 

@@ -10,8 +10,8 @@
 
 #include "hyper/variables/distortions/forward.hpp"
 
+#include "hyper/jacobian.hpp"
 #include "hyper/variables/cartesian.hpp"
-#include "hyper/variables/jacobian.hpp"
 
 namespace hyper::variables {
 

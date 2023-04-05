@@ -5,7 +5,7 @@
 
 #include "hyper/matrix.hpp"
 
-namespace hyper::variables {
+namespace hyper {
 
 template <typename TScalar, int TNumRows, int TNumCols = TNumRows, int TOptions = DefaultStorageOption(TNumRows, TNumCols)>
 using Jacobian = Matrix<TScalar, TNumRows, TNumCols, TOptions>;
@@ -22,4 +22,4 @@ using JacobianXN = MatrixXN<TOtherDerived, TOptions>;
 template <typename TScalar, int TOptions = DefaultStorageOption(Eigen::Dynamic, Eigen::Dynamic)>
 using JacobianX = MatrixX<TScalar, TOptions>;
 
-}  // namespace hyper::variables
+}  // namespace hyper

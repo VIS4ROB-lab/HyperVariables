@@ -9,6 +9,8 @@
 
 namespace hyper::variables {
 
+#define HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES false
+
 template <typename>
 struct Traits;
 
@@ -23,6 +25,33 @@ class Stamped;
 
 template <typename, int>
 class Cartesian;
+
+template <typename TScalar>
+using R1 = Cartesian<TScalar, 1>;
+
+template <typename TScalar>
+using R2 = Cartesian<TScalar, 2>;
+
+template <typename TScalar>
+using R3 = Cartesian<TScalar, 3>;
+
+template <typename TScalar>
+using R4 = Cartesian<TScalar, 4>;
+
+template <typename TScalar>
+using R5 = Cartesian<TScalar, 5>;
+
+template <typename TScalar>
+using R6 = Cartesian<TScalar, 6>;
+
+template <typename TScalar, int TNumParameters>
+using Rn = Cartesian<TScalar, TNumParameters>;
+
+template <typename TScalar>
+using Stamp = R1<TScalar>;
+
+template <typename TScalar>
+using Pixel = R2<TScalar>;
 
 template <typename TScalar, int TNumParameters>
 struct Traits<Cartesian<TScalar, TNumParameters>> {
@@ -39,7 +68,7 @@ template <typename>
 class PitchYaw;
 
 template <typename TScalar>
-struct Traits<PitchYaw<TScalar>> : public Traits<Cartesian<TScalar, 2>> {};
+struct Traits<PitchYaw<TScalar>> : public Traits<R2<TScalar>> {};
 
 HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::PitchYaw)
 
@@ -47,7 +76,7 @@ template <typename>
 class Bearing;
 
 template <typename TScalar>
-struct Traits<Bearing<TScalar>> : public Traits<Cartesian<TScalar, 3>> {};
+struct Traits<Bearing<TScalar>> : public Traits<R3<TScalar>> {};
 
 HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Bearing)
 
@@ -55,7 +84,7 @@ template <typename>
 class Gravity;
 
 template <typename TScalar>
-struct Traits<Gravity<TScalar>> : public Traits<Cartesian<TScalar, 3>> {};
+struct Traits<Gravity<TScalar>> : public Traits<R3<TScalar>> {};
 
 HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Gravity)
 
@@ -63,7 +92,7 @@ template <typename>
 class Intrinsics;
 
 template <typename TScalar>
-struct Traits<Intrinsics<TScalar>> : public Traits<Cartesian<TScalar, 4>> {};
+struct Traits<Intrinsics<TScalar>> : public Traits<R4<TScalar>> {};
 
 HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Intrinsics)
 
@@ -88,6 +117,32 @@ struct Traits<Sensitivity<TScalar, TOrder>> : public Traits<Cartesian<TScalar, T
 HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::Sensitivity, int)
 
 template <typename>
+class Quaternion;
+
+template <typename TScalar>
+struct Traits<Quaternion<TScalar>> : public Traits<R4<TScalar>> {
+  using Base = Eigen::Quaternion<TScalar>;
+};
+
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Quaternion)
+
+template <typename>
+class SU2;
+
+template <typename TScalar>
+struct Traits<SU2<TScalar>> : Traits<Quaternion<TScalar>> {};
+
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::SU2)
+
+template <typename>
+class SE3;
+
+template <typename TScalar>
+struct Traits<SE3<TScalar>> : Traits<Cartesian<TScalar, SU2<TScalar>::kNumParameters + 3>> {};
+
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::SE3)
+
+template <typename>
 class Tangent;
 
 template <typename TDerived>
@@ -104,7 +159,14 @@ struct Traits<Eigen::Map<const Tangent<TDerived>, TMapOptions>> : Traits<Tangent
 };
 
 template <typename TScalar>
-using Stamp = Cartesian<TScalar, 1>;
+struct Traits<Tangent<SU2<TScalar>>> : Traits<R3<TScalar>> {};
+
+HYPER_DECLARE_TANGENT_MAP_TRAITS(hyper::variables::SU2)
+
+template <typename TScalar>
+struct Traits<Tangent<SE3<TScalar>>> : Traits<R6<TScalar>> {};
+
+HYPER_DECLARE_TANGENT_MAP_TRAITS(hyper::variables::SE3)
 
 template <typename TVariable>
 struct Traits<Stamped<TVariable>> : public Traits<Cartesian<typename TVariable::Scalar, Stamp<typename TVariable::Scalar>::kNumParameters + TVariable::kNumParameters>> {
@@ -120,15 +182,6 @@ template <typename TVariable, int TMapOptions>
 struct Traits<Eigen::Map<const Stamped<TVariable>, TMapOptions>> final : public Traits<Stamped<TVariable>> {
   using Base = Eigen::Map<const typename Traits<Stamped<TVariable>>::Base, TMapOptions>;
 };
-
-template <typename TScalar, int TNumParameters = 2>
-using Pixel = Cartesian<TScalar, TNumParameters>;
-
-template <typename TScalar, int TNumParameters = 3>
-using Position = Cartesian<TScalar, TNumParameters>;
-
-template <typename TScalar, int TNumParameters = 3>
-using Translation = Cartesian<TScalar, TNumParameters>;
 
 template <typename>
 struct NumericVariableTraits;

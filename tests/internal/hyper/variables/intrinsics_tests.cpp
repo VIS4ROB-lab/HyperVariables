@@ -21,8 +21,8 @@ class IntrinsicsTests : public testing::Test {
   using Scalar = double;
   using Pixel = variables::Pixel<Scalar>;
   using Intrinsics = variables::Intrinsics<Scalar>;
-  using PixelJacobian = variables::JacobianNM<Pixel>;
-  using IntrinsicsJacobian = variables::JacobianNM<Pixel, Intrinsics>;
+  using PixelJacobian = hyper::JacobianNM<Pixel>;
+  using IntrinsicsJacobian = hyper::JacobianNM<Pixel, Intrinsics>;
 
   static auto randomPixel() -> Pixel { return Pixel::Random(); }
 

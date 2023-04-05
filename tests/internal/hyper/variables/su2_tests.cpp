@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include "hyper/variables/groups/su2.hpp"
+#include "hyper/variables/su2.hpp"
 
 namespace hyper::variables::tests {
 
@@ -47,9 +47,9 @@ class SU2Tests : public testing::Test {
   using SU2 = variables::SU2<Scalar>;
   using SU2Tangent = variables::Tangent<SU2>;
   using Vector = variables::Cartesian<Scalar, 3>;
-  using SU2Jacobian = variables::JacobianNM<SU2Tangent>;
-  using VectorJacobian = variables::JacobianNM<Vector>;
-  using VectorSU2Jacobian = variables::JacobianNM<Vector, SU2Tangent>;
+  using SU2Jacobian = hyper::JacobianNM<SU2Tangent>;
+  using VectorJacobian = hyper::JacobianNM<Vector>;
+  using VectorSU2Jacobian = hyper::JacobianNM<Vector, SU2Tangent>;
 
   [[nodiscard]] auto checkGroupInverseJacobian() const -> bool {
     SU2Jacobian J_a, J_n;

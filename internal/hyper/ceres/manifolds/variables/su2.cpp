@@ -3,9 +3,9 @@
 
 #ifdef HYPER_COMPILE_WITH_CERES
 
-#include "hyper/ceres/manifolds/variables/groups/su2.hpp"
+#include "hyper/ceres/manifolds/variables/su2.hpp"
 #include "hyper/ceres/manifolds/variables/euclidean.hpp"
-#include "hyper/variables/groups/su2.hpp"
+#include "hyper/variables/su2.hpp"
 
 namespace hyper::ceres::manifolds {
 

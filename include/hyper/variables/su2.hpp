@@ -6,8 +6,6 @@
 #include <glog/logging.h>
 #include <Eigen/Geometry>
 
-#include "hyper/variables/groups/forward.hpp"
-
 #include "hyper/variables/cartesian.hpp"
 
 namespace hyper::variables {
@@ -26,7 +24,7 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
   using Base::Base;
   using Base::operator*;
 
-  using Translation = Cartesian<Scalar, 3>;
+  using Translation = R3<Scalar>;
 
   // Constants.
   static constexpr auto SizeAtCompileTime = (int)Base::Coefficients::SizeAtCompileTime;
@@ -455,7 +453,7 @@ class SU2TangentBase : public CartesianBase<TDerived> {
     constexpr auto kiAlpha = SU2<Scalar>::kiAlpha;
 
     // Definitions.
-    using Jacobian = variables::JacobianNM<Tangent<SU2<Scalar>>>;
+    using Jacobian = hyper::JacobianNM<Tangent<SU2<Scalar>>>;
 
     const auto nw2 = this->squaredNorm();
     const auto nv2 = kiAlpha * kiAlpha * nw2;

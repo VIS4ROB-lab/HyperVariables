@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "hyper/variables/groups/su2.hpp"
+#include "hyper/variables/su2.hpp"
 
 namespace hyper::variables {
 
@@ -21,7 +21,7 @@ class SE3Base : public CartesianBase<TDerived> {
 
   using Rotation = SU2<Scalar>;
   using RotationWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Rotation>;
-  using Translation = Cartesian<Scalar, 3>;
+  using Translation = R3<Scalar>;
   using TranslationWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Translation>;
 
   using Tangent = variables::Tangent<SE3<Scalar>>;

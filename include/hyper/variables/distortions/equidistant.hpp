@@ -17,7 +17,7 @@ class EquidistantDistortionBase : public DistortionBase<TDerived> {
   using Base::Base;
 
   using Pixel = variables::Pixel<Scalar>;
-  using PixelJacobian = variables::JacobianNM<Pixel>;
+  using PixelJacobian = hyper::JacobianNM<Pixel>;
   using PlainDistortion = typename Traits<TDerived>::PlainDistortion;
 
   // Constants.

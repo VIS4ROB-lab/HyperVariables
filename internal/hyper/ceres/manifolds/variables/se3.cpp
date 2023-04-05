@@ -6,8 +6,8 @@
 #include <ceres/product_manifold.h>
 
 #include "hyper/ceres/manifolds/variables/euclidean.hpp"
-#include "hyper/ceres/manifolds/variables/groups/se3.hpp"
-#include "hyper/variables/groups/se3.hpp"
+#include "hyper/ceres/manifolds/variables/se3.hpp"
+#include "hyper/variables/se3.hpp"
 
 namespace hyper::ceres::manifolds {
 

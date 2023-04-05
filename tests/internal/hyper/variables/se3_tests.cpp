@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include "hyper/variables/groups/se3.hpp"
+#include "hyper/variables/se3.hpp"
 
 namespace hyper::variables::tests {
 
@@ -18,7 +18,7 @@ class SE3Tests : public testing::Test {
   using Scalar = double;
   using SE3 = variables::SE3<Scalar>;
   using SE3Tangent = variables::Tangent<SE3>;
-  using SE3Jacobian = variables::JacobianNM<SE3Tangent>;
+  using SE3Jacobian = hyper::JacobianNM<SE3Tangent>;
 
   [[nodiscard]] auto checkGroupInverse() const -> bool {
     return (se3_.gInv().gInv()).isApprox(se3_, kTol) && (se3_.gInv().gPlus(se3_)).isApprox(SE3::Identity(), kTol) && (se3_.gPlus(se3_.gInv())).isApprox(SE3::Identity(), kTol);

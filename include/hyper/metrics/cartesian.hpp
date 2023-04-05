@@ -17,7 +17,7 @@ class CartesianMetric final : public Metric<TScalar> {
   // Definitions.
   using Input = variables::Cartesian<TScalar, kInputSize>;
   using Output = variables::Cartesian<TScalar, kOutputSize>;
-  using Jacobian = variables::JacobianNM<Output, Input>;
+  using Jacobian = hyper::JacobianNM<Output, Input>;
 
   /// Evaluates the distance between elements.
   /// \param lhs Left element/input vector.
