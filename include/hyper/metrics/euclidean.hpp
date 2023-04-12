@@ -3,18 +3,17 @@
 
 #pragma once
 
-#include <glog/logging.h>
-
 #include "hyper/metrics/metric.hpp"
+#include "hyper/variables/cartesian.hpp"
 
 namespace hyper::metrics {
 
 template <typename TScalar, int N>
-class AngularMetric<variables::Rn<TScalar, N>> final : public Metric<TScalar> {
+class EuclideanMetric<variables::Rn<TScalar, N>> final : public Metric<TScalar> {
  public:
   // Definitions.
   using Input = variables::Rn<TScalar, N>;
-  using Output = variables::R1<TScalar>;
+  using Output = variables::Rn<TScalar, N>;
 
   // Constants.
   static constexpr auto kAmbientInputSize = Input::kNumParameters;
@@ -26,39 +25,19 @@ class AngularMetric<variables::Rn<TScalar, N>> final : public Metric<TScalar> {
   /// Evaluates the distance between elements.
   /// \param lhs Left element/input vector.
   /// \param rhs Right element/input vector.
-  /// \param d Distance between elements.
+  /// \param output Distance between elements.
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
-  static auto Evaluate(const TScalar* lhs, const TScalar* rhs, TScalar* d, TScalar* J_lhs = nullptr, TScalar* J_rhs = nullptr) -> void {
-    const auto lhs_ = Eigen::Map<const Input>{lhs};
-    const auto rhs_ = Eigen::Map<const Input>{rhs};
-
-    const auto cross = lhs_.cross(rhs_).eval();
-    const auto ncross = cross.norm();
-    const auto dot = lhs_.dot(rhs_);
-
-    if (J_lhs || J_rhs) {
-      if (ncross < Eigen::NumTraits<TScalar>::epsilon()) {
-        if (J_lhs) {
-          Eigen::Map<Jacobian>{J_lhs}.setZero();
-        }
-        if (J_rhs) {
-          Eigen::Map<Jacobian>{J_rhs}.setZero();
-        }
-      } else {
-        const auto a = ncross * ncross + dot * dot;
-        const auto b = (dot / (a * ncross));
-        const auto c = (ncross / a);
-        if (J_lhs) {
-          Eigen::Map<Jacobian>{J_lhs}.noalias() = (b * rhs_.cross(cross) - c * rhs_).transpose();
-        }
-        if (J_rhs) {
-          Eigen::Map<Jacobian>{J_rhs}.noalias() = (b * cross.cross(lhs_) - c * lhs_).transpose();
-        }
-      }
+  static auto Evaluate(const TScalar* lhs, const TScalar* rhs, TScalar* output, TScalar* J_lhs = nullptr, TScalar* J_rhs = nullptr) -> void {
+    if (J_lhs) {
+      Eigen::Map<Jacobian>{J_lhs}.setIdentity();
     }
 
-    Eigen::Map<Output>{d}[0] = std::atan2(ncross, dot);
+    if (J_rhs) {
+      Eigen::Map<Jacobian>{J_rhs}.noalias() = TScalar{-1} * Jacobian::Identity();
+    }
+
+    Eigen::Map<Output>{output}.noalias() = Eigen::Map<const Input>{lhs} - Eigen::Map<const Input>{rhs};
   }
 
   /// Evaluates the distance between elements.
