@@ -11,6 +11,12 @@ namespace hyper::variables {
 
 #define HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES false
 
+template <typename TPointer, typename TSize = std::int32_t>
+using Partition = std::vector<std::pair<TPointer, TSize>>;
+
+template <typename TPointer, typename TSize = std::int32_t>
+using Partitions = std::vector<Partition<TPointer, TSize>>;
+
 template <typename>
 struct Traits;
 
