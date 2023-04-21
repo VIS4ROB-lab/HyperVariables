@@ -11,10 +11,10 @@ template <typename TDerived>
 class SE3TangentBase;
 
 template <typename TDerived>
-class SE3Base : public CartesianBase<TDerived> {
+class SE3Base : public RnBase<TDerived> {
  public:
   // Definitions.
-  using Base = CartesianBase<TDerived>;
+  using Base = RnBase<TDerived>;
   using Scalar = typename Base::Scalar;
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
   using Base::Base;
@@ -305,10 +305,10 @@ class SE3 final : public SE3Base<SE3<TScalar>> {
 };
 
 template <typename TDerived>
-class SE3TangentBase : public CartesianBase<TDerived> {
+class SE3TangentBase : public RnBase<TDerived> {
  public:
   // Definitions.
-  using Base = CartesianBase<TDerived>;
+  using Base = RnBase<TDerived>;
   using Scalar = typename Base::Scalar;
   using Base::Base;
 

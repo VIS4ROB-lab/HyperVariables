@@ -43,28 +43,25 @@ template <typename>
 class Stamped;
 
 template <typename, int>
-class Cartesian;
+class Rn;
 
 template <typename TScalar>
-using R1 = Cartesian<TScalar, 1>;
+using R1 = Rn<TScalar, 1>;
 
 template <typename TScalar>
-using R2 = Cartesian<TScalar, 2>;
+using R2 = Rn<TScalar, 2>;
 
 template <typename TScalar>
-using R3 = Cartesian<TScalar, 3>;
+using R3 = Rn<TScalar, 3>;
 
 template <typename TScalar>
-using R4 = Cartesian<TScalar, 4>;
+using R4 = Rn<TScalar, 4>;
 
 template <typename TScalar>
-using R5 = Cartesian<TScalar, 5>;
+using R5 = Rn<TScalar, 5>;
 
 template <typename TScalar>
-using R6 = Cartesian<TScalar, 6>;
-
-template <typename TScalar, int TNumParameters>
-using Rn = Cartesian<TScalar, TNumParameters>;
+using R6 = Rn<TScalar, 6>;
 
 template <typename TScalar>
 using Stamp = R1<TScalar>;
@@ -73,7 +70,7 @@ template <typename TScalar>
 using Pixel = R2<TScalar>;
 
 template <typename TScalar, int TNumParameters>
-struct Traits<Cartesian<TScalar, TNumParameters>> {
+struct Traits<Rn<TScalar, TNumParameters>> {
   // Constants.
   static constexpr auto kNumParameters = TNumParameters;
 
@@ -81,7 +78,7 @@ struct Traits<Cartesian<TScalar, TNumParameters>> {
   using Base = Eigen::Matrix<TScalar, TNumParameters, 1>;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::Cartesian, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::Rn, int)
 
 template <typename>
 class PitchYaw;
@@ -116,10 +113,20 @@ struct Traits<Intrinsics<TScalar>> : public Traits<R4<TScalar>> {};
 HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Intrinsics)
 
 template <typename, int>
+class AxesOffset;
+
+template <typename TScalar, int TOrder>
+struct Traits<AxesOffset<TScalar, TOrder>> : public Traits<Rn<TScalar, TOrder * TOrder>> {
+  static constexpr auto kOrder = TOrder;
+};
+
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::AxesOffset, int)
+
+template <typename, int>
 class OrthonormalityAlignment;
 
 template <typename TScalar, int TOrder>
-struct Traits<OrthonormalityAlignment<TScalar, TOrder>> : public Traits<Cartesian<TScalar, TOrder + ((TOrder - 1) * TOrder) / 2>> {
+struct Traits<OrthonormalityAlignment<TScalar, TOrder>> : public Traits<Rn<TScalar, TOrder + ((TOrder - 1) * TOrder) / 2>> {
   static constexpr auto kOrder = TOrder;
 };
 
@@ -129,7 +136,7 @@ template <typename, int>
 class Sensitivity;
 
 template <typename TScalar, int TOrder>
-struct Traits<Sensitivity<TScalar, TOrder>> : public Traits<Cartesian<TScalar, TOrder * TOrder>> {
+struct Traits<Sensitivity<TScalar, TOrder>> : public Traits<Rn<TScalar, TOrder * TOrder>> {
   static constexpr auto kOrder = TOrder;
 };
 
@@ -157,7 +164,7 @@ template <typename>
 class SE3;
 
 template <typename TScalar>
-struct Traits<SE3<TScalar>> : Traits<Cartesian<TScalar, SU2<TScalar>::kNumParameters + 3>> {};
+struct Traits<SE3<TScalar>> : Traits<Rn<TScalar, SU2<TScalar>::kNumParameters + 3>> {};
 
 HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::SE3)
 
@@ -188,7 +195,7 @@ struct Traits<Tangent<SE3<TScalar>>> : Traits<R6<TScalar>> {};
 HYPER_DECLARE_TANGENT_MAP_TRAITS(hyper::variables::SE3)
 
 template <typename TVariable>
-struct Traits<Stamped<TVariable>> : public Traits<Cartesian<typename TVariable::Scalar, Stamp<typename TVariable::Scalar>::kNumParameters + TVariable::kNumParameters>> {
+struct Traits<Stamped<TVariable>> : public Traits<Rn<typename TVariable::Scalar, Stamp<typename TVariable::Scalar>::kNumParameters + TVariable::kNumParameters>> {
   using Variable = TVariable;
 };
 

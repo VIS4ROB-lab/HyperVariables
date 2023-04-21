@@ -4,18 +4,18 @@
 #pragma once
 
 #include "hyper/jacobian.hpp"
-#include "hyper/variables/cartesian.hpp"
+#include "hyper/variables/rn.hpp"
 
 namespace hyper::variables {
 
 template <typename TDerived>
-class SensitivityBase : public CartesianBase<TDerived> {
+class SensitivityBase : public RnBase<TDerived> {
  public:
   // Constants.
   static constexpr auto kOrder = Traits<TDerived>::kOrder;
 
   // Definitions.
-  using Base = CartesianBase<TDerived>;
+  using Base = RnBase<TDerived>;
   using Scalar = typename Base::Scalar;
   using Base::Base;
 

@@ -17,7 +17,7 @@ template <typename, int>
 class EquidistantDistortion;
 
 template <typename TScalar, int TOrder>
-struct Traits<EquidistantDistortion<TScalar, TOrder>> : public Traits<Cartesian<TScalar, TOrder>> {
+struct Traits<EquidistantDistortion<TScalar, TOrder>> : public Traits<Rn<TScalar, TOrder>> {
   static constexpr auto kOrder = TOrder;
   using PlainDistortion = EquidistantDistortion<TScalar, TOrder>;
 };
@@ -28,7 +28,7 @@ template <typename, int>
 class RadialTangentialDistortion;
 
 template <typename TScalar, int TOrder>
-struct Traits<RadialTangentialDistortion<TScalar, TOrder>> : public Traits<Cartesian<TScalar, TOrder == Eigen::Dynamic ? TOrder : TOrder + 2>> {
+struct Traits<RadialTangentialDistortion<TScalar, TOrder>> : public Traits<Rn<TScalar, TOrder + 2>> {
   static constexpr auto kOrder = TOrder;
   using PlainDistortion = RadialTangentialDistortion<TScalar, TOrder>;
 };
@@ -39,7 +39,7 @@ template <typename, int>
 class IterativeRadialDistortion;
 
 template <typename TScalar, int TOrder>
-struct Traits<IterativeRadialDistortion<TScalar, TOrder>> : public Traits<Cartesian<TScalar, TOrder>> {
+struct Traits<IterativeRadialDistortion<TScalar, TOrder>> : public Traits<Rn<TScalar, TOrder>> {
   static constexpr auto kOrder = TOrder;
   using PlainDistortion = IterativeRadialDistortion<TScalar, TOrder>;
 };

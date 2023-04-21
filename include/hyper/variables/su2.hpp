@@ -6,7 +6,7 @@
 #include <glog/logging.h>
 #include <Eigen/Geometry>
 
-#include "hyper/variables/cartesian.hpp"
+#include "hyper/variables/rn.hpp"
 
 namespace hyper::variables {
 
@@ -432,10 +432,10 @@ class SU2 final : public SU2Base<SU2<TScalar>> {
 };
 
 template <typename TDerived>
-class SU2TangentBase : public CartesianBase<TDerived> {
+class SU2TangentBase : public RnBase<TDerived> {
  public:
   // Definitions.
-  using Base = CartesianBase<TDerived>;
+  using Base = RnBase<TDerived>;
   using Scalar = typename Base::Scalar;
   using Base::Base;
 

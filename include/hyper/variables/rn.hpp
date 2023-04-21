@@ -9,10 +9,10 @@
 namespace hyper::variables {
 
 template <typename TDerived>
-class CartesianTangentBase;
+class RnTangentBase;
 
 template <typename TDerived>
-class CartesianBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, Variable<DerivedScalar_t<TDerived>>, ConstVariable<DerivedScalar_t<TDerived>>> {
+class RnBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, Variable<DerivedScalar_t<TDerived>>, ConstVariable<DerivedScalar_t<TDerived>>> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
@@ -20,12 +20,12 @@ class CartesianBase : public Traits<TDerived>::Base, public ConditionalConstBase
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
   using Base::Base;
 
-  using Tangent = variables::Tangent<Cartesian<Scalar, (int)Base::SizeAtCompileTime>>;
+  using Tangent = variables::Tangent<Rn<Scalar, (int)Base::SizeAtCompileTime>>;
 
   // Constants.
   static constexpr auto kNumParameters = (int)Base::SizeAtCompileTime;
 
-  HYPER_INHERIT_ASSIGNMENT_OPERATORS(CartesianBase)
+  HYPER_INHERIT_ASSIGNMENT_OPERATORS(RnBase)
 
   /// Map as Eigen vector.
   /// \return Vector.
@@ -46,8 +46,8 @@ class CartesianBase : public Traits<TDerived>::Base, public ConditionalConstBase
   /// Group inverse.
   /// \param J_this Jacobian w.r.t. this.
   /// \return Group element.
-  auto gInv(Scalar* J_this = nullptr) const -> Cartesian<Scalar, kNumParameters> {
-    Cartesian<Scalar, kNumParameters> inv = Scalar{-1} * *this;
+  auto gInv(Scalar* J_this = nullptr) const -> Rn<Scalar, kNumParameters> {
+    Rn<Scalar, kNumParameters> inv = Scalar{-1} * *this;
 
     if (!J_this) {
       return inv;
@@ -64,8 +64,8 @@ class CartesianBase : public Traits<TDerived>::Base, public ConditionalConstBase
   /// \param J_other Jacobian w.r.t. other.
   /// \return Group element.
   template <typename TOther_>
-  auto gPlus(const CartesianBase<TOther_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr) const -> Cartesian<Scalar, kNumParameters> {
-    Cartesian<Scalar, kNumParameters> plus = *this + other;
+  auto gPlus(const RnBase<TOther_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr) const -> Rn<Scalar, kNumParameters> {
+    Rn<Scalar, kNumParameters> plus = *this + other;
 
     if (!J_this && !J_other) {
       return plus;
@@ -82,9 +82,9 @@ class CartesianBase : public Traits<TDerived>::Base, public ConditionalConstBase
   /// Tangent plus.
   /// \tparam TOther_ Other type.
   /// \param other Other element.
-  /// \return Cartesian.
+  /// \return Element.
   template <typename TOther_>
-  auto tPlus(const CartesianTangentBase<TOther_>& other) const -> Cartesian<Scalar, kNumParameters> {
+  auto tPlus(const RnTangentBase<TOther_>& other) const -> Rn<Scalar, kNumParameters> {
     return *this + other;
   }
 
@@ -93,7 +93,7 @@ class CartesianBase : public Traits<TDerived>::Base, public ConditionalConstBase
   /// \param other Other element.
   /// \return Tangent.
   template <typename TOther_>
-  auto tMinus(const CartesianBase<TOther_>& other) const -> Tangent {
+  auto tMinus(const RnBase<TOther_>& other) const -> Tangent {
     return *this - other;
   }
 
@@ -111,34 +111,34 @@ class CartesianBase : public Traits<TDerived>::Base, public ConditionalConstBase
 };
 
 template <typename TScalar, int TNumParameters>
-class Cartesian final : public CartesianBase<Cartesian<TScalar, TNumParameters>> {
+class Rn final : public RnBase<Rn<TScalar, TNumParameters>> {
  public:
-  using Base = CartesianBase<Cartesian<TScalar, TNumParameters>>;
+  using Base = RnBase<Rn<TScalar, TNumParameters>>;
   using Base::Base;
 
-  HYPER_INHERIT_ASSIGNMENT_OPERATORS(Cartesian)
+  HYPER_INHERIT_ASSIGNMENT_OPERATORS(Rn)
 };
 
 }  // namespace hyper::variables
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::Cartesian, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::Rn, int)
 
 namespace hyper::variables {
 
 template <typename TDerived>
-class CartesianTangentBase : public CartesianBase<TDerived> {
+class RnTangentBase : public RnBase<TDerived> {
  public:
-  using Base = CartesianBase<TDerived>;
+  using Base = RnBase<TDerived>;
   using Scalar = typename Base::Scalar;
   using Base::Base;
 
-  HYPER_INHERIT_ASSIGNMENT_OPERATORS(CartesianTangentBase)
+  HYPER_INHERIT_ASSIGNMENT_OPERATORS(RnTangentBase)
 };
 
 template <typename TDerived>
-class Tangent final : public CartesianTangentBase<Tangent<TDerived>> {
+class Tangent final : public RnTangentBase<Tangent<TDerived>> {
  public:
-  using Base = CartesianTangentBase<Tangent<TDerived>>;
+  using Base = RnTangentBase<Tangent<TDerived>>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Tangent)
@@ -151,18 +151,18 @@ namespace Eigen {
 using namespace hyper::variables;
 
 template <typename TDerived, int TMapOptions>
-class Map<Tangent<TDerived>, TMapOptions> final : public CartesianTangentBase<Map<Tangent<TDerived>, TMapOptions>> {
+class Map<Tangent<TDerived>, TMapOptions> final : public RnTangentBase<Map<Tangent<TDerived>, TMapOptions>> {
  public:
-  using Base = CartesianTangentBase<Map<Tangent<TDerived>, TMapOptions>>;
+  using Base = RnTangentBase<Map<Tangent<TDerived>, TMapOptions>>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Map)
 };
 
 template <typename TDerived, int TMapOptions>
-class Map<const Tangent<TDerived>, TMapOptions> final : public CartesianTangentBase<Map<const Tangent<TDerived>, TMapOptions>> {
+class Map<const Tangent<TDerived>, TMapOptions> final : public RnTangentBase<Map<const Tangent<TDerived>, TMapOptions>> {
  public:
-  using Base = CartesianTangentBase<Map<const Tangent<TDerived>, TMapOptions>>;
+  using Base = RnTangentBase<Map<const Tangent<TDerived>, TMapOptions>>;
   using Base::Base;
 };
 

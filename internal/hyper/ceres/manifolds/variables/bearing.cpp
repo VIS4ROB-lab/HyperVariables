@@ -13,7 +13,7 @@ namespace hyper::ceres::manifolds {
 
 auto Manifold<variables::Bearing<double>>::CreateManifold(const bool constant) -> std::unique_ptr<::ceres::Manifold> {
   if (constant) {
-    return std::make_unique<Manifold<variables::Cartesian<Scalar, Bearing::kNumParameters>>>(true);
+    return std::make_unique<Manifold<variables::Rn<Scalar, Bearing::kNumParameters>>>(true);
   } else {
     return std::make_unique<::ceres::SphereManifold<Bearing::kNumParameters>>();
   }

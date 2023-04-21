@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include "hyper/variables/cartesian.hpp"
+#include "hyper/variables/rn.hpp"
 
 namespace hyper::variables {
 
 template <typename TDerived>
-class PitchYawBase : public CartesianBase<TDerived> {
+class PitchYawBase : public RnBase<TDerived> {
  public:
   // Constants.
   static constexpr auto kPitchOffset = 0;
@@ -17,7 +17,7 @@ class PitchYawBase : public CartesianBase<TDerived> {
   static constexpr auto kNumYawParameters = 1;
 
   // Definitions.
-  using Base = CartesianBase<TDerived>;
+  using Base = RnBase<TDerived>;
   using Scalar = typename Base::Scalar;
   using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
   using Base::Base;

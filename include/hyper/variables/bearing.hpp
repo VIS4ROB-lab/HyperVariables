@@ -6,15 +6,15 @@
 #include <glog/logging.h>
 #include <Eigen/LU>
 
-#include "hyper/variables/cartesian.hpp"
+#include "hyper/variables/rn.hpp"
 
 namespace hyper::variables {
 
 template <typename TDerived>
-class BearingBase : public CartesianBase<TDerived> {
+class BearingBase : public RnBase<TDerived> {
  public:
   // Definitions.
-  using Base = CartesianBase<TDerived>;
+  using Base = RnBase<TDerived>;
   using Scalar = typename Base::Scalar;
   using Base::Base;
 

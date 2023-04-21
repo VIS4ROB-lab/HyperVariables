@@ -4,7 +4,7 @@
 #pragma once
 
 #include "hyper/metrics/metric.hpp"
-#include "hyper/variables/cartesian.hpp"
+#include "hyper/variables/rn.hpp"
 
 namespace hyper::metrics {
 

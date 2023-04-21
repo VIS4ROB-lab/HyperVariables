@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "hyper/variables/cartesian.hpp"
+#include "hyper/variables/rn.hpp"
 
 namespace hyper::variables {
 
@@ -120,7 +120,7 @@ class StampedBase : public Traits<TDerived>::Base,
 
   /// Tangent plus.
   /// \param other Other element.
-  /// \return Cartesian.
+  /// \return Element.
   auto tPlus(const Stamped<Tangent<Variable>>& other) const -> Stamped<Variable> {
     Stamped<Variable> stamped_variable;
     stamped_variable.stamp() = stamp() + other.stamp();

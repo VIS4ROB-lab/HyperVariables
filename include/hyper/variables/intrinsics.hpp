@@ -4,15 +4,15 @@
 #pragma once
 
 #include "hyper/jacobian.hpp"
-#include "hyper/variables/cartesian.hpp"
+#include "hyper/variables/rn.hpp"
 
 namespace hyper::variables {
 
 template <typename TDerived>
-class IntrinsicsBase : public CartesianBase<TDerived> {
+class IntrinsicsBase : public RnBase<TDerived> {
  public:
   // Definitions.
-  using Base = CartesianBase<TDerived>;
+  using Base = RnBase<TDerived>;
   using Scalar = typename Base::Scalar;
   using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
   using Base::Base;

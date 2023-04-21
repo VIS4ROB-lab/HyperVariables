@@ -46,10 +46,10 @@ class SU2Tests : public testing::Test {
   using Scalar = double;
   using SU2 = variables::SU2<Scalar>;
   using SU2Tangent = variables::Tangent<SU2>;
-  using Vector = variables::Cartesian<Scalar, 3>;
+  using R3 = variables::R3<Scalar>;
   using SU2Jacobian = hyper::JacobianNM<SU2Tangent>;
-  using VectorJacobian = hyper::JacobianNM<Vector>;
-  using VectorSU2Jacobian = hyper::JacobianNM<Vector, SU2Tangent>;
+  using VectorJacobian = hyper::JacobianNM<R3>;
+  using VectorSU2Jacobian = hyper::JacobianNM<R3, SU2Tangent>;
 
   [[nodiscard]] auto checkGroupInverseJacobian() const -> bool {
     SU2Jacobian J_a, J_n;
@@ -78,7 +78,7 @@ class SU2Tests : public testing::Test {
   }
 
   [[nodiscard]] auto checkGroupActionJacobian() const -> bool {
-    const Vector input = Vector::Random();
+    const R3 input = R3::Random();
 
     VectorSU2Jacobian J_a, J_n;
     VectorJacobian J_v_a, J_v_n;
@@ -88,8 +88,8 @@ class SU2Tests : public testing::Test {
       const SU2Tangent inc = kInc * SU2Tangent::Unit(j);
       J_n.col(j) = (su2_.tPlus(inc).act(input) - output) / kInc;
     }
-    for (auto j = 0; j < Vector::kNumParameters; ++j) {
-      J_v_n.col(j) = (su2_.act(input + kInc * Vector::Unit(j)) - output) / kInc;
+    for (auto j = 0; j < R3::kNumParameters; ++j) {
+      J_v_n.col(j) = (su2_.act(input + kInc * R3::Unit(j)) - output) / kInc;
     }
 
     return J_n.isApprox(J_a, kTol) && J_v_n.isApprox(J_v_a, kTol);

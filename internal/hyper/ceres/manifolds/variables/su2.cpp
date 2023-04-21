@@ -60,7 +60,7 @@ class GroupManifoldImpl final : public ::ceres::Manifold {
 
 auto Manifold<variables::SU2<double>>::CreateManifold(const bool constant) -> std::unique_ptr<::ceres::Manifold> {
   if (constant) {
-    return std::make_unique<Manifold<variables::Cartesian<Scalar, SU2::kNumParameters>>>(true);
+    return std::make_unique<Manifold<variables::Rn<Scalar, SU2::kNumParameters>>>(true);
   } else {
     return std::make_unique<internal::GroupManifoldImpl<SU2>>();
   }
