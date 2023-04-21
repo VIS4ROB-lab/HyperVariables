@@ -15,7 +15,26 @@
 
 namespace hyper::variables {
 
-template <typename TDistortion, typename TScalar = typename TDistortion::Scalar>
+template <typename>
+struct NumDistortionTraits;
+
+template <>
+struct NumDistortionTraits<float> {
+  static constexpr float kDistortionTolerance = 1e-6;
+  static constexpr float kDistortionTolerance2 = kDistortionTolerance * kDistortionTolerance;
+  static constexpr auto kMaxNumDistortionSteps = 20;
+};
+
+template <>
+struct NumDistortionTraits<double> {
+  static constexpr double kDistortionTolerance = 1e-12;
+  static constexpr double kDistortionTolerance2 = kDistortionTolerance * kDistortionTolerance;
+  static constexpr auto kMaxNumDistortionSteps = 20;
+};
+
+namespace distortion {
+
+template <typename TScalar, typename TDistortion>
 auto Undistort(const TDistortion* distortion, const Eigen::Ref<const Pixel<TScalar>>& p, TScalar* J_p, TScalar* J_d, const TScalar* parameters) -> Pixel<TScalar> {
   // Definitions.
   using Pixel = variables::Pixel<TScalar>;
@@ -23,13 +42,13 @@ auto Undistort(const TDistortion* distortion, const Eigen::Ref<const Pixel<TScal
   Pixel output = p;
   JacobianNM<Pixel> J_p_p, J_p_p_i;
 
-  for (auto i = 0; i <= NumericVariableTraits<TScalar>::kMaxNumDistortionSteps; ++i) {
+  for (auto i = 0; i <= NumDistortionTraits<TScalar>::kMaxNumDistortionSteps; ++i) {
     const auto b = (distortion->distort(output, J_p_p_i.data(), nullptr, parameters) - p).eval();
     J_p_p.noalias() = J_p_p_i.inverse();
 
-    if (NumericVariableTraits<TScalar>::kDistortionTolerance2 < b.dot(b)) {
-      DLOG_IF(WARNING, i == NumericVariableTraits<TScalar>::kMaxNumDistortionSteps) << "Maximum number of iterations reached.";
-      DLOG_IF_EVERY_N(WARNING, J_p_p_i.determinant() < NumericVariableTraits<TScalar>::kSmallAngleTolerance, NumericVariableTraits<TScalar>::kMaxNumDistortionSteps)
+    if (NumDistortionTraits<TScalar>::kDistortionTolerance2 < b.dot(b)) {
+      DLOG_IF(WARNING, i == NumDistortionTraits<TScalar>::kMaxNumDistortionSteps) << "Maximum number of iterations reached.";
+      DLOG_IF_EVERY_N(WARNING, J_p_p_i.determinant() < NumTraits<TScalar>::kSmallAngleTolerance, NumDistortionTraits<TScalar>::kMaxNumDistortionSteps)
           << "Numerical issues detected.";
       output.noalias() -= J_p_p * b;
     } else {
@@ -50,6 +69,8 @@ auto Undistort(const TDistortion* distortion, const Eigen::Ref<const Pixel<TScal
 
   return output;
 }
+
+}  // namespace distortion
 
 template <typename TScalar>
 class ConstDistortion : public ConstVariable<TScalar> {
@@ -77,7 +98,9 @@ class ConstDistortion : public ConstVariable<TScalar> {
   /// \param J_d  Distortion Jacobian.
   /// \param parameters Undistort with external parameters.
   /// \return Undistorted p.
-  virtual auto undistort(const Eigen::Ref<const Pixel>& p, Scalar* J_p, Scalar* J_d, const Scalar* parameters) const -> Pixel { return Undistort(this, p, J_p, J_d, parameters); }
+  virtual auto undistort(const Eigen::Ref<const Pixel>& p, Scalar* J_p, Scalar* J_d, const Scalar* parameters) const -> Pixel {
+    return distortion::Undistort(this, p, J_p, J_d, parameters);
+  }
 };
 
 template <typename TScalar>
@@ -106,7 +129,9 @@ class Distortion : public Variable<TScalar> {
   /// \param J_d  Distortion Jacobian.
   /// \param parameters Undistort with external parameters.
   /// \return Undistorted p.
-  virtual auto undistort(const Eigen::Ref<const Pixel>& p, Scalar* J_p, Scalar* J_d, const Scalar* parameters) const -> Pixel { return Undistort(this, p, J_p, J_d, parameters); }
+  virtual auto undistort(const Eigen::Ref<const Pixel>& p, Scalar* J_p, Scalar* J_d, const Scalar* parameters) const -> Pixel {
+    return distortion::Undistort(this, p, J_p, J_d, parameters);
+  }
 };
 
 template <typename TDerived>

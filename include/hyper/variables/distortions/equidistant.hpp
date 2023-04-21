@@ -116,7 +116,7 @@ auto EquidistantDistortionBase<TDerived>::distort(const Eigen::Ref<const Pixel>&
     auto J_p_i = ParameterJacobian{1, size};
     const auto d_theta = distortTheta(theta, J_p ? &J_theta : nullptr, J_d ? J_p_i.data() : nullptr);
 
-    const auto is_small_angle = (rho < NumericVariableTraits<Scalar>::kSmallAngleTolerance);
+    const auto is_small_angle = (rho < NumTraits<Scalar>::kSmallAngleTolerance);
     const auto a = is_small_angle ? Scalar{1} : (d_theta / rho);
 
     if (J_p) {

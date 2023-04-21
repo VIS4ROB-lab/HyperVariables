@@ -13,10 +13,13 @@ class Metric;
 template <typename TInput>
 class AngularMetric;
 
-template <typename TInput, typename TOutput = TInput>
+template <typename TInput>
 class EuclideanMetric;
 
-template <typename TInput, typename TOutput = variables::Tangent<TInput>>
-class ManifoldMetric;
+template <typename TScalar>
+class SU2Metric;
+
+template <typename TScalar>
+class SE3Metric;
 
 }  // namespace hyper::metrics

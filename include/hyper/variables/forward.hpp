@@ -11,6 +11,19 @@ namespace hyper::variables {
 
 #define HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES false
 
+template <typename>
+struct NumTraits;
+
+template <>
+struct NumTraits<float> {
+  static constexpr float kSmallAngleTolerance = 1e-4;
+};
+
+template <>
+struct NumTraits<double> {
+  static constexpr double kSmallAngleTolerance = 1e-8;
+};
+
 template <typename TPointer, typename TSize = std::int32_t>
 using Partition = std::vector<std::pair<TPointer, TSize>>;
 
@@ -187,25 +200,6 @@ struct Traits<Eigen::Map<Stamped<TVariable>, TMapOptions>> final : public Traits
 template <typename TVariable, int TMapOptions>
 struct Traits<Eigen::Map<const Stamped<TVariable>, TMapOptions>> final : public Traits<Stamped<TVariable>> {
   using Base = Eigen::Map<const typename Traits<Stamped<TVariable>>::Base, TMapOptions>;
-};
-
-template <typename>
-struct NumericVariableTraits;
-
-template <>
-struct NumericVariableTraits<float> {
-  static constexpr float kSmallAngleTolerance = 1e-4;
-  static constexpr float kDistortionTolerance = 1e-6;
-  static constexpr float kDistortionTolerance2 = kDistortionTolerance * kDistortionTolerance;
-  static constexpr auto kMaxNumDistortionSteps = 20;
-};
-
-template <>
-struct NumericVariableTraits<double> {
-  static constexpr double kSmallAngleTolerance = 1e-8;
-  static constexpr double kDistortionTolerance = 1e-12;
-  static constexpr double kDistortionTolerance2 = kDistortionTolerance * kDistortionTolerance;
-  static constexpr auto kMaxNumDistortionSteps = 20;
 };
 
 template <typename TDerived>
