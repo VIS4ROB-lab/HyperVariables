@@ -5,7 +5,7 @@
 
 #include "hyper/variables/forward.hpp"
 
-#include "hyper/vector.hpp"
+#include "hyper/matrix.hpp"
 
 namespace hyper::variables {
 

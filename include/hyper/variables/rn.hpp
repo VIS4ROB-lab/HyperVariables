@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "hyper/jacobian.hpp"
+#include "hyper/matrix.hpp"
 #include "hyper/variables/variable.hpp"
 
 namespace hyper::variables {

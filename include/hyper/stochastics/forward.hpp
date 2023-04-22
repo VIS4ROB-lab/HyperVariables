@@ -3,9 +3,22 @@
 
 #pragma once
 
+#include "hyper/variables/forward.hpp"
+
 #include "hyper/matrix.hpp"
 
-namespace hyper::variables {
+namespace hyper::stochastics {
+
+enum class GaussianType { STANDARD, INFORMATION };
+
+template <typename TScalar, int TOrder>
+class Uncertainty;
+
+template <typename, int, GaussianType>
+class Gaussian;
+
+template <typename, int>
+class DualGaussian;
 
 template <typename TScalar, int TSize, int TOptions = DefaultStorageOption(TSize, TSize)>
 using Covariance = Matrix<TScalar, TSize, TSize, TOptions>;
@@ -25,4 +38,4 @@ using PrecisionN = MatrixNM<TDerived, TDerived, TOptions>;
 template <typename TScalar, int TOptions = DefaultStorageOption(Eigen::Dynamic, Eigen::Dynamic)>
 using PrecisionX = MatrixX<TScalar, TOptions>;
 
-}  // namespace hyper::variables
+}  // namespace hyper::stochastics

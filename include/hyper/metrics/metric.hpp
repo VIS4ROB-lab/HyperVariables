@@ -5,8 +5,7 @@
 
 #include "hyper/metrics/forward.hpp"
 
-#include "hyper/jacobian.hpp"
-#include "hyper/vector.hpp"
+#include "hyper/matrix.hpp"
 
 namespace hyper::metrics {
 

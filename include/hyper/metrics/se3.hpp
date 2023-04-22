@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "hyper/jacobian.hpp"
 #include "hyper/metrics/metric.hpp"
 #include "hyper/variables/se3.hpp"
 
