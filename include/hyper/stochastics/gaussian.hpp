@@ -107,16 +107,32 @@ class Gaussian<TScalar, TOrder, GaussianType::STANDARD> final {
     }
   }
 
-  /// Matrix accessor.
-  /// \return Matrix
-  auto matrix() const -> const Matrix& { return matrix_; }
+  /// Plus operator.
+  /// \param other Other Gaussian.
+  /// \return Gaussian.
+  auto operator+(const Gaussian& other) -> Gaussian { return {mu() + other.mu(), sigma() + other.sigma()}; }
 
-  /// Matrix setter.
-  /// \tparam TDerived_ Derived type.
-  /// \param matrix Matrix.
-  template <typename TDerived_>
-  auto setMatrix(const Eigen::MatrixBase<TDerived_>& matrix) -> void {
-    matrix_ = matrix.const_derived();
+  /// Minus operator.
+  /// \param other Other Gaussian.
+  /// \return Gaussian.
+  auto operator-(const Gaussian& other) -> Gaussian { return {mu() - other.mu(), sigma() - other.sigma()}; }
+
+  /// Plus operator (in-place).
+  /// \param other Other Gaussian.
+  /// \return Gaussian.
+  auto operator+=(const Gaussian& other) -> Gaussian& {
+    mu() += other.mu();
+    sigma() += other.sigma();
+    return *this;
+  }
+
+  /// Minus operator (in-place).
+  /// \param other Other Gaussian.
+  /// \return Gaussian.
+  auto operator-=(const Gaussian& other) -> Gaussian& {
+    mu() -= other.mu();
+    sigma() -= other.sigma();
+    return *this;
   }
 
   /// Inverse sigma.
@@ -211,16 +227,32 @@ class Gaussian<TScalar, TOrder, GaussianType::INFORMATION> final {
   /// \return Inverse lambda.
   inline auto lambdaInverse() const { return gaussian::invertPSDMatrix<TScalar, TOrder>(lambda()); }
 
-  /// Matrix accessor.
-  /// \return Matrix
-  auto matrix() const -> const Matrix& { return matrix_; }
+  /// Plus operator.
+  /// \param other Other Gaussian.
+  /// \return Gaussian.
+  auto operator+(const Gaussian& other) -> Gaussian { return {eta() + other.eta(), lambda() + other.lambda()}; }
 
-  /// Matrix setter.
-  /// \tparam TDerived_ Derived type.
-  /// \param matrix Matrix.
-  template <typename TDerived_>
-  auto setMatrix(const Eigen::MatrixBase<TDerived_>& matrix) -> void {
-    matrix_ = matrix.const_derived();
+  /// Minus operator.
+  /// \param other Other Gaussian.
+  /// \return Gaussian.
+  auto operator-(const Gaussian& other) -> Gaussian { return {eta() - other.eta(), lambda() - other.lambda()}; }
+
+  /// Plus operator (in-place).
+  /// \param other Other Gaussian.
+  /// \return Gaussian.
+  auto operator+=(const Gaussian& other) -> Gaussian& {
+    eta() += other.eta();
+    lambda() += other.lambda();
+    return *this;
+  }
+
+  /// Minus operator (in-place).
+  /// \param other Other Gaussian.
+  /// \return Gaussian.
+  auto operator-=(const Gaussian& other) -> Gaussian& {
+    eta() -= other.eta();
+    lambda() -= other.lambda();
+    return *this;
   }
 
   /// Converts this.
@@ -261,6 +293,18 @@ class DualGaussian final {
   /// Constructor from order.
   /// \param order Input order.
   explicit DualGaussian(Index order = TOrder) : standard_gaussian_{order}, information_gaussian_{order} {}
+
+  /// Constructor from order.
+  /// \param order Input order.
+  /// \return Gaussian.
+  inline auto setIdentity(Index order = TOrder) -> DualGaussian& {
+    *this = Identity(order);
+    return *this;
+  }
+
+  /// Retrieves the order.
+  /// \return Order.
+  [[nodiscard]] inline auto order() const { return standard_gaussian_.order(); }
 
   /// Standard form accessor.
   /// \return Gaussian in standard form.

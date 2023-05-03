@@ -79,6 +79,16 @@ class RnBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDer
     return plus;
   }
 
+  /// Group logarithm (Rn -> Rn tangent).
+  /// \param J_this Jacobian w.r.t. this.
+  /// \return Tangent element.
+  [[nodiscard]] auto gLog(Scalar* J_this = nullptr) const -> Tangent {
+    if (J_this) {
+      Eigen::Map<JacobianNM<Tangent>>{J_this}.setIdentity();
+    }
+    return *this;
+  }
+
   /// Tangent plus.
   /// \tparam TOther_ Other type.
   /// \param other Other element.
@@ -133,6 +143,16 @@ class RnTangentBase : public RnBase<TDerived> {
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(RnTangentBase)
+
+  /// Group exponential (Rn tangent -> Rn).
+  /// \param J_this Jacobian w.r.t. this.
+  /// \return Group element.
+  auto gExp(Scalar* J_this = nullptr) const -> Rn<Scalar, Base::kNumParameters> {
+    if (J_this) {
+      Eigen::Map<JacobianNM<Rn<Scalar, Base::kNumParameters>>>{J_this}.setIdentity();
+    }
+    return *this;
+  }
 };
 
 template <typename TDerived>
