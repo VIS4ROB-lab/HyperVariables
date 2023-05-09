@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model
+   href="http://download.ros.org/schema/package_format3.xsd"
+   schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>hyper_variables</name>
+  <version>1.0.0</version>
+  <description>HyperVariables comprises low-level containers used in HyperSLAM to represent parameters within non-linear optimizations.</description>
+  <maintainer email="dhug@mavt.ethz.ch">David Hug</maintainer>
+  <license>BSD-3-Clause</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <build_depend>Eigen3</build_depend>
+  <build_depend>libgoogle-glog-dev</build_depend>
+
+  <exec_depend>libgoogle-glog-dev</exec_depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+
