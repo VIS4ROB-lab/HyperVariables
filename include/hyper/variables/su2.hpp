@@ -184,7 +184,7 @@ class SU2Base : public QuaternionBase<TDerived> {
       return inv;
     }
 
-#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
     Eigen::Map<JacobianNM<Tangent>>{J_this}.noalias() = Scalar{-1} * inv.matrix();
 #else
     Eigen::Map<JacobianNM<Tangent>>{J_this}.noalias() = Scalar{-1} * this->matrix();
@@ -204,7 +204,7 @@ class SU2Base : public QuaternionBase<TDerived> {
       return *this * other;
     }
 
-#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
     if (J_this) {
       Eigen::Map<JacobianNM<Tangent>>{J_this}.setIdentity();
     }
@@ -249,7 +249,7 @@ class SU2Base : public QuaternionBase<TDerived> {
       Eigen::Map<JacobianNM<Tangent>>{J_this}.setIdentity();
     } else {
       const auto Wx = log.hat();
-#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
       Eigen::Map<JacobianNM<Tangent>>{J_this}.noalias() =
           JacobianNM<Tangent>::Identity() - Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
 #else
@@ -270,7 +270,7 @@ class SU2Base : public QuaternionBase<TDerived> {
   /// \return Group element.
   template <typename Other_>
   auto tPlus(const SU2TangentBase<Other_>& other) const -> SU2<Scalar> {
-#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
     return other.gExp().gPlus(*this);
 #else
     return this->gPlus(other.gExp());
@@ -283,7 +283,7 @@ class SU2Base : public QuaternionBase<TDerived> {
   /// \return Tangent element.
   template <typename Other_>
   auto tMinus(const SU2Base<Other_>& other) const -> Tangent {
-#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
     return this->gPlus(other.gInv()).gLog();
 #else
     return other.gInv().gPlus(*this).gLog();
@@ -300,7 +300,7 @@ class SU2Base : public QuaternionBase<TDerived> {
     tau[Order::kX] = kiAlpha * ptr[Order::kX];
     tau[Order::kY] = kiAlpha * ptr[Order::kY];
     tau[Order::kZ] = kiAlpha * ptr[Order::kZ];
-#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
     J(Order::kX, 0) = tau[Order::kW];
     J(Order::kY, 0) = -tau[Order::kZ];
     J(Order::kZ, 0) = tau[Order::kY];
@@ -344,7 +344,7 @@ class SU2Base : public QuaternionBase<TDerived> {
     tau[Order::kX] = kAlpha * ptr[Order::kX];
     tau[Order::kY] = kAlpha * ptr[Order::kY];
     tau[Order::kZ] = kAlpha * ptr[Order::kZ];
-#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
     J(0, Order::kX) = tau[Order::kW];
     J(1, Order::kX) = tau[Order::kZ];
     J(2, Order::kX) = -tau[Order::kY];
@@ -394,7 +394,7 @@ class SU2Base : public QuaternionBase<TDerived> {
     }
 
     if (J_this) {
-#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
       Eigen::Map<JacobianNM<Translation, Tangent>>{J_this}.noalias() = Scalar{-1} * x.hat();
 #else
       Eigen::Map<JacobianNM<Translation, Tangent>>{J_this}.noalias() = Scalar{-1} * this->matrix() * other.hat();
@@ -482,7 +482,7 @@ class SU2TangentBase : public RnBase<TDerived> {
       Eigen::Map<Jacobian>{J_this}.setIdentity();
     } else {
       const auto Wx = this->hat();
-#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
       Eigen::Map<Jacobian>{J_this}.noalias() = Jacobian::Identity() + (Scalar{1} - std::cos(nw)) / nw2 * Wx + (nw - std::sin(nw)) / nw3 * Wx * Wx;
 #else
       Eigen::Map<Jacobian>{J_this}.noalias() = Jacobian::Identity() - (Scalar{1} - std::cos(nw)) / nw2 * Wx + (nw - std::sin(nw)) / nw3 * Wx * Wx;

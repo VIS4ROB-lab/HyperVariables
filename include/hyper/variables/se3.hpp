@@ -98,7 +98,7 @@ class SE3Base : public RnBase<TDerived> {
     if (!J_this) {
       return inv;
     }
-#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
     auto J = Eigen::Map<JacobianNM<Tangent>>{J_this};
     const auto i_R_this = (Scalar{-1} * i_rotation.matrix()).eval();
     Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset) = i_R_this;
@@ -129,7 +129,7 @@ class SE3Base : public RnBase<TDerived> {
     if (!J_this && !J_other) {
       return plus;
     }
-#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
     if (J_this) {
       auto J = Eigen::Map<JacobianNM<Tangent>>{J_this};
       Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(J, Tangent::kAngularOffset).setIdentity();
@@ -196,7 +196,7 @@ class SE3Base : public RnBase<TDerived> {
   /// \return Group element.
   template <typename TOther_>
   auto tPlus(const SE3TangentBase<TOther_>& other) const -> SE3<Scalar> {
-#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
     return {other.angular().gExp().gPlus(rotation()), translation() + other.linear()};
 #else
     return {rotation().gPlus(other.angular().gExp()), translation() + other.linear()};
@@ -209,7 +209,7 @@ class SE3Base : public RnBase<TDerived> {
   /// \return Tangent element.
   template <typename TOther_>
   auto tMinus(const SE3Base<TOther_>& other) const -> Tangent {
-#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
     Tangent minus;
     minus.angular() = rotation().gPlus(other.rotation().gInv()).gLog();
     minus.linear() = (translation() - other.translation());
@@ -248,7 +248,7 @@ class SE3Base : public RnBase<TDerived> {
       return x;
     }
     if (J_this) {
-#if HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
       auto J = Eigen::Map<JacobianNM<Translation, Tangent>>{J_this};
       Tangent::template AngularJacobian<Translation::kNumParameters>(J, 0).noalias() = Scalar{-1} * R_this_v.hat();
       Tangent::template LinearJacobian<Translation::kNumParameters>(J, 0).setIdentity();

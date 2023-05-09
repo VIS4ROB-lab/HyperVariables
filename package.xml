@@ -11,7 +11,7 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>Eigen3</build_depend>
+  <build_depend>eigen</build_depend>
   <build_depend>libgoogle-glog-dev</build_depend>
 
   <exec_depend>libgoogle-glog-dev</exec_depend>

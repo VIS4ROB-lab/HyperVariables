@@ -9,8 +9,6 @@
 
 namespace hyper::variables {
 
-#define HYPER_USE_GLOBAL_MANIFOLD_DERIVATIVES false
-
 template <typename>
 struct NumTraits;
 
