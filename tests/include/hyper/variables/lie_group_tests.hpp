@@ -9,7 +9,6 @@ template <typename TGroup>
 class LieGroupTests : public testing::Test {
  protected:
   // Constants.
-  static constexpr auto kItr = 10;
   static constexpr auto kInc = 1e-6;
   static constexpr auto kTol = 1e-5;
 
@@ -69,13 +68,12 @@ class LieGroupTests : public testing::Test {
     return J_n.isApprox(J_a, kTol) && J_v_n.isApprox(J_v_a, kTol);
   }
 
-  [[nodiscard]] auto checkGroupExponentials() const -> bool {
-    const auto qle = group_.gLog().gExp();
-    const auto qel = group_.gexp().glog();
-    return qle.isApprox(group_, kTol) && qel.isApprox(group_, kTol);
+  [[nodiscard]] auto checkGroupExponentialMap() const -> bool {
+    const auto group = group_.gLog().gExp();
+    return group.isApprox(group_, kTol);
   }
 
-  [[nodiscard]] auto checkGroupExponentialsJacobians() const -> bool {
+  [[nodiscard]] auto checkGroupExponentialMapJacobians() const -> bool {
     TangentJacobian J_l_a, J_e_a;
     const auto tangent = group_.gLog(J_l_a.data());
     const auto group = tangent.gExp(J_e_a.data());
@@ -114,6 +112,25 @@ class LieGroupTests : public testing::Test {
     }
 
     return A_n.isApprox(A_a, kTol);
+  }
+
+  auto checkGroupOperators(int iterations) -> void {
+    for (auto i = 0; i < iterations; ++i) {
+      this->group_ = Group::Random();
+      EXPECT_TRUE(this->checkGroupInverseJacobian());
+      EXPECT_TRUE(this->checkGroupPlusJacobian());
+      EXPECT_TRUE(this->checkGroupActionJacobian());
+      EXPECT_TRUE(this->checkGroupExponentialMap());
+      EXPECT_TRUE(this->checkGroupExponentialMapJacobians());
+      EXPECT_TRUE(this->checkGroupAdjoint());
+    }
+  }
+
+  auto checkTangentOperators(int iterations) -> void {
+    for (auto i = 0; i < iterations; ++i) {
+      this->group_ = Group::Random();
+      EXPECT_TRUE(this->checkTangentJacobian());
+    }
   }
 
   Group group_;

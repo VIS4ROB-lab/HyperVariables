@@ -26,6 +26,14 @@ class SE3Base : public RnBase<TDerived> {
 
   using Tangent = variables::Tangent<SE3<Scalar>>;
 
+  using Adjoint = Matrix<Scalar, Traits<Tangent>::kNumParameters>;
+  using GroupJacobian = Jacobian<Scalar, Base::kNumParameters>;
+  using TangentJacobian = Jacobian<Scalar, Traits<Tangent>::kNumParameters>;
+  using GroupToTangentJacobian = Jacobian<Scalar, Base::kNumParameters, Traits<Tangent>::kNumParameters>;
+  using TangentToGroupJacobian = Jacobian<Scalar, Traits<Tangent>::kNumParameters, Base::kNumParameters>;
+  using ActionJacobian = Jacobian<Scalar, Traits<Translation>::kNumParameters, Traits<Tangent>::kNumParameters>;
+  using TranslationJacobian = Jacobian<Scalar, Traits<Translation>::kNumParameters>;
+
   // Constants.
   static constexpr auto kRotationOffset = 0;
   static constexpr auto kNumRotationParameters = Rotation::kNumParameters;
@@ -37,13 +45,13 @@ class SE3Base : public RnBase<TDerived> {
 
   /// Rotation Jacobian accessor/modifier.
   template <int NumRows, typename TDerived_>
-  static auto RotationJacobian(Eigen::MatrixBase<TDerived_>& matrix, int row) {
+  static auto RotationJacobianBlock(Eigen::MatrixBase<TDerived_>& matrix, int row) {
     return matrix.template block<NumRows, kNumRotationParameters>(row, kRotationOffset);
   }
 
   /// Translation Jacobian accessor/modifier.
   template <int NumRows, typename TDerived_>
-  static auto TranslationJacobian(Eigen::MatrixBase<TDerived_>& matrix, int row) {
+  static auto TranslationJacobianBlock(Eigen::MatrixBase<TDerived_>& matrix, int row) {
     return matrix.template block<NumRows, kNumTranslationParameters>(row, kTranslationOffset);
   }
 
@@ -229,6 +237,25 @@ class SE3Base : public RnBase<TDerived> {
   /// Tangent minus Jacobian.
   /// \return Jacobian.
   auto tMinusJacobian() const -> Jacobian<Scalar, Traits<Tangent>::kNumParameters, Base::kNumParameters>;
+
+  /// Group adjoint.
+  /// \return Adjoint.
+  [[nodiscard]] auto gAdj() const -> Adjoint {
+    Adjoint A;
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
+    Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(A, Tangent::kAngularOffset).setIdentity();
+    Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(A, Tangent::kLinearOffset).noalias() = translation().hat();
+    Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(A, Tangent::kAngularOffset).setZero();
+    Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(A, Tangent::kLinearOffset).setIdentity();
+#else
+    const auto A_r = rotation().gAdj();
+    Tangent::template AngularJacobian<Tangent::kNumAngularParameters>(A, Tangent::kAngularOffset) = A_r;
+    Tangent::template AngularJacobian<Tangent::kNumLinearParameters>(A, Tangent::kLinearOffset).noalias() = translation().hat() * A_r;
+    Tangent::template LinearJacobian<Tangent::kNumAngularParameters>(A, Tangent::kAngularOffset).setZero();
+    Tangent::template LinearJacobian<Tangent::kNumLinearParameters>(A, Tangent::kLinearOffset).setIdentity();
+#endif
+    return A;
+  }
 
   /// Group action.
   /// \tparam TOther_ Other type.

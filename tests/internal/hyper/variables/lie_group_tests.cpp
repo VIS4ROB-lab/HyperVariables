@@ -2,7 +2,7 @@
 /// the 'LICENSE' file, which is part of this repository.
 
 #include "hyper/variables/lie_group_tests.hpp"
-#include "hyper/variables/su2.hpp"
+#include "hyper/variables/se3.hpp"
 
 namespace hyper::variables::tests {
 
@@ -34,26 +34,15 @@ TEST_F(QuaternionTests, GroupExponentials) {
   }
 }
 
-using TestTypes = ::testing::Types<SU2<double>>;
+using TestTypes = ::testing::Types<SU2<double>, SE3<double>>;
 TYPED_TEST_SUITE(LieGroupTests, TestTypes);
 
 TYPED_TEST(LieGroupTests, GroupOperators) {
-  for (auto i = 0; i < TestFixture::kItr; ++i) {
-    this->group_ = TestFixture::Group::Random();
-    EXPECT_TRUE(this->checkGroupExponentials());
-    EXPECT_TRUE(this->checkGroupInverseJacobian());
-    EXPECT_TRUE(this->checkGroupPlusJacobian());
-    EXPECT_TRUE(this->checkGroupActionJacobian());
-    EXPECT_TRUE(this->checkGroupExponentialsJacobians());
-    EXPECT_TRUE(this->checkGroupAdjoint());
-  }
+  this->checkGroupOperators(10);
 }
 
 TYPED_TEST(LieGroupTests, TangentOperators) {
-  for (auto i = 0; i < TestFixture::kItr; ++i) {
-    this->group_ = TestFixture::Group::Random();
-    EXPECT_TRUE(this->checkTangentJacobian());
-  }
+  this->checkTangentOperators(10);
 }
 
 }  // namespace hyper::variables::tests

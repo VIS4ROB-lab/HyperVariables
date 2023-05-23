@@ -7,6 +7,8 @@
 
 #include "hyper/variables/macros.hpp"
 
+#define HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES false
+
 namespace hyper::variables {
 
 template <typename>

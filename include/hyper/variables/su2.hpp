@@ -25,7 +25,7 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
   using Base::operator*;
 
   using Translation = R3<Scalar>;
-  using TranslationJacobian = JacobianNM<Translation>;
+  using TranslationJacobian = Jacobian<Scalar, Traits<Translation>::kNumParameters>;
 
   // Constants.
   static constexpr auto SizeAtCompileTime = (int)Base::Coefficients::SizeAtCompileTime;
@@ -160,12 +160,12 @@ class SU2Base : public QuaternionBase<TDerived> {
 
   using Tangent = variables::Tangent<SU2<Scalar>>;
 
-  using Adjoint = MatrixNM<Tangent>;
+  using Adjoint = Matrix<Scalar, Traits<Tangent>::kNumParameters>;
   using GroupJacobian = Jacobian<Scalar, Base::kNumParameters>;
   using TangentJacobian = Jacobian<Scalar, Traits<Tangent>::kNumParameters>;
   using GroupToTangentJacobian = Jacobian<Scalar, Base::kNumParameters, Traits<Tangent>::kNumParameters>;
   using TangentToGroupJacobian = Jacobian<Scalar, Traits<Tangent>::kNumParameters, Base::kNumParameters>;
-  using ActionJacobian = JacobianNM<Translation, Tangent>;
+  using ActionJacobian = Jacobian<Scalar, Traits<Translation>::kNumParameters, Traits<Tangent>::kNumParameters>;
 
   static constexpr auto kAlpha = Scalar{2.0};
   static constexpr auto kiAlpha = Scalar{1} / kAlpha;
@@ -386,7 +386,7 @@ class SU2Base : public QuaternionBase<TDerived> {
   }
 
   /// Group adjoint.
-  /// \return Adjoint matrix.
+  /// \return Adjoint.
   [[nodiscard]] auto gAdj() const -> Adjoint {
 #if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
     return Adjoint::Identity();

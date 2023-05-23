@@ -7,7 +7,6 @@ if (PROJECT_IS_TOP_LEVEL)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -Wall -Wextra -Wnon-virtual-dtor -pedantic")
 endif ()
 
-option(HYPER_BUILD_WITH_GLOBAL_LIE_GROUP_DERIVATIVES "Build with global Lie group derivatives." FALSE)
 option(HYPER_BUILD_WITH_CERES "Build with Ceres." FALSE)
 
 find_package(ament_cmake REQUIRED)
@@ -21,10 +20,6 @@ ament_export_targets(${PROJECT_NAME} HAS_LIBRARY_TARGET)
 target_include_directories(${PROJECT_NAME} PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-
-if (HYPER_BUILD_WITH_GLOBAL_LIE_GROUP_DERIVATIVES)
-    target_compile_definitions(${PROJECT_NAME} PUBLIC HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES)
-endif ()
 
 if (HYPER_BUILD_WITH_CERES)
     find_package(Ceres REQUIRED)
@@ -54,13 +49,16 @@ install(
 if (BUILD_TESTING)
     find_package(ament_cmake_gtest REQUIRED)
     file(GLOB_RECURSE PROJECT_TEST_FILES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/tests/*.hpp ${PROJECT_SOURCE_DIR}/tests/*.cpp)
-    ament_add_gtest(${PROJECT_NAME}_tests ${PROJECT_TEST_FILES})
-    target_include_directories(${PROJECT_NAME}_tests PUBLIC
-            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/tests/include>
-            $<INSTALL_INTERFACE:include>
-            )
-    target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME})
+
+    if (PROJECT_TEST_FILES)
+        ament_add_gtest(${PROJECT_NAME}_tests ${PROJECT_TEST_FILES})
+        target_include_directories(${PROJECT_NAME}_tests PUBLIC
+                $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+                $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/tests/include>
+                $<INSTALL_INTERFACE:include>
+                )
+        target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME})
+    endif ()
 endif ()
 
 ament_package()
