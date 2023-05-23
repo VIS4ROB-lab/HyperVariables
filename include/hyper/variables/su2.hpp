@@ -25,6 +25,7 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
   using Base::operator*;
 
   using Translation = R3<Scalar>;
+  using TranslationJacobian = JacobianNM<Translation>;
 
   // Constants.
   static constexpr auto SizeAtCompileTime = (int)Base::Coefficients::SizeAtCompileTime;
@@ -154,9 +155,17 @@ class SU2Base : public QuaternionBase<TDerived> {
   using Base::operator*;
 
   using Translation = typename Base::Translation;
+  using TranslationJacobian = typename Base::TranslationJacobian;
   using Order = typename Base::Order;
 
   using Tangent = variables::Tangent<SU2<Scalar>>;
+
+  using Adjoint = MatrixNM<Tangent>;
+  using GroupJacobian = Jacobian<Scalar, Base::kNumParameters>;
+  using TangentJacobian = Jacobian<Scalar, Traits<Tangent>::kNumParameters>;
+  using GroupToTangentJacobian = Jacobian<Scalar, Base::kNumParameters, Traits<Tangent>::kNumParameters>;
+  using TangentToGroupJacobian = Jacobian<Scalar, Traits<Tangent>::kNumParameters, Base::kNumParameters>;
+  using ActionJacobian = JacobianNM<Translation, Tangent>;
 
   static constexpr auto kAlpha = Scalar{2.0};
   static constexpr auto kiAlpha = Scalar{1} / kAlpha;
@@ -171,10 +180,6 @@ class SU2Base : public QuaternionBase<TDerived> {
   /// \return Random element.
   static auto Random() -> SU2<Scalar> { return Base::UnitRandom(); }
 
-  /// Group adjoint.
-  /// \return Adjoint matrix.
-  [[nodiscard]] auto gAdj() const { return this->matrix(); }
-
   /// Group inverse.
   /// \param J_this Jacobian w.r.t. this.
   /// \return Inverse group element.
@@ -185,9 +190,9 @@ class SU2Base : public QuaternionBase<TDerived> {
     }
 
 #if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
-    Eigen::Map<JacobianNM<Tangent>>{J_this}.noalias() = Scalar{-1} * inv.matrix();
+    Eigen::Map<TangentJacobian>{J_this}.noalias() = Scalar{-1} * inv.matrix();
 #else
-    Eigen::Map<JacobianNM<Tangent>>{J_this}.noalias() = Scalar{-1} * this->matrix();
+    Eigen::Map<TangentJacobian>{J_this}.noalias() = Scalar{-1} * this->matrix();
 #endif
     return inv;
   }
@@ -206,17 +211,17 @@ class SU2Base : public QuaternionBase<TDerived> {
 
 #if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
     if (J_this) {
-      Eigen::Map<JacobianNM<Tangent>>{J_this}.setIdentity();
+      Eigen::Map<TangentJacobian>{J_this}.setIdentity();
     }
     if (J_other) {
-      Eigen::Map<JacobianNM<Tangent>>{J_other}.noalias() = this->matrix();
+      Eigen::Map<TangentJacobian>{J_other}.noalias() = this->matrix();
     }
 #else
     if (J_this) {
-      Eigen::Map<JacobianNM<Tangent>>{J_this}.noalias() = other.inverse().matrix();
+      Eigen::Map<TangentJacobian>{J_this}.noalias() = other.inverse().matrix();
     }
     if (J_other) {
-      Eigen::Map<JacobianNM<Tangent>>{J_other}.setIdentity();
+      Eigen::Map<TangentJacobian>{J_other}.setIdentity();
     }
 #endif
     return *this * other;
@@ -246,15 +251,15 @@ class SU2Base : public QuaternionBase<TDerived> {
     const auto nw3 = nw * nw2;
 
     if (nw3 < Eigen::NumTraits<Scalar>::epsilon()) {
-      Eigen::Map<JacobianNM<Tangent>>{J_this}.setIdentity();
+      Eigen::Map<TangentJacobian>{J_this}.setIdentity();
     } else {
       const auto Wx = log.hat();
 #if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
-      Eigen::Map<JacobianNM<Tangent>>{J_this}.noalias() =
-          JacobianNM<Tangent>::Identity() - Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
+      Eigen::Map<TangentJacobian>{J_this}.noalias() =
+          TangentJacobian::Identity() - Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
 #else
-      Eigen::Map<JacobianNM<Tangent>>{J_this}.noalias() =
-          JacobianNM<Tangent>::Identity() + Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
+      Eigen::Map<TangentJacobian>{J_this}.noalias() =
+          TangentJacobian::Identity() + Scalar{0.5} * Wx + (Scalar{1} / nw2 - (Scalar{1} + std::cos(nw)) / (Scalar{2} * nw * std::sin(nw))) * Wx * Wx;
 #endif
     }
     return log;
@@ -292,8 +297,8 @@ class SU2Base : public QuaternionBase<TDerived> {
 
   /// Tangent plus Jacobian.
   /// \return Jacobian.
-  auto tPlusJacobian() const -> Jacobian<Scalar, Base::kNumParameters, Traits<Tangent>::kNumParameters> {
-    Jacobian<Scalar, Base::kNumParameters, Traits<Tangent>::kNumParameters> J;
+  auto tPlusJacobian() const -> GroupToTangentJacobian {
+    GroupToTangentJacobian J;
     const auto ptr = this->data();
     Scalar tau[Base::kNumParameters];
     tau[Order::kW] = kiAlpha * ptr[Order::kW];
@@ -336,8 +341,8 @@ class SU2Base : public QuaternionBase<TDerived> {
 
   /// Tangent minus Jacobian.
   /// \return Jacobian.
-  auto tMinusJacobian() const -> Jacobian<Scalar, Traits<Tangent>::kNumParameters, Base::kNumParameters> {
-    Jacobian<Scalar, Traits<Tangent>::kNumParameters, Base::kNumParameters> J;
+  auto tMinusJacobian() const -> TangentToGroupJacobian {
+    TangentToGroupJacobian J;
     const auto ptr = this->data();
     Scalar tau[Base::kNumParameters];
     tau[Order::kW] = kAlpha * ptr[Order::kW];
@@ -380,6 +385,16 @@ class SU2Base : public QuaternionBase<TDerived> {
     return J;
   }
 
+  /// Group adjoint.
+  /// \return Adjoint matrix.
+  [[nodiscard]] auto gAdj() const -> Adjoint {
+#if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
+    return Adjoint::Identity();
+#else
+    return this->matrix();
+#endif
+  }
+
   /// Group action.
   /// \tparam Other_ Other type.
   /// \param other Other vector.
@@ -395,13 +410,13 @@ class SU2Base : public QuaternionBase<TDerived> {
 
     if (J_this) {
 #if HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
-      Eigen::Map<JacobianNM<Translation, Tangent>>{J_this}.noalias() = Scalar{-1} * x.hat();
+      Eigen::Map<ActionJacobian>{J_this}.noalias() = Scalar{-1} * x.hat();
 #else
-      Eigen::Map<JacobianNM<Translation, Tangent>>{J_this}.noalias() = Scalar{-1} * this->matrix() * other.hat();
+      Eigen::Map<ActionJacobian>{J_this}.noalias() = Scalar{-1} * this->matrix() * other.hat();
 #endif
     }
     if (J_other) {
-      Eigen::Map<JacobianNM<Translation>>{J_other}.noalias() = this->matrix();
+      Eigen::Map<TranslationJacobian>{J_other}.noalias() = this->matrix();
     }
     return x;
   }
@@ -439,6 +454,8 @@ class SU2TangentBase : public RnBase<TDerived> {
   using Scalar = typename Base::Scalar;
   using Base::Base;
 
+  using Jacobian = hyper::Jacobian<Scalar, Traits<Tangent<SU2<Scalar>>>::kNumParameters>;
+
   // Constants.
   static constexpr auto kAngularOffset = 0;
   static constexpr auto kNumAngularParameters = 3;
@@ -451,9 +468,6 @@ class SU2TangentBase : public RnBase<TDerived> {
   auto gExp(Scalar* J_this = nullptr) const -> SU2<Scalar> {
     // Constants.
     constexpr auto kiAlpha = SU2<Scalar>::kiAlpha;
-
-    // Definitions.
-    using Jacobian = hyper::JacobianNM<Tangent<SU2<Scalar>>>;
 
     const auto nw2 = this->squaredNorm();
     const auto nv2 = kiAlpha * kiAlpha * nw2;
