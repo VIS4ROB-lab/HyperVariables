@@ -3,7 +3,7 @@
 
 #pragma once
 
-#ifdef HYPER_COMPILE_WITH_CERES
+#if HYPER_COMPILE_WITH_CERES
 
 #include "hyper/ceres/manifolds/wrapper.hpp"
 #include "hyper/variables/su2.hpp"

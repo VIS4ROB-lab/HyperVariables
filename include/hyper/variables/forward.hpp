@@ -3,11 +3,13 @@
 
 #pragma once
 
+#ifndef HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
+#error "Compile with global Lie group derivatives flag must be set."
+#endif
+
 #include <Eigen/Core>
 
 #include "hyper/variables/macros.hpp"
-
-#define HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES false
 
 namespace hyper::variables {
 

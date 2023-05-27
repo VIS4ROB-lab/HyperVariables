@@ -3,7 +3,11 @@
 
 #pragma once
 
-#ifdef HYPER_COMPILE_WITH_CERES
+#ifndef HYPER_COMPILE_WITH_CERES
+#error "Compile with Ceres flag must be set."
+#endif
+
+#if HYPER_COMPILE_WITH_CERES
 
 namespace hyper::ceres::manifolds {
 
