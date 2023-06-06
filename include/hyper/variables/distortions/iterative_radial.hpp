@@ -51,7 +51,7 @@ class IterativeRadialDistortionBase : public DistortionBase<TDerived> {
   /// Perturbed distortion.
   /// \param scale Perturbation scale.
   /// \return Perturbed distortion.
-  auto perturbed(const Scalar& scale) const -> VectorX<Scalar> final { return Perturbed(scale); }
+  auto perturbed(const Scalar& scale) const -> VectorX final { return Perturbed(scale); }
 
   /// Distorts a pixel.
   /// \param p Pixel to distort.

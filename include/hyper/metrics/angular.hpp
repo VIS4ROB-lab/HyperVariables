@@ -18,7 +18,7 @@ class AngularMetric<variables::Rn<Scalar, N>> final : public Metric {
   using Output = variables::R1<Scalar>;
   using InputTangent = variables::Tangent<Input>;
   using OutputTangent = variables::Tangent<Output>;
-  using Jacobian = hyper::Jacobian<Scalar, OutputTangent::kNumParameters, InputTangent::kNumParameters>;
+  using Jacobian = hyper::JacobianNM<OutputTangent, InputTangent>;
 
   /// Evaluates the distance between elements.
   /// \param lhs Left element/input vector.

@@ -12,12 +12,12 @@ template <typename TDerived>
 class RnTangentBase;
 
 template <typename TDerived>
-class RnBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, Variable<DerivedScalar_t<TDerived>>, ConstVariable<DerivedScalar_t<TDerived>>> {
+class RnBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, Variable, ConstVariable> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
   using Scalar = typename Base::Scalar;
-  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
+  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX>;
   using Base::Base;
 
   using Tangent = variables::Tangent<Rn<Scalar, (int)Base::SizeAtCompileTime>>;
@@ -29,7 +29,7 @@ class RnBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDer
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final { return *this; }
+  auto asVector() const -> Eigen::Ref<const VectorX> final { return *this; }
 
   /// Map as Eigen vector.
   /// \return Vector.
@@ -109,21 +109,17 @@ class RnBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDer
 
   /// Tangent plus Jacobian.
   /// \return Jacobian.
-  auto tPlusJacobian() const -> Jacobian<Scalar, kNumParameters, Traits<Tangent>::kNumParameters> {
-    return Jacobian<Scalar, kNumParameters, Traits<Tangent>::kNumParameters>::Identity();
-  }
+  auto tPlusJacobian() const -> Jacobian<kNumParameters, Traits<Tangent>::kNumParameters> { return Jacobian<kNumParameters, Traits<Tangent>::kNumParameters>::Identity(); }
 
   /// Tangent minus Jacobian.
   /// \return Jacobian.
-  auto tMinusJacobian() const -> Jacobian<Scalar, Traits<Tangent>::kNumParameters, kNumParameters> {
-    return Jacobian<Scalar, Traits<Tangent>::kNumParameters, kNumParameters>::Identity();
-  }
+  auto tMinusJacobian() const -> Jacobian<Traits<Tangent>::kNumParameters, kNumParameters> { return Jacobian<Traits<Tangent>::kNumParameters, kNumParameters>::Identity(); }
 };
 
-template <typename TScalar, int TNumParameters>
-class Rn final : public RnBase<Rn<TScalar, TNumParameters>> {
+template <typename TScalar, int TOrder>
+class Rn final : public RnBase<Rn<TScalar, TOrder>> {
  public:
-  using Base = RnBase<Rn<TScalar, TNumParameters>>;
+  using Base = RnBase<Rn<TScalar, TOrder>>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Rn)

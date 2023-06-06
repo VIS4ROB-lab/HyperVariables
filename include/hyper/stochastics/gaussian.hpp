@@ -40,9 +40,9 @@ class Gaussian<TOrder, GaussianType::STANDARD> final {
  public:
   // Definitions.
   using Index = Eigen::Index;
-  using Mu = Eigen::Matrix<Scalar, TOrder, 1>;
-  using Sigma = Eigen::Matrix<Scalar, TOrder, TOrder>;
-  using Matrix = Eigen::Matrix<Scalar, TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
+  using Mu = Vector<TOrder>;
+  using Sigma = Matrix<TOrder, TOrder>;
+  using Matrix = Matrix<TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
 
   /// Zero Gaussian.
   /// \return Gaussian.
@@ -156,9 +156,9 @@ class Gaussian<TOrder, GaussianType::INFORMATION> final {
  public:
   // Definitions.
   using Index = Eigen::Index;
-  using Eta = Eigen::Matrix<Scalar, TOrder, 1>;
-  using Lambda = Eigen::Matrix<Scalar, TOrder, TOrder>;
-  using Matrix = Eigen::Matrix<Scalar, TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
+  using Eta = Vector<TOrder>;
+  using Lambda = Matrix<TOrder, TOrder>;
+  using Matrix = Matrix<TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
 
   /// Zero Gaussian.
   /// \return Gaussian.

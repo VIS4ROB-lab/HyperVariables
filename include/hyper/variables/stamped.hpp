@@ -7,11 +7,8 @@
 
 namespace hyper::variables {
 
-template <typename TScalar>
-class AbstractStamped : public Variable<TScalar> {
+class StampedVariable : public Variable {
  public:
-  using Scalar = std::remove_const_t<TScalar>;
-
   /// Time accessor.
   /// \return Time.
   [[nodiscard]] virtual auto time() const -> const Scalar& = 0;
@@ -29,11 +26,8 @@ class AbstractStamped : public Variable<TScalar> {
   virtual auto stamp() -> Eigen::Map<Stamp<Scalar>> = 0;
 };
 
-template <typename TScalar>
-class ConstAbstractStamped : public ConstVariable<TScalar> {
+class ConstStampedVariable : public ConstVariable {
  public:
-  using Scalar = std::remove_const_t<TScalar>;
-
   /// Time accessor.
   /// \return Time.
   [[nodiscard]] virtual auto time() const -> const Scalar& = 0;
@@ -52,14 +46,12 @@ class ConstAbstractStamped : public ConstVariable<TScalar> {
 };
 
 template <typename TDerived>
-class StampedBase : public Traits<TDerived>::Base,
-                    public ConditionalConstBase_t<TDerived, AbstractStamped<DerivedScalar_t<TDerived>>, ConstAbstractStamped<DerivedScalar_t<TDerived>>> {
+class StampedBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, StampedVariable, ConstStampedVariable> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
-  using Scalar = typename Base::Scalar;
   using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
-  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
+  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX>;
   using Base::Base;
 
   using Variable = typename Traits<TDerived>::Variable;
@@ -88,7 +80,7 @@ class StampedBase : public Traits<TDerived>::Base,
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final { return *this; }
+  [[nodiscard]] auto asVector() const -> Eigen::Ref<const VectorX> final { return *this; }
 
   /// Map as Eigen vector.
   /// \return Vector.
@@ -140,8 +132,8 @@ class StampedBase : public Traits<TDerived>::Base,
 
   /// Tangent plus Jacobian.
   /// \return Jacobian.
-  auto tPlusJacobian() const -> Jacobian<Scalar, kNumParameters, Tangent<Variable>::kNumParameters + kNumStampParameters> {
-    Jacobian<Scalar, kNumParameters, Tangent<Variable>::kNumParameters + 1> J;
+  auto tPlusJacobian() const -> Jacobian<kNumParameters, Tangent<Variable>::kNumParameters + kNumStampParameters> {
+    Jacobian<kNumParameters, Tangent<Variable>::kNumParameters + 1> J;
     J.template block<kNumVariableParameters, Tangent<Variable>::kNumParameters>(kVariableOffset, 0) = variable().tPlusJacobian();
     J.template block<kNumStampParameters, Tangent<Variable>::kNumParameters>(kStampOffset, 0).setZero();
     J.template block<kNumVariableParameters, kNumStampParameters>(kVariableOffset, Tangent<Variable>::kNumParameters).setZero();
@@ -151,8 +143,8 @@ class StampedBase : public Traits<TDerived>::Base,
 
   /// Tangent minus Jacobian.
   /// \return Jacobian.
-  auto tMinusJacobian() const -> Jacobian<Scalar, Tangent<Variable>::kNumParameters + 1, kNumParameters> {
-    Jacobian<Scalar, Tangent<Variable>::kNumParameters + 1, kNumParameters> J;
+  auto tMinusJacobian() const -> Jacobian<Tangent<Variable>::kNumParameters + 1, kNumParameters> {
+    Jacobian<Tangent<Variable>::kNumParameters + 1, kNumParameters> J;
     J.template block<Tangent<Variable>::kNumParameters, kNumVariableParameters>(0, kVariableOffset) = variable().tMinusJacobian();
     J.template block<kNumStampParameters, kNumVariableParameters>(Tangent<Variable>::kNumParameters, kVariableOffset).setZero();
     J.template block<Tangent<Variable>::kNumParameters, kNumStampParameters>(0, kStampOffset).setZero();

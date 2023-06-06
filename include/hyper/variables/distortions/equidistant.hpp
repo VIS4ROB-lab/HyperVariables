@@ -51,7 +51,7 @@ class EquidistantDistortionBase : public DistortionBase<TDerived> {
   /// Perturbed distortion.
   /// \param scale Perturbation scale.
   /// \return Perturbed distortion.
-  auto perturbed(const Scalar& scale) const -> VectorX<Scalar> final { return Perturbed(scale); }
+  auto perturbed(const Scalar& scale) const -> VectorX final { return Perturbed(scale); }
 
   /// Distorts a pixel.
   /// \param p Pixel to distort.
@@ -62,7 +62,7 @@ class EquidistantDistortionBase : public DistortionBase<TDerived> {
   auto distort(const Eigen::Ref<const Pixel>& p, Scalar* J_p, Scalar* J_d, const Scalar* parameters) const -> Pixel final;
 
  private:
-  using ParameterJacobian = Jacobian<Scalar, 1, Eigen::Dynamic>;
+  using ParameterJacobian = Jacobian<1, Eigen::Dynamic>;
 
   /// Computes the theta distortion.
   /// \param theta Input theta.

@@ -13,14 +13,13 @@ constexpr auto DefaultStorageOption(const int rows, const int cols) -> int {
   return Eigen::AutoAlign | ((rows == 1 && cols != 1) ? Eigen::RowMajor : ((cols == 1 && rows != 1) ? Eigen::ColMajor : EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION));  // NOLINT
 }
 
-template <int TNumRows, int TOptions = DefaultStorageOption(TNumRows, 1)>
-using Vector = Eigen::Matrix<Scalar, TNumRows, 1, TOptions>;
+template <int TNumRows>
+using Vector = Eigen::Matrix<Scalar, TNumRows, 1>;
 
-template <typename TDerived, int TOptions = DefaultVectorStorageOption(TDerived::SizeAtCompileTime, 1)>
-using VectorN = Vector<TDerived::SizeAtCompileTime, TOptions>;
+template <typename TDerived>
+using VectorN = Vector<TDerived::SizeAtCompileTime>;
 
-template <int TOptions = DefaultStorageOption(Eigen::Dynamic, 1)>
-using VectorX = Vector<Eigen::Dynamic, TOptions>;
+using VectorX = Vector<Eigen::Dynamic>;
 
 template <int TNumRows, int TNumCols = TNumRows, int TOptions = DefaultStorageOption(TNumRows, TNumCols)>
 using Matrix = Eigen::Matrix<Scalar, TNumRows, TNumCols, TOptions>;

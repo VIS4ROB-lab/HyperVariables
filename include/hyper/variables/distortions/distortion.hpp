@@ -72,7 +72,7 @@ auto Undistort(const TDistortion* distortion, const Eigen::Ref<const Pixel<TScal
 }  // namespace distortion
 
 template <typename TScalar>
-class ConstDistortion : public ConstVariable<TScalar> {
+class ConstDistortion : public ConstVariable {
  public:
   // Definitions.
   using Scalar = TScalar;
@@ -81,7 +81,7 @@ class ConstDistortion : public ConstVariable<TScalar> {
   /// Perturbed distortion.
   /// \param scale Perturbation scale.
   /// \return Perturbed distortion.
-  virtual auto perturbed(const Scalar& scale) const -> VectorX<Scalar> = 0;
+  virtual auto perturbed(const Scalar& scale) const -> VectorX = 0;
 
   /// Distorts a pixel.
   /// \param p Pixel to distort.
@@ -103,7 +103,7 @@ class ConstDistortion : public ConstVariable<TScalar> {
 };
 
 template <typename TScalar>
-class Distortion : public Variable<TScalar> {
+class Distortion : public Variable {
  public:
   // Definitions.
   using Scalar = TScalar;
@@ -112,7 +112,7 @@ class Distortion : public Variable<TScalar> {
   /// Perturbed distortion.
   /// \param scale Perturbation scale.
   /// \return Perturbed distortion.
-  virtual auto perturbed(const Scalar& scale) const -> VectorX<Scalar> = 0;
+  virtual auto perturbed(const Scalar& scale) const -> VectorX = 0;
 
   /// Distorts a pixel.
   /// \param p Pixel to distort.
@@ -139,7 +139,7 @@ class DistortionBase : public Traits<TDerived>::Base, public ConditionalConstBas
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
   using Scalar = typename Base::Scalar;
-  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
+  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX>;
   using Base::Base;
 
   // Constants.
@@ -149,7 +149,7 @@ class DistortionBase : public Traits<TDerived>::Base, public ConditionalConstBas
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final { return *this; }
+  [[nodiscard]] auto asVector() const -> Eigen::Ref<const VectorX> final { return *this; }
 
   /// Map as Eigen vector.
   /// \return Vector.

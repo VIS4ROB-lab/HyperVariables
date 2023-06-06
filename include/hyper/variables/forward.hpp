@@ -15,16 +15,14 @@ namespace hyper::variables {
 template <typename>
 struct Traits;
 
-template <typename>
 class Variable;
 
-template <typename>
 class ConstVariable;
 
 template <typename>
 class Stamped;
 
-template <typename, int>
+template <typename, int TOrder>
 class Rn;
 
 template <typename TScalar>

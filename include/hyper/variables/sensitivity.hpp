@@ -18,8 +18,8 @@ class SensitivityBase : public RnBase<TDerived> {
   using Scalar = typename Base::Scalar;
   using Base::Base;
 
-  using OrderVector = hyper::Vector<Scalar, kOrder>;
-  using OrderMatrix = hyper::Matrix<Scalar, kOrder, kOrder>;
+  using OrderVector = hyper::Vector<kOrder>;
+  using OrderMatrix = hyper::Matrix<kOrder, kOrder>;
 
   using Input = OrderVector;
   using InputJacobian = hyper::JacobianNM<OrderVector>;

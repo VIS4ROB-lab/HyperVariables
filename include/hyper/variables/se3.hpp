@@ -16,7 +16,7 @@ class SE3Base : public RnBase<TDerived> {
   // Definitions.
   using Base = RnBase<TDerived>;
   using Scalar = typename Base::Scalar;
-  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
+  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX>;
   using Base::Base;
 
   using Rotation = SU2<Scalar>;
@@ -26,13 +26,13 @@ class SE3Base : public RnBase<TDerived> {
 
   using Tangent = variables::Tangent<SE3<Scalar>>;
 
-  using Adjoint = Matrix<Scalar, Traits<Tangent>::kNumParameters>;
-  using GroupJacobian = Jacobian<Scalar, Base::kNumParameters>;
-  using TangentJacobian = Jacobian<Scalar, Traits<Tangent>::kNumParameters>;
-  using GroupToTangentJacobian = Jacobian<Scalar, Base::kNumParameters, Traits<Tangent>::kNumParameters>;
-  using TangentToGroupJacobian = Jacobian<Scalar, Traits<Tangent>::kNumParameters, Base::kNumParameters>;
-  using ActionJacobian = Jacobian<Scalar, Traits<Translation>::kNumParameters, Traits<Tangent>::kNumParameters>;
-  using TranslationJacobian = Jacobian<Scalar, Traits<Translation>::kNumParameters>;
+  using Adjoint = Matrix<Traits<Tangent>::kNumParameters>;
+  using GroupJacobian = Jacobian<Base::kNumParameters>;
+  using TangentJacobian = Jacobian<Traits<Tangent>::kNumParameters>;
+  using GroupToTangentJacobian = Jacobian<Base::kNumParameters, Traits<Tangent>::kNumParameters>;
+  using TangentToGroupJacobian = Jacobian<Traits<Tangent>::kNumParameters, Base::kNumParameters>;
+  using ActionJacobian = Jacobian<Traits<Translation>::kNumParameters, Traits<Tangent>::kNumParameters>;
+  using TranslationJacobian = Jacobian<Traits<Translation>::kNumParameters>;
 
   // Constants.
   static constexpr auto kRotationOffset = 0;
@@ -232,11 +232,11 @@ class SE3Base : public RnBase<TDerived> {
 
   /// Tangent plus Jacobian.
   /// \return Jacobian.
-  auto tPlusJacobian() const -> Jacobian<Scalar, Base::kNumParameters, Traits<Tangent>::kNumParameters>;
+  auto tPlusJacobian() const -> Jacobian<Base::kNumParameters, Traits<Tangent>::kNumParameters>;
 
   /// Tangent minus Jacobian.
   /// \return Jacobian.
-  auto tMinusJacobian() const -> Jacobian<Scalar, Traits<Tangent>::kNumParameters, Base::kNumParameters>;
+  auto tMinusJacobian() const -> Jacobian<Traits<Tangent>::kNumParameters, Base::kNumParameters>;
 
   /// Group adjoint.
   /// \return Adjoint.
@@ -416,8 +416,8 @@ class Tangent<SE3<TScalar>> final : public SE3TangentBase<Tangent<SE3<TScalar>>>
 };
 
 template <typename TDerived>
-auto SE3Base<TDerived>::tPlusJacobian() const -> Jacobian<Scalar, Base::kNumParameters, Traits<Tangent>::kNumParameters> {
-  Jacobian<Scalar, Base::kNumParameters, Tangent::kNumParameters> J;
+auto SE3Base<TDerived>::tPlusJacobian() const -> Jacobian<Base::kNumParameters, Traits<Tangent>::kNumParameters> {
+  Jacobian<Base::kNumParameters, Tangent::kNumParameters> J;
   J.template block<kNumRotationParameters, Tangent::kNumAngularParameters>(kRotationOffset, Tangent::kAngularOffset) = rotation().tPlusJacobian();
   J.template block<kNumTranslationParameters, Tangent::kNumAngularParameters>(kTranslationOffset, Tangent::kAngularOffset).setZero();
   J.template block<kNumRotationParameters, Tangent::kNumLinearParameters>(kRotationOffset, Tangent::kLinearOffset).setZero();
@@ -426,8 +426,8 @@ auto SE3Base<TDerived>::tPlusJacobian() const -> Jacobian<Scalar, Base::kNumPara
 }
 
 template <typename TDerived>
-auto SE3Base<TDerived>::tMinusJacobian() const -> Jacobian<Scalar, Traits<Tangent>::kNumParameters, Base::kNumParameters> {
-  Jacobian<Scalar, Traits<Tangent>::kNumParameters, Base::kNumParameters> J;
+auto SE3Base<TDerived>::tMinusJacobian() const -> Jacobian<Traits<Tangent>::kNumParameters, Base::kNumParameters> {
+  Jacobian<Traits<Tangent>::kNumParameters, Base::kNumParameters> J;
   J.template block<Tangent::kNumAngularParameters, kNumRotationParameters>(Tangent::kAngularOffset, kRotationOffset) = rotation().tMinusJacobian();
   J.template block<Tangent::kNumLinearParameters, kNumRotationParameters>(Tangent::kLinearOffset, kRotationOffset).setZero();
   J.template block<Tangent::kNumAngularParameters, kNumTranslationParameters>(Tangent::kAngularOffset, kTranslationOffset).setZero();

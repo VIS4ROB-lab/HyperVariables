@@ -16,8 +16,8 @@ class Uncertainty {
  public:
   // Definitions.
   using Index = Eigen::Index;
-  using Covariance = Matrix<Scalar, TOrder, TOrder>;  ///< Covariance matrix type.
-  using Precision = Matrix<Scalar, TOrder, TOrder>;   ///< Precision matrix type.
+  using Covariance = Matrix<TOrder, TOrder>;  ///< Covariance matrix type.
+  using Precision = Matrix<TOrder, TOrder>;   ///< Precision matrix type.
 
   /// Initialization as identity.
   /// \param order Order.

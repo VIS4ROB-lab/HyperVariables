@@ -14,18 +14,18 @@ template <typename TDerived>
 class SU2TangentBase;
 
 template <typename TDerived>
-class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, Variable<DerivedScalar_t<TDerived>>, ConstVariable<DerivedScalar_t<TDerived>>> {
+class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, Variable, ConstVariable> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
   using Scalar = typename Base::Scalar;
   using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
-  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX<Scalar>>;
+  using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX>;
   using Base::Base;
   using Base::operator*;
 
   using Translation = R3<Scalar>;
-  using TranslationJacobian = Jacobian<Scalar, Traits<Translation>::kNumParameters>;
+  using TranslationJacobian = Jacobian<Traits<Translation>::kNumParameters>;
 
   // Constants.
   static constexpr auto SizeAtCompileTime = (int)Base::Coefficients::SizeAtCompileTime;
@@ -73,7 +73,7 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Ref<const VectorX<Scalar>> final { return this->coeffs(); }
+  auto asVector() const -> Eigen::Ref<const VectorX> final { return this->coeffs(); }
 
   /// Map as Eigen vector.
   /// \return Vector.
@@ -160,12 +160,12 @@ class SU2Base : public QuaternionBase<TDerived> {
 
   using Tangent = variables::Tangent<SU2<Scalar>>;
 
-  using Adjoint = Matrix<Scalar, Traits<Tangent>::kNumParameters>;
-  using GroupJacobian = Jacobian<Scalar, Base::kNumParameters>;
-  using TangentJacobian = Jacobian<Scalar, Traits<Tangent>::kNumParameters>;
-  using GroupToTangentJacobian = Jacobian<Scalar, Base::kNumParameters, Traits<Tangent>::kNumParameters>;
-  using TangentToGroupJacobian = Jacobian<Scalar, Traits<Tangent>::kNumParameters, Base::kNumParameters>;
-  using ActionJacobian = Jacobian<Scalar, Traits<Translation>::kNumParameters, Traits<Tangent>::kNumParameters>;
+  using Adjoint = Matrix<Traits<Tangent>::kNumParameters>;
+  using GroupJacobian = Jacobian<Base::kNumParameters>;
+  using TangentJacobian = Jacobian<Traits<Tangent>::kNumParameters>;
+  using GroupToTangentJacobian = Jacobian<Base::kNumParameters, Traits<Tangent>::kNumParameters>;
+  using TangentToGroupJacobian = Jacobian<Traits<Tangent>::kNumParameters, Base::kNumParameters>;
+  using ActionJacobian = Jacobian<Traits<Translation>::kNumParameters, Traits<Tangent>::kNumParameters>;
 
   static constexpr auto kAlpha = Scalar{2.0};
   static constexpr auto kiAlpha = Scalar{1} / kAlpha;
@@ -454,7 +454,7 @@ class SU2TangentBase : public RnBase<TDerived> {
   using Scalar = typename Base::Scalar;
   using Base::Base;
 
-  using Jacobian = hyper::Jacobian<Scalar, Traits<Tangent<SU2<Scalar>>>::kNumParameters>;
+  using Jacobian = hyper::Jacobian<Traits<Tangent<SU2<Scalar>>>::kNumParameters>;
 
   // Constants.
   static constexpr auto kAngularOffset = 0;
