@@ -21,34 +21,32 @@ using VectorN = Vector<TDerived::SizeAtCompileTime>;
 
 using VectorX = Vector<Eigen::Dynamic>;
 
-template <int TNumRows, int TNumCols = TNumRows, int TOptions = DefaultStorageOption(TNumRows, TNumCols)>
-using Matrix = Eigen::Matrix<Scalar, TNumRows, TNumCols, TOptions>;
+template <int TNumRows, int TNumCols = TNumRows>
+using Matrix = Eigen::Matrix<Scalar, TNumRows, TNumCols, DefaultStorageOption(TNumRows, TNumCols)>;
 
-template <typename TDerived, typename TOtherDerived = TDerived, int TOptions = DefaultStorageOption(TDerived::SizeAtCompileTime, TOtherDerived::SizeAtCompileTime)>
-using MatrixNM = Matrix<TDerived::SizeAtCompileTime, TOtherDerived::SizeAtCompileTime, TOptions>;
+template <typename TDerived, typename TOtherDerived = TDerived>
+using MatrixNM = Matrix<TDerived::SizeAtCompileTime, TOtherDerived::SizeAtCompileTime>;
 
-template <typename TDerived, int TOptions = DefaultStorageOption(TDerived::SizeAtCompileTime, Eigen::Dynamic)>
-using MatrixNX = Matrix<TDerived::SizeAtCompileTime, Eigen::Dynamic, TOptions>;
+template <typename TDerived>
+using MatrixNX = Matrix<TDerived::SizeAtCompileTime, Eigen::Dynamic>;
 
-template <typename TOtherDerived, int TOptions = DefaultStorageOption(Eigen::Dynamic, TOtherDerived::SizeAtCompileTime)>
-using MatrixXN = Matrix<Eigen::Dynamic, TOtherDerived::SizeAtCompileTime, TOptions>;
+template <typename TOtherDerived>
+using MatrixXN = Matrix<Eigen::Dynamic, TOtherDerived::SizeAtCompileTime>;
 
-template <int TOptions = DefaultStorageOption(Eigen::Dynamic, Eigen::Dynamic)>
-using MatrixX = Matrix<Eigen::Dynamic, Eigen::Dynamic, TOptions>;
+using MatrixX = Matrix<Eigen::Dynamic, Eigen::Dynamic>;
 
-template <int TNumRows, int TNumCols = TNumRows, int TOptions = DefaultStorageOption(TNumRows, TNumCols)>
-using Jacobian = Matrix<TNumRows, TNumCols, TOptions>;
+template <int TNumRows, int TNumCols = TNumRows>
+using Jacobian = Matrix<TNumRows, TNumCols>;
 
-template <typename TDerived, typename TOtherDerived = TDerived, int TOptions = DefaultStorageOption(TDerived::SizeAtCompileTime, TOtherDerived::SizeAtCompileTime)>
-using JacobianNM = MatrixNM<TDerived, TOtherDerived, TOptions>;
+template <typename TDerived, typename TOtherDerived = TDerived>
+using JacobianNM = MatrixNM<TDerived, TOtherDerived>;
 
-template <typename TDerived, int TOptions = DefaultStorageOption(TDerived::SizeAtCompileTime, Eigen::Dynamic)>
-using JacobianNX = MatrixNX<TDerived, TOptions>;
+template <typename TDerived>
+using JacobianNX = MatrixNX<TDerived>;
 
-template <typename TOtherDerived, int TOptions = DefaultStorageOption(Eigen::Dynamic, TOtherDerived::SizeAtCompileTime)>
-using JacobianXN = MatrixXN<TOtherDerived, TOptions>;
+template <typename TOtherDerived>
+using JacobianXN = MatrixXN<TOtherDerived>;
 
-template <int TOptions = DefaultStorageOption(Eigen::Dynamic, Eigen::Dynamic)>
-using JacobianX = MatrixX<TOptions>;
+using JacobianX = MatrixX;
 
 }  // namespace hyper

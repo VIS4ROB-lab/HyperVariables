@@ -20,22 +20,20 @@ class Gaussian;
 template <int TOrder>
 class DualGaussian;
 
-template <int TSize, int TOptions = DefaultStorageOption(TSize, TSize)>
-using Covariance = Matrix<TSize, TSize, TOptions>;
+template <int TSize>
+using Covariance = Matrix<TSize, TSize>;
 
-template <typename TDerived, int TOptions = DefaultStorageOption(TDerived::SizeAtCompileTime, TDerived::SizeAtCompileTime)>
-using CovarianceN = MatrixNM<TDerived, TDerived, TOptions>;
+template <typename TDerived>
+using CovarianceN = MatrixNM<TDerived, TDerived>;
 
-template <int TOptions = DefaultStorageOption(Eigen::Dynamic, Eigen::Dynamic)>
-using CovarianceX = MatrixX<TOptions>;
+using CovarianceX = MatrixX;
 
-template <int TSize, int TOptions = DefaultStorageOption(TSize, TSize)>
-using Precision = Matrix<TSize, TSize, TOptions>;
+template <int TSize>
+using Precision = Matrix<TSize, TSize>;
 
-template <typename TDerived, int TOptions = DefaultStorageOption(TDerived::SizeAtCompileTime, TDerived::SizeAtCompileTime)>
-using PrecisionN = MatrixNM<TDerived, TDerived, TOptions>;
+template <typename TDerived>
+using PrecisionN = MatrixNM<TDerived, TDerived>;
 
-template <int TOptions = DefaultStorageOption(Eigen::Dynamic, Eigen::Dynamic)>
-using PrecisionX = MatrixX<TOptions>;
+using PrecisionX = MatrixX;
 
 }  // namespace hyper::stochastics
