@@ -3,34 +3,14 @@
 
 #pragma once
 
-#ifndef HYPER_COMPILE_WITH_GLOBAL_LIE_GROUP_DERIVATIVES
-#error "Compile with global Lie group derivatives flag must be set."
-#endif
-
 #include <Eigen/Core>
 
+#include "hyper/definitions.hpp"
 #include "hyper/variables/macros.hpp"
 
+namespace hyper {}
+
 namespace hyper::variables {
-
-template <typename>
-struct NumTraits;
-
-template <>
-struct NumTraits<float> {
-  static constexpr float kSmallAngleTolerance = 1e-4;
-};
-
-template <>
-struct NumTraits<double> {
-  static constexpr double kSmallAngleTolerance = 1e-8;
-};
-
-template <typename TPointer, typename TSize = std::int32_t>
-using Partition = std::vector<std::pair<TPointer, TSize>>;
-
-template <typename TPointer, typename TSize = std::int32_t>
-using Partitions = std::vector<Partition<TPointer, TSize>>;
 
 template <typename>
 struct Traits;

@@ -9,12 +9,8 @@
 
 namespace hyper::metrics {
 
-template <typename TScalar>
 class Metric {
  public:
-  // Definitions.
-  using Scalar = TScalar;
-
   /// Default destructor.
   virtual ~Metric() = default;
 
@@ -40,7 +36,7 @@ class Metric {
   /// \param output Distance between elements.
   /// \param J_lhs Jacobian w.r.t. left element.
   /// \param J_rhs Jacobian w.r.t. right element.
-  virtual auto evaluate(const TScalar* lhs, const TScalar* rhs, TScalar* output, TScalar* J_lhs, TScalar* J_rhs) -> void = 0;
+  virtual auto evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void = 0;
 };
 
 }  // namespace hyper::metrics

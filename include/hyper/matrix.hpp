@@ -5,6 +5,8 @@
 
 #include <Eigen/Core>
 
+#include "hyper/definitions.hpp"
+
 namespace hyper {
 
 constexpr auto DefaultStorageOption(const int rows, const int cols) -> int {
