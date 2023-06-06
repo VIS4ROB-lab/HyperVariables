@@ -19,11 +19,11 @@ class StampedVariable : public Variable {
 
   /// Stamp accessor.
   /// \return Stamp.
-  [[nodiscard]] virtual auto stamp() const -> Eigen::Map<const Stamp<Scalar>> = 0;
+  [[nodiscard]] virtual auto stamp() const -> Eigen::Map<const Stamp> = 0;
 
   /// Stamp modifier.
   /// \return Stamp.
-  virtual auto stamp() -> Eigen::Map<Stamp<Scalar>> = 0;
+  virtual auto stamp() -> Eigen::Map<Stamp> = 0;
 };
 
 class ConstStampedVariable : public ConstVariable {
@@ -38,11 +38,11 @@ class ConstStampedVariable : public ConstVariable {
 
   /// Stamp accessor.
   /// \return Stamp.
-  [[nodiscard]] virtual auto stamp() const -> Eigen::Map<const Stamp<Scalar>> = 0;
+  [[nodiscard]] virtual auto stamp() const -> Eigen::Map<const Stamp> = 0;
 
   /// Stamp modifier.
   /// \return Stamp.
-  virtual auto stamp() -> Eigen::Map<const Stamp<Scalar>> = 0;
+  virtual auto stamp() -> Eigen::Map<const Stamp> = 0;
 };
 
 template <typename TDerived>
@@ -56,8 +56,6 @@ class StampedBase : public Traits<TDerived>::Base, public ConditionalConstBase_t
 
   using Variable = typename Traits<TDerived>::Variable;
   using VariableWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Variable>;
-
-  using Stamp = variables::Stamp<Scalar>;
   using StampWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Stamp>;
 
   // Constants.
@@ -164,4 +162,4 @@ class Stamped final : public StampedBase<Stamped<TVariable>> {
 
 }  // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Stamped)
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::Stamped, typename)

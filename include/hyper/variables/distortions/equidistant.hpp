@@ -16,7 +16,6 @@ class EquidistantDistortionBase : public DistortionBase<TDerived> {
   using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
   using Base::Base;
 
-  using Pixel = variables::Pixel<Scalar>;
   using PixelJacobian = hyper::JacobianNM<Pixel>;
   using PlainDistortion = typename Traits<TDerived>::PlainDistortion;
 
@@ -72,8 +71,8 @@ class EquidistantDistortionBase : public DistortionBase<TDerived> {
   auto distortTheta(const Scalar& theta, Scalar* J_t, Scalar* J_p) const -> Scalar;
 };
 
-template <typename TScalar, int TOrder>
-class EquidistantDistortion final : public EquidistantDistortionBase<EquidistantDistortion<TScalar, TOrder>> {
+template <int TOrder>
+class EquidistantDistortion final : public EquidistantDistortionBase<EquidistantDistortion<TOrder>> {
  public:
   using Base = EquidistantDistortionBase<EquidistantDistortion>;
   using Base::Base;

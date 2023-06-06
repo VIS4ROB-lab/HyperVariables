@@ -18,7 +18,7 @@ class Manifold<variables::Stamped<TVariable>> final : public ManifoldWrapper {
   // Definitions.
   using Variable = TVariable;
 
-  using Stamp = variables::Stamp<Scalar>;
+  using Stamp = variables::Stamp;
   using StampedVariable = variables::Stamped<TVariable>;
 
   /// Constructor from constancy flags.

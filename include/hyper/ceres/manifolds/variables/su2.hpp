@@ -11,10 +11,10 @@
 namespace hyper::ceres::manifolds {
 
 template <>
-class Manifold<variables::SU2<double>> final : public ManifoldWrapper {
+class Manifold<variables::SU2> final : public ManifoldWrapper {
  public:
   // Definitions.
-  using SU2 = variables::SU2<Scalar>;
+  using SU2 = variables::SU2;
 
   /// Constructor from constancy flag.
   /// \param constant Constancy flag.

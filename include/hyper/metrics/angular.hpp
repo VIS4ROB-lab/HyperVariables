@@ -11,11 +11,11 @@
 namespace hyper::metrics {
 
 template <int N>
-class AngularMetric<variables::Rn<Scalar, N>> final : public Metric {
+class AngularMetric<variables::Rn<N>> final : public Metric {
  public:
   // Definitions.
-  using Input = variables::Rn<Scalar, N>;
-  using Output = variables::R1<Scalar>;
+  using Input = variables::Rn<N>;
+  using Output = variables::R1;
   using InputTangent = variables::Tangent<Input>;
   using OutputTangent = variables::Tangent<Output>;
   using Jacobian = hyper::JacobianNM<OutputTangent, InputTangent>;

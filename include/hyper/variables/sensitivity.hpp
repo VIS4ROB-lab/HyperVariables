@@ -64,14 +64,16 @@ class SensitivityBase : public RnBase<TDerived> {
   }
 };
 
-template <typename TScalar, int TOrder>
-class Sensitivity final : public SensitivityBase<Sensitivity<TScalar, TOrder>> {
+template <int TOrder>
+class Sensitivity final : public SensitivityBase<Sensitivity<TOrder>> {
  public:
-  using Base = SensitivityBase<Sensitivity<TScalar, TOrder>>;
+  using Base = SensitivityBase<Sensitivity<TOrder>>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Sensitivity)
 };
+
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::Sensitivity, int)
 
 }  // namespace hyper::variables
 

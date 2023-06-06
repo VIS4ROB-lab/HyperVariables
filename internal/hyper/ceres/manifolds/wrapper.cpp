@@ -24,23 +24,23 @@ auto ManifoldWrapper::TangentSize() const -> int {
   return manifold_->TangentSize();
 }
 
-auto ManifoldWrapper::Plus(const Scalar* x, const Scalar* delta, Scalar* x_plus_delta) const -> bool {
+auto ManifoldWrapper::Plus(const double* x, const double* delta, double* x_plus_delta) const -> bool {
   return manifold_->Plus(x, delta, x_plus_delta);
 }
 
-auto ManifoldWrapper::PlusJacobian(const Scalar* x, Scalar* jacobian) const -> bool {
+auto ManifoldWrapper::PlusJacobian(const double* x, double* jacobian) const -> bool {
   return manifold_->PlusJacobian(x, jacobian);
 }
 
-auto ManifoldWrapper::RightMultiplyByPlusJacobian(const Scalar* x, const int num_rows, const Scalar* ambient_matrix, Scalar* tangent_matrix) const -> bool {
+auto ManifoldWrapper::RightMultiplyByPlusJacobian(const double* x, const int num_rows, const double* ambient_matrix, double* tangent_matrix) const -> bool {
   return manifold_->RightMultiplyByPlusJacobian(x, num_rows, ambient_matrix, tangent_matrix);
 }
 
-auto ManifoldWrapper::Minus(const Scalar* y, const Scalar* x, Scalar* y_minus_x) const -> bool {
+auto ManifoldWrapper::Minus(const double* y, const double* x, double* y_minus_x) const -> bool {
   return manifold_->Minus(y, x, y_minus_x);
 }
 
-auto ManifoldWrapper::MinusJacobian(const Scalar* x, Scalar* jacobian) const -> bool {
+auto ManifoldWrapper::MinusJacobian(const double* x, double* jacobian) const -> bool {
   return manifold_->MinusJacobian(x, jacobian);
 }
 

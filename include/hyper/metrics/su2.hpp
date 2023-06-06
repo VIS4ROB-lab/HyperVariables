@@ -11,10 +11,10 @@ namespace hyper::metrics {
 class SU2Metric final : public Metric {
  public:
   // Definitions.
-  using Input = variables::SU2<Scalar>;
-  using Output = variables::Tangent<variables::SU2<Scalar>>;
+  using Input = variables::SU2;
+  using Output = variables::Tangent<variables::SU2>;
   using InputTangent = variables::Tangent<Input>;
-  using OutputTangent = variables::Tangent<Output>;
+  using OutputTangent = variables::Tangent<Input>;
   using Jacobian = hyper::JacobianNM<OutputTangent, InputTangent>;
 
   /// Evaluates the distance between elements.

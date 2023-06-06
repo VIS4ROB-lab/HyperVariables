@@ -11,10 +11,10 @@
 namespace hyper::ceres::manifolds {
 
 template <>
-class Manifold<variables::SE3<double>> final : public ManifoldWrapper {
+class Manifold<variables::SE3> final : public ManifoldWrapper {
  public:
   // Definitions.
-  using SE3 = variables::SE3<Scalar>;
+  using SE3 = variables::SE3;
 
   /// Constructor from constancy flags.
   /// \param rotation_constant Rotation constancy flag.

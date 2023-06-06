@@ -13,7 +13,7 @@ namespace hyper::ceres::manifolds {
 
 class ManifoldWrapper;
 
-template <typename>
+template <typename TGroup>
 class Manifold;
 
 }  // namespace hyper::ceres::manifolds

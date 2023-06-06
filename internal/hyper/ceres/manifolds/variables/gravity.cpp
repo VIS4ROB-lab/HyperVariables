@@ -7,7 +7,7 @@
 
 namespace hyper::ceres::manifolds {
 
-Manifold<variables::Gravity<double>>::Manifold(const bool constant) : Manifold<Bearing>{constant} {}
+Manifold<variables::Gravity>::Manifold(const bool constant) : Manifold<Bearing>{constant} {}
 
 }  // namespace hyper::ceres::manifolds
 

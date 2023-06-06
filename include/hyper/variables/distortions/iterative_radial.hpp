@@ -16,7 +16,6 @@ class IterativeRadialDistortionBase : public DistortionBase<TDerived> {
   using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
   using Base::Base;
 
-  using Pixel = variables::Pixel<Scalar>;
   using PixelJacobian = hyper::JacobianNM<Pixel>;
   using PlainDistortion = typename Traits<TDerived>::PlainDistortion;
 
@@ -76,8 +75,8 @@ class IterativeRadialDistortionBase : public DistortionBase<TDerived> {
   auto InverseIterativePixelDistortionJacobian(const Pixel& p, const Scalar& rho2, const Scalar& alpha) const -> Pixel;
 };
 
-template <typename TScalar, int TOrder>
-class IterativeRadialDistortion final : public IterativeRadialDistortionBase<IterativeRadialDistortion<TScalar, TOrder>> {
+template <int TOrder>
+class IterativeRadialDistortion final : public IterativeRadialDistortionBase<IterativeRadialDistortion<TOrder>> {
  public:
   using Base = IterativeRadialDistortionBase<IterativeRadialDistortion>;
   using Base::Base;
@@ -205,7 +204,7 @@ auto IterativeRadialDistortionBase<TDerived>::InverseIterativePixelPixelJacobian
   const auto a = Scalar{1} + alpha * rho2;
   const auto b = Scalar{1} / (a * a);
   const auto c = alpha * (y2 - x2);
-  const auto d = b * Scalar{-2} * alpha * xy;
+  const auto d = b* Scalar{-2} * alpha * xy;
 
   PixelJacobian J;
   J(0, 0) = b * (Scalar{1} + c);

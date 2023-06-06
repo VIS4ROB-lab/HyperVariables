@@ -20,7 +20,7 @@ class RnBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDer
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX>;
   using Base::Base;
 
-  using Tangent = variables::Tangent<Rn<Scalar, (int)Base::SizeAtCompileTime>>;
+  using Tangent = variables::Tangent<Rn<(int)Base::SizeAtCompileTime>>;
 
   // Constants.
   static constexpr auto kNumParameters = (int)Base::SizeAtCompileTime;
@@ -29,7 +29,7 @@ class RnBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDer
 
   /// Map as Eigen vector.
   /// \return Vector.
-  auto asVector() const -> Eigen::Ref<const VectorX> final { return *this; }
+  [[nodiscard]] auto asVector() const -> Eigen::Ref<const VectorX> final { return *this; }
 
   /// Map as Eigen vector.
   /// \return Vector.
@@ -46,8 +46,8 @@ class RnBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDer
   /// Group inverse.
   /// \param J_this Jacobian w.r.t. this.
   /// \return Group element.
-  auto gInv(Scalar* J_this = nullptr) const -> Rn<Scalar, kNumParameters> {
-    Rn<Scalar, kNumParameters> inv = Scalar{-1} * *this;
+  auto gInv(Scalar* J_this = nullptr) const -> Rn<kNumParameters> {
+    Rn<kNumParameters> inv = Scalar{-1} * *this;
 
     if (!J_this) {
       return inv;
@@ -64,8 +64,8 @@ class RnBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDer
   /// \param J_other Jacobian w.r.t. other.
   /// \return Group element.
   template <typename TOther_>
-  auto gPlus(const RnBase<TOther_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr) const -> Rn<Scalar, kNumParameters> {
-    Rn<Scalar, kNumParameters> plus = *this + other;
+  auto gPlus(const RnBase<TOther_>& other, Scalar* J_this = nullptr, Scalar* J_other = nullptr) const -> Rn<kNumParameters> {
+    Rn<kNumParameters> plus = *this + other;
 
     if (!J_this && !J_other) {
       return plus;
@@ -94,7 +94,7 @@ class RnBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDer
   /// \param other Other element.
   /// \return Element.
   template <typename TOther_>
-  auto tPlus(const RnTangentBase<TOther_>& other) const -> Rn<Scalar, kNumParameters> {
+  auto tPlus(const RnTangentBase<TOther_>& other) const -> Rn<kNumParameters> {
     return *this + other;
   }
 
@@ -116,14 +116,16 @@ class RnBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDer
   auto tMinusJacobian() const -> Jacobian<Traits<Tangent>::kNumParameters, kNumParameters> { return Jacobian<Traits<Tangent>::kNumParameters, kNumParameters>::Identity(); }
 };
 
-template <typename TScalar, int TOrder>
-class Rn final : public RnBase<Rn<TScalar, TOrder>> {
+template <int TOrder>
+class Rn final : public RnBase<Rn<TOrder>> {
  public:
-  using Base = RnBase<Rn<TScalar, TOrder>>;
+  using Base = RnBase<Rn<TOrder>>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Rn)
 };
+
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::Rn, int)
 
 }  // namespace hyper::variables
 
@@ -143,9 +145,9 @@ class RnTangentBase : public RnBase<TDerived> {
   /// Group exponential (Rn tangent -> Rn).
   /// \param J_this Jacobian w.r.t. this.
   /// \return Group element.
-  auto gExp(Scalar* J_this = nullptr) const -> Rn<Scalar, Base::kNumParameters> {
+  auto gExp(Scalar* J_this = nullptr) const -> Rn<Base::kNumParameters> {
     if (J_this) {
-      Eigen::Map<JacobianNM<Rn<Scalar, Base::kNumParameters>>>{J_this}.setIdentity();
+      Eigen::Map<JacobianNM<Rn<Base::kNumParameters>>>{J_this}.setIdentity();
     }
     return *this;
   }

@@ -18,9 +18,6 @@ class IntrinsicsTests : public testing::Test {
   static constexpr auto kSensorHeight_2 = 480 / 2;
 
   // Definitions.
-  using Scalar = double;
-  using Pixel = variables::Pixel<Scalar>;
-  using Intrinsics = variables::Intrinsics<Scalar>;
   using PixelJacobian = hyper::JacobianNM<Pixel>;
   using IntrinsicsJacobian = hyper::JacobianNM<Pixel, Intrinsics>;
 

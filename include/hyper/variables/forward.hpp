@@ -5,7 +5,7 @@
 
 #include <Eigen/Core>
 
-#include "hyper/definitions.hpp"
+#include "hyper/matrix.hpp"
 #include "hyper/variables/macros.hpp"
 
 namespace hyper {}
@@ -22,131 +22,87 @@ class ConstVariable;
 template <typename>
 class Stamped;
 
-template <typename, int TOrder>
+template <int TOrder>
 class Rn;
 
-template <typename TScalar>
-using R1 = Rn<TScalar, 1>;
+using R1 = Rn<1>;
+using R2 = Rn<2>;
+using R3 = Rn<3>;
+using R4 = Rn<4>;
+using R5 = Rn<5>;
+using R6 = Rn<6>;
+using Stamp = R1;
+using Pixel = R2;
 
-template <typename TScalar>
-using R2 = Rn<TScalar, 2>;
-
-template <typename TScalar>
-using R3 = Rn<TScalar, 3>;
-
-template <typename TScalar>
-using R4 = Rn<TScalar, 4>;
-
-template <typename TScalar>
-using R5 = Rn<TScalar, 5>;
-
-template <typename TScalar>
-using R6 = Rn<TScalar, 6>;
-
-template <typename TScalar>
-using Stamp = R1<TScalar>;
-
-template <typename TScalar>
-using Pixel = R2<TScalar>;
-
-template <typename TScalar, int TNumParameters>
-struct Traits<Rn<TScalar, TNumParameters>> {
+template <int TOrder>
+struct Traits<Rn<TOrder>> {
   // Constants.
-  static constexpr auto kNumParameters = TNumParameters;
+  static constexpr auto kNumParameters = TOrder;
 
   // Definitions.
-  using Base = Eigen::Matrix<TScalar, TNumParameters, 1>;
+  using Base = Matrix<TOrder, 1>;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::Rn, int)
-
-template <typename>
 class PitchYaw;
 
-template <typename TScalar>
-struct Traits<PitchYaw<TScalar>> : public Traits<R2<TScalar>> {};
+template <>
+struct Traits<PitchYaw> : public Traits<R2> {};
 
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::PitchYaw)
-
-template <typename>
 class Bearing;
 
-template <typename TScalar>
-struct Traits<Bearing<TScalar>> : public Traits<R3<TScalar>> {};
+template <>
+struct Traits<Bearing> : public Traits<R3> {};
 
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Bearing)
-
-template <typename>
 class Gravity;
 
-template <typename TScalar>
-struct Traits<Gravity<TScalar>> : public Traits<R3<TScalar>> {};
+template <>
+struct Traits<Gravity> : public Traits<R3> {};
 
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Gravity)
-
-template <typename>
 class Intrinsics;
 
-template <typename TScalar>
-struct Traits<Intrinsics<TScalar>> : public Traits<R4<TScalar>> {};
+template <>
+struct Traits<Intrinsics> : public Traits<R4> {};
 
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Intrinsics)
-
-template <typename, int>
+template <int TOrder>
 class AxesOffset;
 
-template <typename TScalar, int TOrder>
-struct Traits<AxesOffset<TScalar, TOrder>> : public Traits<Rn<TScalar, TOrder * TOrder>> {
+template <int TOrder>
+struct Traits<AxesOffset<TOrder>> : public Traits<Rn<TOrder * TOrder>> {
   static constexpr auto kOrder = TOrder;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::AxesOffset, int)
-
-template <typename, int>
+template <int TOrder>
 class OrthonormalityAlignment;
 
-template <typename TScalar, int TOrder>
-struct Traits<OrthonormalityAlignment<TScalar, TOrder>> : public Traits<Rn<TScalar, TOrder + ((TOrder - 1) * TOrder) / 2>> {
+template <int TOrder>
+struct Traits<OrthonormalityAlignment<TOrder>> : public Traits<Rn<TOrder + ((TOrder - 1) * TOrder) / 2>> {
   static constexpr auto kOrder = TOrder;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::OrthonormalityAlignment, int)
-
-template <typename, int>
+template <int TOrder>
 class Sensitivity;
 
-template <typename TScalar, int TOrder>
-struct Traits<Sensitivity<TScalar, TOrder>> : public Traits<Rn<TScalar, TOrder * TOrder>> {
+template <int TOrder>
+struct Traits<Sensitivity<TOrder>> : public Traits<Rn<TOrder * TOrder>> {
   static constexpr auto kOrder = TOrder;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::Sensitivity, int)
-
-template <typename>
 class Quaternion;
 
-template <typename TScalar>
-struct Traits<Quaternion<TScalar>> : public Traits<R4<TScalar>> {
-  using Base = Eigen::Quaternion<TScalar>;
+template <>
+struct Traits<Quaternion> : public Traits<R4> {
+  using Base = Eigen::Quaternion<Scalar>;
 };
 
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Quaternion)
-
-template <typename>
 class SU2;
 
-template <typename TScalar>
-struct Traits<SU2<TScalar>> : Traits<Quaternion<TScalar>> {};
+template <>
+struct Traits<SU2> : Traits<Quaternion> {};
 
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::SU2)
-
-template <typename>
 class SE3;
 
-template <typename TScalar>
-struct Traits<SE3<TScalar>> : Traits<Rn<TScalar, SU2<TScalar>::kNumParameters + 3>> {};
-
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::SE3)
+template <>
+struct Traits<SE3> : Traits<Rn<Traits<SU2>::kNumParameters + Traits<R3>::kNumParameters>> {};
 
 template <typename>
 class Tangent;
@@ -164,18 +120,14 @@ struct Traits<Eigen::Map<const Tangent<TDerived>, TMapOptions>> : Traits<Tangent
   using Base = typename Traits<Eigen::Map<const TDerived, TMapOptions>>::Base;
 };
 
-template <typename TScalar>
-struct Traits<Tangent<SU2<TScalar>>> : Traits<R3<TScalar>> {};
+template <>
+struct Traits<Tangent<SU2>> : Traits<R3> {};
 
-HYPER_DECLARE_TANGENT_MAP_TRAITS(hyper::variables::SU2)
-
-template <typename TScalar>
-struct Traits<Tangent<SE3<TScalar>>> : Traits<R6<TScalar>> {};
-
-HYPER_DECLARE_TANGENT_MAP_TRAITS(hyper::variables::SE3)
+template <>
+struct Traits<Tangent<SE3>> : Traits<R6> {};
 
 template <typename TVariable>
-struct Traits<Stamped<TVariable>> : public Traits<Rn<typename TVariable::Scalar, Stamp<typename TVariable::Scalar>::kNumParameters + TVariable::kNumParameters>> {
+struct Traits<Stamped<TVariable>> : public Traits<Rn<TVariable::kNumParameters + Traits<R1>::kNumParameters>> {
   using Variable = TVariable;
 };
 
@@ -188,9 +140,6 @@ template <typename TVariable, int TMapOptions>
 struct Traits<Eigen::Map<const Stamped<TVariable>, TMapOptions>> final : public Traits<Stamped<TVariable>> {
   using Base = Eigen::Map<const typename Traits<Stamped<TVariable>>::Base, TMapOptions>;
 };
-
-template <typename TDerived>
-using DerivedScalar_t = typename Traits<TDerived>::Base::Scalar;
 
 template <typename TDerived>
 inline constexpr bool VariableIsLValue_v = (!bool(std::is_const_v<TDerived>)) && bool(Traits<TDerived>::Base::Flags & Eigen::LvalueBit);

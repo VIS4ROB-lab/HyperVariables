@@ -34,13 +34,13 @@ auto CheckMetric() -> void {
 
 TEST(MetricsTests, Angular) {
   for (auto k = 0; k < kItr; ++k) {
-    CheckMetric<AngularMetric<variables::R3<double>>>();
+    CheckMetric<AngularMetric<variables::R3>>();
   }
 }
 
 TEST(MetricsTests, Euclidean) {
   for (auto k = 0; k < kItr; ++k) {
-    CheckMetric<EuclideanMetric<variables::R3<double>>>();
+    CheckMetric<EuclideanMetric<variables::R3>>();
   }
 }
 

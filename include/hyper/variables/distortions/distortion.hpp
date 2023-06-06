@@ -34,10 +34,7 @@ struct NumDistortionTraits<double> {
 namespace distortion {
 
 template <typename TScalar, typename TDistortion>
-auto Undistort(const TDistortion* distortion, const Eigen::Ref<const Pixel<TScalar>>& p, TScalar* J_p, TScalar* J_d, const TScalar* parameters) -> Pixel<TScalar> {
-  // Definitions.
-  using Pixel = variables::Pixel<TScalar>;
-
+auto Undistort(const TDistortion* distortion, const Eigen::Ref<const Pixel>& p, TScalar* J_p, TScalar* J_d, const TScalar* parameters) -> Pixel {
   Pixel output = p;
   JacobianNM<Pixel> J_p_p, J_p_p_i;
 
@@ -71,17 +68,12 @@ auto Undistort(const TDistortion* distortion, const Eigen::Ref<const Pixel<TScal
 
 }  // namespace distortion
 
-template <typename TScalar>
 class ConstDistortion : public ConstVariable {
  public:
-  // Definitions.
-  using Scalar = TScalar;
-  using Pixel = variables::Pixel<TScalar>;
-
   /// Perturbed distortion.
   /// \param scale Perturbation scale.
   /// \return Perturbed distortion.
-  virtual auto perturbed(const Scalar& scale) const -> VectorX = 0;
+  [[nodiscard]] virtual auto perturbed(const Scalar& scale) const -> VectorX = 0;
 
   /// Distorts a pixel.
   /// \param p Pixel to distort.
@@ -102,17 +94,12 @@ class ConstDistortion : public ConstVariable {
   }
 };
 
-template <typename TScalar>
 class Distortion : public Variable {
  public:
-  // Definitions.
-  using Scalar = TScalar;
-  using Pixel = variables::Pixel<TScalar>;
-
   /// Perturbed distortion.
   /// \param scale Perturbation scale.
   /// \return Perturbed distortion.
-  virtual auto perturbed(const Scalar& scale) const -> VectorX = 0;
+  [[nodiscard]] virtual auto perturbed(const Scalar& scale) const -> VectorX = 0;
 
   /// Distorts a pixel.
   /// \param p Pixel to distort.
@@ -134,7 +121,7 @@ class Distortion : public Variable {
 };
 
 template <typename TDerived>
-class DistortionBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, Distortion<DerivedScalar_t<TDerived>>, ConstDistortion<DerivedScalar_t<TDerived>>> {
+class DistortionBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, Distortion, ConstDistortion> {
  public:
   // Definitions.
   using Base = typename Traits<TDerived>::Base;

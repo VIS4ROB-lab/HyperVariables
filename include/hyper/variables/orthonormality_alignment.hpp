@@ -31,8 +31,8 @@ class OrthonormalityAlignmentBase : public RnBase<TDerived> {
 
   /// Creates and identity orthonormality alignment.
   /// \return Identity orthonormality alignment.
-  static auto Identity() -> OrthonormalityAlignment<Scalar, kOrder> {
-    OrthonormalityAlignment<Scalar, kOrder> orthonormality_alignment;
+  static auto Identity() -> OrthonormalityAlignment<kOrder> {
+    OrthonormalityAlignment<kOrder> orthonormality_alignment;
     return orthonormality_alignment.setIdentity();
   }
 
@@ -131,14 +131,16 @@ class OrthonormalityAlignmentBase : public RnBase<TDerived> {
   }
 };
 
-template <typename TScalar, int TOrder>
-class OrthonormalityAlignment final : public OrthonormalityAlignmentBase<OrthonormalityAlignment<TScalar, TOrder>> {
+template <int TOrder>
+class OrthonormalityAlignment final : public OrthonormalityAlignmentBase<OrthonormalityAlignment<TOrder>> {
  public:
-  using Base = OrthonormalityAlignmentBase<OrthonormalityAlignment<TScalar, TOrder>>;
+  using Base = OrthonormalityAlignmentBase<OrthonormalityAlignment<TOrder>>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(OrthonormalityAlignment)
 };
+
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::OrthonormalityAlignment, int)
 
 }  // namespace hyper::variables
 

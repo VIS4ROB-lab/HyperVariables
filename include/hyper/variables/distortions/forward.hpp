@@ -7,41 +7,39 @@
 
 namespace hyper::variables {
 
-template <typename TDerived>
 class Distortion;
 
-template <typename TDerived>
 class ConstDistortion;
 
-template <typename, int>
+template <int TOrder>
 class EquidistantDistortion;
 
-template <typename TScalar, int TOrder>
-struct Traits<EquidistantDistortion<TScalar, TOrder>> : public Traits<Rn<TScalar, TOrder>> {
+template <int TOrder>
+struct Traits<EquidistantDistortion<TOrder>> : public Traits<Rn<TOrder>> {
   static constexpr auto kOrder = TOrder;
-  using PlainDistortion = EquidistantDistortion<TScalar, TOrder>;
+  using PlainDistortion = EquidistantDistortion<TOrder>;
 };
 
 HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::EquidistantDistortion, int)
 
-template <typename, int>
+template <int TOrder>
 class RadialTangentialDistortion;
 
-template <typename TScalar, int TOrder>
-struct Traits<RadialTangentialDistortion<TScalar, TOrder>> : public Traits<Rn<TScalar, TOrder + 2>> {
+template <int TOrder>
+struct Traits<RadialTangentialDistortion<TOrder>> : public Traits<Rn<TOrder + 2>> {
   static constexpr auto kOrder = TOrder;
-  using PlainDistortion = RadialTangentialDistortion<TScalar, TOrder>;
+  using PlainDistortion = RadialTangentialDistortion<TOrder>;
 };
 
 HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::RadialTangentialDistortion, int)
 
-template <typename, int>
+template <int TOrder>
 class IterativeRadialDistortion;
 
-template <typename TScalar, int TOrder>
-struct Traits<IterativeRadialDistortion<TScalar, TOrder>> : public Traits<Rn<TScalar, TOrder>> {
+template <int TOrder>
+struct Traits<IterativeRadialDistortion<TOrder>> : public Traits<Rn<TOrder>> {
   static constexpr auto kOrder = TOrder;
-  using PlainDistortion = IterativeRadialDistortion<TScalar, TOrder>;
+  using PlainDistortion = IterativeRadialDistortion<TOrder>;
 };
 
 HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::IterativeRadialDistortion, int)

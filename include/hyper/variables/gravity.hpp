@@ -27,10 +27,9 @@ class GravityBase : public RnBase<TDerived> {
   [[nodiscard]] auto checkNorm() const -> bool { return Eigen::internal::isApprox(this->norm(), kNorm); }
 };
 
-template <typename TScalar>
-class Gravity final : public GravityBase<Gravity<TScalar>> {
+class Gravity final : public GravityBase<Gravity> {
  public:
-  using Base = GravityBase<Gravity<TScalar>>;
+  using Base = GravityBase<Gravity>;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Gravity)
 
@@ -46,6 +45,8 @@ class Gravity final : public GravityBase<Gravity<TScalar>> {
     DCHECK(this->checkNorm());
   }
 };
+
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Gravity)
 
 }  // namespace hyper::variables
 

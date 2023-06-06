@@ -1,8 +1,14 @@
-//
-// Created by mcemzi on 21.04.23.
-//
+/// This file is subject to the terms and conditions defined in
+/// the 'LICENSE' file, which is part of this repository.
 
-#ifndef HYPERVARIABLES_AXIS_OFFSETS_HPP
-#define HYPERVARIABLES_AXIS_OFFSETS_HPP
+#pragma once
 
-#endif  //HYPERVARIABLES_AXIS_OFFSETS_HPP
+#include <glog/logging.h>
+
+#include "hyper/variables/rn.hpp"
+
+namespace hyper::variables {
+
+HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::AxesOffset, int)
+
+}

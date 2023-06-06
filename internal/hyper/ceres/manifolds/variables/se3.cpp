@@ -11,7 +11,7 @@
 
 namespace hyper::ceres::manifolds {
 
-auto Manifold<variables::SE3<double>>::CreateManifold(const bool rotation_constant, const bool translation_constant) -> std::unique_ptr<::ceres::Manifold> {
+auto Manifold<variables::SE3>::CreateManifold(const bool rotation_constant, const bool translation_constant) -> std::unique_ptr<::ceres::Manifold> {
   using RotationManifold = Manifold<SE3::Rotation>;
   using TranslationManifold = Manifold<SE3::Translation>;
   using ProductManifold = ::ceres::ProductManifold<RotationManifold, TranslationManifold>;

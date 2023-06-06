@@ -12,29 +12,25 @@ class QuaternionTests : public testing::Test {
   static constexpr auto kItr = 10;
   static constexpr auto kTol = 1e-7;
 
-  // Definitions.
-  using Scalar = double;
-  using Group = Quaternion<Scalar>;
-
-  static auto Random() -> Group { return Group{Eigen::internal::random<Scalar>(0.5, 1.5) * Group::UnitRandom().coeffs()}; }
+  static auto Random() -> Quaternion { return Quaternion{Eigen::internal::random<Scalar>(0.5, 1.5) * Quaternion::UnitRandom().coeffs()}; }
 
   [[nodiscard]] auto checkGroupExponentials() const -> bool {
-    const auto qle = group_.glog().gexp();
-    const auto qel = group_.gexp().glog();
-    return qle.isApprox(group_, kTol) && qel.isApprox(group_, kTol);
+    const auto qle = quaternion_.glog().gexp();
+    const auto qel = quaternion_.gexp().glog();
+    return qle.isApprox(quaternion_, kTol) && qel.isApprox(quaternion_, kTol);
   }
 
-  Group group_;
+  Quaternion quaternion_;
 };
 
 TEST_F(QuaternionTests, GroupExponentials) {
   for (auto i = 0; i < kItr; ++i) {
-    group_ = Random();
+    quaternion_ = Random();
     EXPECT_TRUE(checkGroupExponentials());
   }
 }
 
-using TestTypes = ::testing::Types<SU2<double>, SE3<double>>;
+using TestTypes = ::testing::Types<SU2, SE3>;
 TYPED_TEST_SUITE(LieGroupTests, TestTypes);
 
 TYPED_TEST(LieGroupTests, GroupOperators) {

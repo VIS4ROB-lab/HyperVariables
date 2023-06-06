@@ -5,17 +5,17 @@
 
 #include <Eigen/Dense>
 
+#include "hyper/variables/rn.hpp"
+
 namespace hyper::tests {
 
 TEST(MatrixBasePluginTests, HatVeeDuality) {
   constexpr auto kTol = 1e-12;
 
-  using Scalar = double;
-  using Vector = Eigen::Matrix<Scalar, 3, 1>;
-
-  const Vector u = Vector::Random();
-  const Vector v = Vector::Random();
-  const Vector uxv = u.cross(v);
+  using R3 = variables::R3;
+  const R3 u = R3::Random();
+  const R3 v = R3::Random();
+  const R3 uxv = u.cross(v);
 
   const auto ux = u.hat();
   const auto vx = v.hat();

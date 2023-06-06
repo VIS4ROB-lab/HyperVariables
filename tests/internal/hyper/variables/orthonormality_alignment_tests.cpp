@@ -16,8 +16,7 @@ class OrthonormalityAlignmentTests : public testing::Test {
   static constexpr auto kTol = 1e-8;
 
   // Definitions.
-  using Scalar = double;
-  using Alignment = variables::OrthonormalityAlignment<Scalar, 3>;
+  using Alignment = variables::OrthonormalityAlignment<3>;
 
   using Input = Alignment::Input;
   using InputJacobian = Alignment::InputJacobian;

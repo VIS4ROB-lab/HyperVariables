@@ -16,8 +16,7 @@ class SensitivityTests : public testing::Test {
   static constexpr auto kTol = 1e-8;
 
   // Definitions.
-  using Scalar = double;
-  using Sensitivity = variables::Sensitivity<Scalar, 3>;
+  using Sensitivity = variables::Sensitivity<3>;
 
   using Input = Sensitivity::Input;
   using InputJacobian = Sensitivity::InputJacobian;

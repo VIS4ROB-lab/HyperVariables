@@ -9,9 +9,7 @@
 
 namespace hyper::variables::tests {
 
-using Scalar = double;
-
-class DistortionTests : public testing::TestWithParam<Distortion<Scalar>*> {
+class DistortionTests : public testing::TestWithParam<Distortion*> {
  public:
   // Constants.
   static constexpr auto kMaxPerturbation = 0.005;
@@ -21,9 +19,7 @@ class DistortionTests : public testing::TestWithParam<Distortion<Scalar>*> {
   static constexpr auto kTol = 1e-5;
 
   // Definitions.
-  using Pixel = variables::Pixel<Scalar>;
   using PixelJacobian = hyper::JacobianNM<Pixel>;
-  using Distortion = variables::Distortion<Scalar>;
   using DistortionJacobian = hyper::JacobianNX<Pixel>;
 
   DistortionTests() : distortion_{nullptr} {}
@@ -191,8 +187,7 @@ TEST_P(DistortionTests, InverseParameterJacobian) {
 }
 
 INSTANTIATE_TEST_SUITE_P(, DistortionTests,
-                         testing::Values(new variables::EquidistantDistortion<Scalar, 5>(), new variables::RadialTangentialDistortion<Scalar, 2>(),
-                                         new variables::RadialTangentialDistortion<Scalar, 4>(), new variables::IterativeRadialDistortion<Scalar, 2>(),
-                                         new variables::IterativeRadialDistortion<Scalar, 4>()));
+                         testing::Values(new variables::EquidistantDistortion<5>(), new variables::RadialTangentialDistortion<2>(), new variables::RadialTangentialDistortion<4>(),
+                                         new variables::IterativeRadialDistortion<2>(), new variables::IterativeRadialDistortion<4>()));
 
 }  // namespace hyper::variables::tests

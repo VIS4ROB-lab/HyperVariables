@@ -26,8 +26,6 @@ class IntrinsicsBase : public RnBase<TDerived> {
   static constexpr auto kFocalOffsetY = kFocalOffset + 1;
   static constexpr auto kNumFocalParameters = 2;
 
-  using Pixel = variables::Pixel<Scalar>;
-
   using Input = Pixel;
   using InputJacobian = hyper::JacobianNM<Pixel>;
   using ParameterJacobian = hyper::JacobianNM<Pixel, Base>;
@@ -148,14 +146,15 @@ class IntrinsicsBase : public RnBase<TDerived> {
   }
 };
 
-template <typename TScalar>
-class Intrinsics final : public IntrinsicsBase<Intrinsics<TScalar>> {
+class Intrinsics final : public IntrinsicsBase<Intrinsics> {
  public:
   using Base = IntrinsicsBase<Intrinsics>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Intrinsics)
 };
+
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Intrinsics)
 
 }  // namespace hyper::variables
 

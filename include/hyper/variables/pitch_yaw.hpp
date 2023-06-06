@@ -41,14 +41,15 @@ class PitchYawBase : public RnBase<TDerived> {
   auto yaw() -> ScalarWithConstIfNotLvalue& { return this->data()[kYawOffset]; }
 };
 
-template <typename TScalar>
-class PitchYaw final : public PitchYawBase<PitchYaw<TScalar>> {
+class PitchYaw final : public PitchYawBase<PitchYaw> {
  public:
-  using Base = PitchYawBase<PitchYaw<TScalar>>;
+  using Base = PitchYawBase<PitchYaw>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(PitchYaw)
 };
+
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::PitchYaw)
 
 }  // namespace hyper::variables
 

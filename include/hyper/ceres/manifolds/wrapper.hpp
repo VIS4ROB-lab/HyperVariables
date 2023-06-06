@@ -20,8 +20,6 @@ namespace hyper::ceres::manifolds {
 /// functions in this class.
 class ManifoldWrapper : public ::ceres::Manifold {
  public:
-  using Scalar = double;  // Ceres scalar.
-
   /// Creates a constancy mask (i.e. all parameters are held constant).
   /// \param num_parameters Number of parameters.
   /// \return Constancy mask.
@@ -31,15 +29,15 @@ class ManifoldWrapper : public ::ceres::Manifold {
 
   [[nodiscard]] auto TangentSize() const -> int final;
 
-  auto Plus(const Scalar* x, const Scalar* delta, Scalar* x_plus_delta) const -> bool final;
+  auto Plus(const double* x, const double* delta, double* x_plus_delta) const -> bool final;
 
-  auto PlusJacobian(const Scalar* x, Scalar* jacobian) const -> bool final;
+  auto PlusJacobian(const double* x, double* jacobian) const -> bool final;
 
-  auto RightMultiplyByPlusJacobian(const Scalar* x, int num_rows, const Scalar* ambient_matrix, Scalar* tangent_matrix) const -> bool final;
+  auto RightMultiplyByPlusJacobian(const double* x, int num_rows, const double* ambient_matrix, double* tangent_matrix) const -> bool final;
 
-  auto Minus(const Scalar* y, const Scalar* x, Scalar* y_minus_x) const -> bool final;
+  auto Minus(const double* y, const double* x, double* y_minus_x) const -> bool final;
 
-  auto MinusJacobian(const Scalar* x, Scalar* jacobian) const -> bool final;
+  auto MinusJacobian(const double* x, double* jacobian) const -> bool final;
 
  protected:
   /// Protected constructor from input manifold.

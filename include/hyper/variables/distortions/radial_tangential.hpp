@@ -16,7 +16,6 @@ class RadialTangentialDistortionBase : public DistortionBase<TDerived> {
   using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
   using Base::Base;
 
-  using Pixel = variables::Pixel<Scalar>;
   using PixelJacobian = hyper::JacobianNM<Pixel>;
   using PlainDistortion = typename Traits<TDerived>::PlainDistortion;
 
@@ -84,10 +83,10 @@ class RadialTangentialDistortionBase : public DistortionBase<TDerived> {
   auto distort(const Eigen::Ref<const Pixel>& p, Scalar* J_p, Scalar* J_d, const Scalar* parameters) const -> Pixel final;
 };
 
-template <typename TScalar, int TOrder>
-class RadialTangentialDistortion final : public RadialTangentialDistortionBase<RadialTangentialDistortion<TScalar, TOrder>> {
+template <int TOrder>
+class RadialTangentialDistortion final : public RadialTangentialDistortionBase<RadialTangentialDistortion<TOrder>> {
  public:
-  using Base = RadialTangentialDistortionBase<RadialTangentialDistortion<TScalar, TOrder>>;
+  using Base = RadialTangentialDistortionBase<RadialTangentialDistortion>;
   using Base::Base;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(RadialTangentialDistortion)

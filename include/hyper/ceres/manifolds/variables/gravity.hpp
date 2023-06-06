@@ -11,11 +11,11 @@
 namespace hyper::ceres::manifolds {
 
 template <>
-class Manifold<variables::Gravity<double>> final : public Manifold<variables::Bearing<double>> {
+class Manifold<variables::Gravity> final : public Manifold<variables::Bearing> {
  public:
   // Definitions.
-  using Bearing = variables::Bearing<Scalar>;
-  using Gravity = variables::Gravity<Scalar>;
+  using Bearing = variables::Bearing;
+  using Gravity = variables::Gravity;
 
   /// Constructor from constancy flag.
   /// \param constant Constancy flag.

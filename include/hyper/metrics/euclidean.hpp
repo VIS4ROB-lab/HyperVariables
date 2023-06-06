@@ -9,11 +9,11 @@
 namespace hyper::metrics {
 
 template <int N>
-class EuclideanMetric<variables::Rn<Scalar, N>> final : public Metric {
+class EuclideanMetric<variables::Rn<N>> final : public Metric {
  public:
   // Definitions.
-  using Input = variables::Rn<Scalar, N>;
-  using Output = variables::Rn<Scalar, N>;
+  using Input = variables::Rn<N>;
+  using Output = variables::Rn<N>;
   using InputTangent = variables::Tangent<Input>;
   using OutputTangent = variables::Tangent<Output>;
   using Jacobian = hyper::JacobianNM<OutputTangent, InputTangent>;

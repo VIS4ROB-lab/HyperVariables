@@ -15,8 +15,7 @@ template <typename TGroup>
 class GroupManifoldImpl final : public ::ceres::Manifold {
  public:
   // Definitions.
-  using Scalar = double;
-  using Group = variables::SU2<Scalar>;
+  using Group = variables::SU2;
   using Tangent = variables::Tangent<Group>;
 
   // See Ceres documentation.
@@ -26,7 +25,7 @@ class GroupManifoldImpl final : public ::ceres::Manifold {
   [[nodiscard]] auto TangentSize() const -> int final { return Tangent::kNumParameters; }
 
   // See Ceres documentation.
-  auto Plus(const Scalar* x, const Scalar* delta, Scalar* x_plus_delta) const -> bool final {
+  auto Plus(const double* x, const double* delta, double* x_plus_delta) const -> bool final {
     const auto x_ = Eigen::Map<const Group>{x};
     const auto delta_ = Eigen::Map<const Tangent>{delta};
     Eigen::Map<Group>{x_plus_delta} = x_.tPlus(delta_);
@@ -34,14 +33,14 @@ class GroupManifoldImpl final : public ::ceres::Manifold {
   }
 
   // See Ceres documentation.
-  auto PlusJacobian(const Scalar* x, Scalar* jacobian) const -> bool final {
+  auto PlusJacobian(const double* x, double* jacobian) const -> bool final {
     const auto x_ = Eigen::Map<const Group>{x};
-    Eigen::Map<Eigen::Matrix<Scalar, Group::kNumParameters, Tangent::kNumParameters, Eigen::RowMajor>>{jacobian} = x_.tPlusJacobian();
+    Eigen::Map<Eigen::Matrix<double, Group::kNumParameters, Tangent::kNumParameters, Eigen::RowMajor>>{jacobian} = x_.tPlusJacobian();
     return true;
   }
 
   // See Ceres documentation.
-  auto Minus(const Scalar* y, const Scalar* x, Scalar* y_minus_x) const -> bool final {
+  auto Minus(const double* y, const double* x, double* y_minus_x) const -> bool final {
     const auto y_ = Eigen::Map<const Group>{y};
     const auto x_ = Eigen::Map<const Group>{x};
     Eigen::Map<Tangent>{y_minus_x} = y_.tMinus(x_);
@@ -49,18 +48,18 @@ class GroupManifoldImpl final : public ::ceres::Manifold {
   }
 
   // See Ceres documentation.
-  auto MinusJacobian(const Scalar* x, Scalar* jacobian) const -> bool final {
+  auto MinusJacobian(const double* x, double* jacobian) const -> bool final {
     const auto x_ = Eigen::Map<const Group>{x};
-    Eigen::Map<Eigen::Matrix<Scalar, Tangent::kNumParameters, Group::kNumParameters, Eigen::RowMajor>>{jacobian} = x_.tMinusJacobian();
+    Eigen::Map<Eigen::Matrix<double, Tangent::kNumParameters, Group::kNumParameters, Eigen::RowMajor>>{jacobian} = x_.tMinusJacobian();
     return true;
   }
 };
 
 }  // namespace internal
 
-auto Manifold<variables::SU2<double>>::CreateManifold(const bool constant) -> std::unique_ptr<::ceres::Manifold> {
+auto Manifold<variables::SU2>::CreateManifold(const bool constant) -> std::unique_ptr<::ceres::Manifold> {
   if (constant) {
-    return std::make_unique<Manifold<variables::Rn<Scalar, SU2::kNumParameters>>>(true);
+    return std::make_unique<Manifold<variables::Rn<SU2::kNumParameters>>>(true);
   } else {
     return std::make_unique<internal::GroupManifoldImpl<SU2>>();
   }

@@ -71,10 +71,9 @@ class BearingBase : public RnBase<TDerived> {
   }
 };
 
-template <typename TScalar>
-class Bearing final : public BearingBase<Bearing<TScalar>> {
+class Bearing final : public BearingBase<Bearing> {
  public:
-  using Base = BearingBase<Bearing<TScalar>>;
+  using Base = BearingBase<Bearing>;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Bearing)
 
@@ -90,6 +89,8 @@ class Bearing final : public BearingBase<Bearing<TScalar>> {
     DCHECK(this->checkNorm());
   }
 };
+
+HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Bearing)
 
 }  // namespace hyper::variables
 
