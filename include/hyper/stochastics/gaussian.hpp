@@ -15,10 +15,10 @@ namespace hyper::stochastics {
 
 namespace gaussian {
 
-template <typename TScalar, int TSize, typename TDerived>
-auto invertPSDMatrix(const Eigen::MatrixBase<TDerived>& matrix, const bool full_rank = true) -> Eigen::Matrix<TScalar, TSize, TSize> {
-  using Matrix = Eigen::Matrix<TScalar, TSize, TSize>;
-  using SVDMatrix = Eigen::Matrix<TScalar, TSize, Eigen::Dynamic>;
+template <int TSize, typename TDerived>
+auto invertPSDMatrix(const Eigen::MatrixBase<TDerived>& matrix, const bool full_rank = true) -> Eigen::Matrix<Scalar, TSize, TSize> {
+  using Matrix = Eigen::Matrix<Scalar, TSize, TSize>;
+  using SVDMatrix = Eigen::Matrix<Scalar, TSize, Eigen::Dynamic>;
 
   const auto size = matrix.rows();
 
@@ -35,14 +35,14 @@ auto invertPSDMatrix(const Eigen::MatrixBase<TDerived>& matrix, const bool full_
 
 }  // namespace gaussian
 
-template <typename TScalar, int TOrder>
-class Gaussian<TScalar, TOrder, GaussianType::STANDARD> final {
+template <int TOrder>
+class Gaussian<TOrder, GaussianType::STANDARD> final {
  public:
   // Definitions.
   using Index = Eigen::Index;
-  using Mu = Eigen::Matrix<TScalar, TOrder, 1>;
-  using Sigma = Eigen::Matrix<TScalar, TOrder, TOrder>;
-  using Matrix = Eigen::Matrix<TScalar, TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
+  using Mu = Eigen::Matrix<Scalar, TOrder, 1>;
+  using Sigma = Eigen::Matrix<Scalar, TOrder, TOrder>;
+  using Matrix = Eigen::Matrix<Scalar, TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
 
   /// Zero Gaussian.
   /// \return Gaussian.
@@ -137,28 +137,28 @@ class Gaussian<TScalar, TOrder, GaussianType::STANDARD> final {
 
   /// Inverse sigma.
   /// \return Inverse sigma.
-  inline auto sigmaInverse() const { return gaussian::invertPSDMatrix<TScalar, TOrder>(sigma()); }
+  inline auto sigmaInverse() const { return gaussian::invertPSDMatrix<TOrder>(sigma()); }
 
   /// Converts this.
   /// \param information_gaussian Information Gaussian to write to.
-  auto toInformationGaussian(Gaussian<TScalar, TOrder, GaussianType::INFORMATION>& information_gaussian) const -> void;
+  auto toInformationGaussian(Gaussian<TOrder, GaussianType::INFORMATION>& information_gaussian) const -> void;
 
   /// Converts this.
   /// \return Information form.
-  auto toInformationGaussian() const -> Gaussian<TScalar, TOrder, GaussianType::INFORMATION>;
+  auto toInformationGaussian() const -> Gaussian<TOrder, GaussianType::INFORMATION>;
 
  private:
   Matrix matrix_;  ///< Matrix.
 };
 
-template <typename TScalar, int TOrder>
-class Gaussian<TScalar, TOrder, GaussianType::INFORMATION> final {
+template <int TOrder>
+class Gaussian<TOrder, GaussianType::INFORMATION> final {
  public:
   // Definitions.
   using Index = Eigen::Index;
-  using Eta = Eigen::Matrix<TScalar, TOrder, 1>;
-  using Lambda = Eigen::Matrix<TScalar, TOrder, TOrder>;
-  using Matrix = Eigen::Matrix<TScalar, TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
+  using Eta = Eigen::Matrix<Scalar, TOrder, 1>;
+  using Lambda = Eigen::Matrix<Scalar, TOrder, TOrder>;
+  using Matrix = Eigen::Matrix<Scalar, TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
 
   /// Zero Gaussian.
   /// \return Gaussian.
@@ -225,7 +225,7 @@ class Gaussian<TScalar, TOrder, GaussianType::INFORMATION> final {
 
   /// Inverse lambda.
   /// \return Inverse lambda.
-  inline auto lambdaInverse() const { return gaussian::invertPSDMatrix<TScalar, TOrder>(lambda()); }
+  inline auto lambdaInverse() const { return gaussian::invertPSDMatrix<TOrder>(lambda()); }
 
   /// Plus operator.
   /// \param other Other Gaussian.
@@ -257,23 +257,23 @@ class Gaussian<TScalar, TOrder, GaussianType::INFORMATION> final {
 
   /// Converts this.
   /// \param standard_gaussian Standard Gaussian to write to.
-  auto toStandardGaussian(Gaussian<TScalar, TOrder, GaussianType::STANDARD>& standard_gaussian) const -> void;
+  auto toStandardGaussian(Gaussian<TOrder, GaussianType::STANDARD>& standard_gaussian) const -> void;
 
   /// Converts this.
   /// \return Standard form.
-  auto toStandardGaussian() const -> Gaussian<TScalar, TOrder, GaussianType::STANDARD>;
+  auto toStandardGaussian() const -> Gaussian<TOrder, GaussianType::STANDARD>;
 
  private:
   Matrix matrix_;  ///< Matrix.
 };
 
-template <typename TScalar, int TOrder>
+template <int TOrder>
 class DualGaussian final {
  public:
   // Definitions.
   using Index = Eigen::Index;
-  using StandardGaussian = Gaussian<TScalar, TOrder, GaussianType::STANDARD>;
-  using InformationGaussian = Gaussian<TScalar, TOrder, GaussianType::INFORMATION>;
+  using StandardGaussian = Gaussian<TOrder, GaussianType::STANDARD>;
+  using InformationGaussian = Gaussian<TOrder, GaussianType::INFORMATION>;
 
   using Mu = typename StandardGaussian::Mu;
   using Sigma = typename StandardGaussian::Sigma;
@@ -369,29 +369,29 @@ class DualGaussian final {
   InformationGaussian information_gaussian_;
 };
 
-template <typename TScalar, int TOrder>
-auto Gaussian<TScalar, TOrder, GaussianType::STANDARD>::toInformationGaussian(Gaussian<TScalar, TOrder, GaussianType::INFORMATION>& information_gaussian) const -> void {
+template <int TOrder>
+auto Gaussian<TOrder, GaussianType::STANDARD>::toInformationGaussian(Gaussian<TOrder, GaussianType::INFORMATION>& information_gaussian) const -> void {
   information_gaussian.lambda().noalias() = sigmaInverse();
   information_gaussian.eta().noalias() = information_gaussian.lambda() * mu();
 }
 
-template <typename TScalar, int TOrder>
-auto Gaussian<TScalar, TOrder, GaussianType::STANDARD>::toInformationGaussian() const -> Gaussian<TScalar, TOrder, GaussianType::INFORMATION> {
-  using InformationGaussian = Gaussian<TScalar, TOrder, GaussianType::INFORMATION>;
+template <int TOrder>
+auto Gaussian<TOrder, GaussianType::STANDARD>::toInformationGaussian() const -> Gaussian<TOrder, GaussianType::INFORMATION> {
+  using InformationGaussian = Gaussian<TOrder, GaussianType::INFORMATION>;
   InformationGaussian information_gaussian{order()};
   toInformationGaussian(information_gaussian);
   return information_gaussian;
 }
 
-template <typename TScalar, int TOrder>
-auto Gaussian<TScalar, TOrder, GaussianType::INFORMATION>::toStandardGaussian(Gaussian<TScalar, TOrder, GaussianType::STANDARD>& standard_gaussian) const -> void {
+template <int TOrder>
+auto Gaussian<TOrder, GaussianType::INFORMATION>::toStandardGaussian(Gaussian<TOrder, GaussianType::STANDARD>& standard_gaussian) const -> void {
   standard_gaussian.sigma().noalias() = lambdaInverse();
   standard_gaussian.mu().noalias() = standard_gaussian.sigma() * eta();
 }
 
-template <typename TScalar, int TOrder>
-auto Gaussian<TScalar, TOrder, GaussianType::INFORMATION>::toStandardGaussian() const -> Gaussian<TScalar, TOrder, GaussianType::STANDARD> {
-  using StandardGaussian = Gaussian<TScalar, TOrder, GaussianType::STANDARD>;
+template <int TOrder>
+auto Gaussian<TOrder, GaussianType::INFORMATION>::toStandardGaussian() const -> Gaussian<TOrder, GaussianType::STANDARD> {
+  using StandardGaussian = Gaussian<TOrder, GaussianType::STANDARD>;
   StandardGaussian standard_gaussian{order()};
   toStandardGaussian(standard_gaussian);
   return standard_gaussian;

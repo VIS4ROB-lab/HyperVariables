@@ -11,31 +11,31 @@ namespace hyper::stochastics {
 
 enum class GaussianType { STANDARD, INFORMATION };
 
-template <typename TScalar, int TOrder>
+template <int TOrder>
 class Uncertainty;
 
-template <typename, int, GaussianType>
+template <int TOrder, GaussianType>
 class Gaussian;
 
-template <typename, int>
+template <int TOrder>
 class DualGaussian;
 
-template <typename TScalar, int TSize, int TOptions = DefaultStorageOption(TSize, TSize)>
-using Covariance = Matrix<TScalar, TSize, TSize, TOptions>;
+template <int TSize, int TOptions = DefaultStorageOption(TSize, TSize)>
+using Covariance = Matrix<TSize, TSize, TOptions>;
 
 template <typename TDerived, int TOptions = DefaultStorageOption(TDerived::SizeAtCompileTime, TDerived::SizeAtCompileTime)>
 using CovarianceN = MatrixNM<TDerived, TDerived, TOptions>;
 
-template <typename TScalar, int TOptions = DefaultStorageOption(Eigen::Dynamic, Eigen::Dynamic)>
-using CovarianceX = MatrixX<TScalar, TOptions>;
+template <int TOptions = DefaultStorageOption(Eigen::Dynamic, Eigen::Dynamic)>
+using CovarianceX = MatrixX<TOptions>;
 
-template <typename TScalar, int TSize, int TOptions = DefaultStorageOption(TSize, TSize)>
-using Precision = Matrix<TScalar, TSize, TSize, TOptions>;
+template <int TSize, int TOptions = DefaultStorageOption(TSize, TSize)>
+using Precision = Matrix<TSize, TSize, TOptions>;
 
 template <typename TDerived, int TOptions = DefaultStorageOption(TDerived::SizeAtCompileTime, TDerived::SizeAtCompileTime)>
 using PrecisionN = MatrixNM<TDerived, TDerived, TOptions>;
 
-template <typename TScalar, int TOptions = DefaultStorageOption(Eigen::Dynamic, Eigen::Dynamic)>
-using PrecisionX = MatrixX<TScalar, TOptions>;
+template <int TOptions = DefaultStorageOption(Eigen::Dynamic, Eigen::Dynamic)>
+using PrecisionX = MatrixX<TOptions>;
 
 }  // namespace hyper::stochastics

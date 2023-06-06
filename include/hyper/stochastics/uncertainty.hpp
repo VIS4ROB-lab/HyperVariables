@@ -11,14 +11,13 @@
 
 namespace hyper::stochastics {
 
-template <typename TScalar, int TOrder>
+template <int TOrder>
 class Uncertainty {
  public:
   // Definitions.
-  using Scalar = TScalar;
   using Index = Eigen::Index;
-  using Covariance = Matrix<TScalar, TOrder, TOrder>;  ///< Covariance matrix type.
-  using Precision = Matrix<TScalar, TOrder, TOrder>;   ///< Precision matrix type.
+  using Covariance = Matrix<Scalar, TOrder, TOrder>;  ///< Covariance matrix type.
+  using Precision = Matrix<Scalar, TOrder, TOrder>;   ///< Precision matrix type.
 
   /// Initialization as identity.
   /// \param order Order.
