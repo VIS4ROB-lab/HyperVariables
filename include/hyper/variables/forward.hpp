@@ -31,8 +31,8 @@ using R3 = Rn<3>;
 using R4 = Rn<4>;
 using R5 = Rn<5>;
 using R6 = Rn<6>;
-using Stamp = R1;
-using Pixel = R2;
+
+using Stamp = Rn<1>;
 
 template <int TOrder>
 struct Traits<Rn<TOrder>> {

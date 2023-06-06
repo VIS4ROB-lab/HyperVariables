@@ -19,8 +19,9 @@ class DistortionTests : public testing::TestWithParam<Distortion*> {
   static constexpr auto kTol = 1e-5;
 
   // Definitions.
-  using PixelJacobian = hyper::JacobianNM<Pixel>;
-  using DistortionJacobian = hyper::JacobianNX<Pixel>;
+  using Pixel = variables::Distortion::Pixel;
+  using PixelJacobian = variables::Distortion::PixelJacobian;
+  using ParameterJacobian = variables::Distortion::ParameterJacobian;
 
   DistortionTests() : distortion_{nullptr} {}
 
@@ -64,11 +65,11 @@ class DistortionTests : public testing::TestWithParam<Distortion*> {
   auto checkParameterJacobian() const -> void {
     for (auto i = 0; i < kInnerItr; ++i) {
       const auto num_distortion_parameters = distortion_->asVector().size();
-      auto J_a = DistortionJacobian{Pixel::kNumParameters, num_distortion_parameters};
+      auto J_a = ParameterJacobian{Pixel::kNumParameters, num_distortion_parameters};
       const Pixel px = Pixel::Random();
       const Pixel d_px = distortion_->distort(px, nullptr, J_a.data(), nullptr);
 
-      auto J_n = DistortionJacobian{Pixel::kNumParameters, num_distortion_parameters};
+      auto J_n = ParameterJacobian{Pixel::kNumParameters, num_distortion_parameters};
       auto vector = distortion_->asVector();
       for (auto j = 0; j < vector.size(); ++j) {
         const auto tmp = vector[j];
@@ -121,10 +122,10 @@ class DistortionTests : public testing::TestWithParam<Distortion*> {
       const Pixel px = Pixel::Random();
 
       const auto num_distortion_parameters = distortion_->asVector().size();
-      auto J_a = DistortionJacobian{Pixel::kNumParameters, num_distortion_parameters};
+      auto J_a = ParameterJacobian{Pixel::kNumParameters, num_distortion_parameters};
       const Pixel d_px = distortion_->undistort(px, nullptr, J_a.data(), nullptr);
 
-      auto J_n = DistortionJacobian{Pixel::kNumParameters, num_distortion_parameters};
+      auto J_n = ParameterJacobian{Pixel::kNumParameters, num_distortion_parameters};
       auto vector = distortion_->asVector();
       for (auto j = 0; j < vector.size(); ++j) {
         const auto tmp = vector[j];

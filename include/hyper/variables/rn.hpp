@@ -14,16 +14,16 @@ class RnTangentBase;
 template <typename TDerived>
 class RnBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, Variable, ConstVariable> {
  public:
+  // Constants.
+  static constexpr auto kNumParameters = Traits<TDerived>::kNumParameters;
+
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
   using Scalar = typename Base::Scalar;
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX>;
   using Base::Base;
 
-  using Tangent = variables::Tangent<Rn<(int)Base::SizeAtCompileTime>>;
-
-  // Constants.
-  static constexpr auto kNumParameters = (int)Base::SizeAtCompileTime;
+  using Tangent = variables::Tangent<Rn<kNumParameters>>;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(RnBase)
 

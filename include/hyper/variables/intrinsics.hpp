@@ -26,8 +26,8 @@ class IntrinsicsBase : public RnBase<TDerived> {
   static constexpr auto kFocalOffsetY = kFocalOffset + 1;
   static constexpr auto kNumFocalParameters = 2;
 
-  using Input = Pixel;
-  using InputJacobian = hyper::JacobianNM<Pixel>;
+  using Pixel = R2;
+  using PixelJacobian = hyper::JacobianNM<Pixel>;
   using ParameterJacobian = hyper::JacobianNM<Pixel, Base>;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(IntrinsicsBase)
@@ -85,7 +85,7 @@ class IntrinsicsBase : public RnBase<TDerived> {
   /// \param J_i Input Jacobian.
   /// \param J_p Parameter Jacobian.
   /// \return Normalized pixel coordinates.
-  auto normalize(const Eigen::Ref<const Input>& input, Scalar* J_i = nullptr, Scalar* J_p = nullptr) const -> Pixel {  // NOLINT
+  auto normalize(const Eigen::Ref<const R2>& input, Scalar* J_i = nullptr, Scalar* J_p = nullptr) const -> R2 {  // NOLINT
     const auto ifx = Scalar{1} / fx();
     const auto ify = Scalar{1} / fy();
     const auto dx = input.x() - cx();
@@ -94,7 +94,7 @@ class IntrinsicsBase : public RnBase<TDerived> {
     const auto dy_ify = dy * ify;
 
     if (J_i) {
-      auto J = Eigen::Map<InputJacobian>{J_i};
+      auto J = Eigen::Map<PixelJacobian>{J_i};
       J(0, 0) = ifx;
       J(1, 0) = Scalar{0};
       J(0, 1) = Scalar{0};
@@ -121,9 +121,9 @@ class IntrinsicsBase : public RnBase<TDerived> {
   /// \param J_i Input Jacobian.
   /// \param J_p Parameter Jacobian.
   /// \return Denormalized pixel coordinates.
-  auto denormalize(const Eigen::Ref<const Input>& input, Scalar* J_i = nullptr, Scalar* J_p = nullptr) const -> Pixel {  // NOLINT
+  auto denormalize(const Eigen::Ref<const R2>& input, Scalar* J_i = nullptr, Scalar* J_p = nullptr) const -> R2 {  // NOLINT
     if (J_i) {
-      auto J = Eigen::Map<InputJacobian>{J_i};
+      auto J = Eigen::Map<PixelJacobian>{J_i};
       J(0, 0) = fx();
       J(1, 0) = Scalar{0};
       J(0, 1) = Scalar{0};

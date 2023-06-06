@@ -16,6 +16,7 @@ class IterativeRadialDistortionBase : public DistortionBase<TDerived> {
   using ScalarWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, Scalar>;
   using Base::Base;
 
+  using Pixel = R2;
   using PixelJacobian = hyper::JacobianNM<Pixel>;
   using PlainDistortion = typename Traits<TDerived>::PlainDistortion;
 

@@ -18,8 +18,9 @@ class IntrinsicsTests : public testing::Test {
   static constexpr auto kSensorHeight_2 = 480 / 2;
 
   // Definitions.
-  using PixelJacobian = hyper::JacobianNM<Pixel>;
-  using IntrinsicsJacobian = hyper::JacobianNM<Pixel, Intrinsics>;
+  using Pixel = typename Intrinsics::Pixel;
+  using PixelJacobian = typename Intrinsics::PixelJacobian;
+  using ParameterJacobian = typename Intrinsics::ParameterJacobian;
 
   static auto randomPixel() -> Pixel { return Pixel::Random(); }
 
@@ -60,11 +61,11 @@ class IntrinsicsTests : public testing::Test {
   }
 
   auto checkParameterJacobian() -> bool {
-    IntrinsicsJacobian J_a;
+    ParameterJacobian J_a;
     const Pixel px = Pixel::Random();
     const Pixel d_px = intrinsics_.normalize(px, nullptr, J_a.data());
 
-    IntrinsicsJacobian J_n;
+    ParameterJacobian J_n;
     for (auto j = 0; j < Intrinsics::kNumParameters; ++j) {
       const auto tmp = intrinsics_[j];
       intrinsics_[j] = tmp - kInc;
@@ -109,10 +110,10 @@ class IntrinsicsTests : public testing::Test {
   auto checkInverseParameterJacobian() -> bool {
     const auto px = randomPixel();
 
-    IntrinsicsJacobian J_a;
+    ParameterJacobian J_a;
     intrinsics_.denormalize(px, nullptr, J_a.data());
 
-    IntrinsicsJacobian J_n;
+    ParameterJacobian J_n;
     for (auto j = 0; j < Intrinsics::kNumParameters; ++j) {
       const auto tmp = intrinsics_[j];
       intrinsics_[j] = tmp - kInc;

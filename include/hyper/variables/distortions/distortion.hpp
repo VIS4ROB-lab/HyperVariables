@@ -3,11 +3,6 @@
 
 #pragma once
 
-#include <memory>
-
-#include <glog/logging.h>
-#include <Eigen/LU>
-
 #include "hyper/variables/distortions/forward.hpp"
 
 #include "hyper/variables/rn.hpp"
@@ -31,45 +26,13 @@ struct NumDistortionTraits<double> {
   static constexpr auto kMaxNumDistortionSteps = 20;
 };
 
-namespace distortion {
-
-template <typename TScalar, typename TDistortion>
-auto Undistort(const TDistortion* distortion, const Eigen::Ref<const Pixel>& p, TScalar* J_p, TScalar* J_d, const TScalar* parameters) -> Pixel {
-  Pixel output = p;
-  JacobianNM<Pixel> J_p_p, J_p_p_i;
-
-  for (auto i = 0; i <= NumDistortionTraits<TScalar>::kMaxNumDistortionSteps; ++i) {
-    const auto b = (distortion->distort(output, J_p_p_i.data(), nullptr, parameters) - p).eval();
-    J_p_p.noalias() = J_p_p_i.inverse();
-
-    if (NumDistortionTraits<TScalar>::kDistortionTolerance2 < b.dot(b)) {
-      DLOG_IF(WARNING, i == NumDistortionTraits<TScalar>::kMaxNumDistortionSteps) << "Maximum number of iterations reached.";
-      DLOG_IF_EVERY_N(WARNING, J_p_p_i.determinant() < NumTraits<TScalar>::kSmallAngleTolerance, NumDistortionTraits<TScalar>::kMaxNumDistortionSteps)
-          << "Numerical issues detected.";
-      output.noalias() -= J_p_p * b;
-    } else {
-      break;
-    }
-  }
-
-  if (J_p) {
-    Eigen::Map<JacobianNM<Pixel>>{J_p}.noalias() = J_p_p;
-  }
-
-  if (J_d) {
-    const auto size = distortion->asVector().size();
-    auto J_p_d_i = JacobianNX<Pixel>{Pixel::kNumParameters, size};
-    distortion->distort(output, nullptr, J_p_d_i.data(), parameters);
-    Eigen::Map<JacobianNX<Pixel>>{J_d, Pixel::kNumParameters, size}.noalias() = TScalar{-1} * J_p_p * J_p_d_i;
-  }
-
-  return output;
-}
-
-}  // namespace distortion
-
 class ConstDistortion : public ConstVariable {
  public:
+  // Definitions.
+  using Pixel = R2;
+  using PixelJacobian = JacobianNM<R2>;
+  using ParameterJacobian = JacobianNX<R2>;
+
   /// Perturbed distortion.
   /// \param scale Perturbation scale.
   /// \return Perturbed distortion.
@@ -89,13 +52,16 @@ class ConstDistortion : public ConstVariable {
   /// \param J_d  Distortion Jacobian.
   /// \param parameters Undistort with external parameters.
   /// \return Undistorted p.
-  virtual auto undistort(const Eigen::Ref<const Pixel>& p, Scalar* J_p, Scalar* J_d, const Scalar* parameters) const -> Pixel {
-    return distortion::Undistort(this, p, J_p, J_d, parameters);
-  }
+  virtual auto undistort(const Eigen::Ref<const Pixel>& p, Scalar* J_p, Scalar* J_d, const Scalar* parameters) const -> Pixel;
 };
 
 class Distortion : public Variable {
  public:
+  // Definitions.
+  using Pixel = R2;
+  using PixelJacobian = JacobianNM<R2>;
+  using ParameterJacobian = JacobianNX<R2>;
+
   /// Perturbed distortion.
   /// \param scale Perturbation scale.
   /// \return Perturbed distortion.
@@ -115,22 +81,20 @@ class Distortion : public Variable {
   /// \param J_d  Distortion Jacobian.
   /// \param parameters Undistort with external parameters.
   /// \return Undistorted p.
-  virtual auto undistort(const Eigen::Ref<const Pixel>& p, Scalar* J_p, Scalar* J_d, const Scalar* parameters) const -> Pixel {
-    return distortion::Undistort(this, p, J_p, J_d, parameters);
-  }
+  virtual auto undistort(const Eigen::Ref<const Pixel>& p, Scalar* J_p, Scalar* J_d, const Scalar* parameters) const -> Pixel;
 };
 
 template <typename TDerived>
 class DistortionBase : public Traits<TDerived>::Base, public ConditionalConstBase_t<TDerived, Distortion, ConstDistortion> {
  public:
+  // Constants.
+  static constexpr auto kNumParameters = Traits<TDerived>::kNumParameters;
+
   // Definitions.
   using Base = typename Traits<TDerived>::Base;
   using Scalar = typename Base::Scalar;
   using VectorXWithConstIfNotLvalue = ConstValueIfVariableIsNotLValue_t<TDerived, VectorX>;
   using Base::Base;
-
-  // Constants.
-  static constexpr auto kNumParameters = (int)Base::SizeAtCompileTime;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(DistortionBase)
 
