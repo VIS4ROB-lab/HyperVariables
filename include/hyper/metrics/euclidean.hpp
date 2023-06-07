@@ -24,17 +24,7 @@ class EuclideanMetric<variables::Rn<N>> final : public Metric {
   /// \param output Distance between elements.
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
-  static auto Evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs = nullptr, Scalar* J_rhs = nullptr) -> void {
-    if (J_lhs) {
-      Eigen::Map<Jacobian>{J_lhs}.setIdentity();
-    }
-
-    if (J_rhs) {
-      Eigen::Map<Jacobian>{J_rhs}.noalias() = Scalar{-1} * Jacobian::Identity();
-    }
-
-    Eigen::Map<Output>{output}.noalias() = Eigen::Map<const Input>{lhs} - Eigen::Map<const Input>{rhs};
-  }
+  static auto Evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs = nullptr, Scalar* J_rhs = nullptr) -> void;
 
   /// Evaluates the distance between elements.
   /// \param lhs Left element/input vector.
@@ -42,11 +32,7 @@ class EuclideanMetric<variables::Rn<N>> final : public Metric {
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
   /// \return Distance between elements.
-  static auto Evaluate(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, Scalar* J_lhs = nullptr, Scalar* J_rhs = nullptr) -> Output {
-    Output output;
-    Evaluate(lhs.data(), rhs.data(), output.data(), J_lhs, J_rhs);
-    return output;
-  }
+  static auto Evaluate(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, Scalar* J_lhs = nullptr, Scalar* J_rhs = nullptr) -> Output;
 
   /// Retrieves the ambient input size.
   /// \return Ambient input size.
@@ -70,7 +56,7 @@ class EuclideanMetric<variables::Rn<N>> final : public Metric {
   /// \param output Distance between elements.
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
-  auto evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void final { Evaluate(lhs, rhs, output, J_lhs, J_rhs); }
+  auto evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void final;
 };
 
 }  // namespace hyper::metrics

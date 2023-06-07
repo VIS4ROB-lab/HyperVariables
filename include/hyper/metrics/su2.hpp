@@ -23,28 +23,7 @@ class SU2Metric final : public Metric {
   /// \param output Distance between elements.
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
-  static auto Evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs = nullptr, Scalar* J_rhs = nullptr) -> void {
-    const auto lhs_ = Eigen::Map<const Input>{lhs};
-    const auto rhs_ = Eigen::Map<const Input>{rhs};
-    auto output_ = Eigen::Map<Output>{output};
-
-    if (!J_lhs && !J_rhs) {
-      output_ = lhs_.gPlus(rhs_.gInv()).gLog();
-    } else if (J_lhs && J_rhs) {
-      Jacobian J_t_p, J_p_l, J_p_ir, J_ir_r;
-      output_ = lhs_.gPlus(rhs_.gInv(J_ir_r.data()), J_p_l.data(), J_p_ir.data()).gLog(J_t_p.data());
-      Eigen::Map<Jacobian>{J_lhs}.noalias() = J_t_p * J_p_l;
-      Eigen::Map<Jacobian>{J_rhs}.noalias() = J_t_p * J_p_ir * J_ir_r;
-    } else if (J_lhs) {
-      Jacobian J_t_p, J_p_l;
-      output_ = lhs_.gPlus(rhs_.gInv(), J_p_l.data()).gLog(J_t_p.data());
-      Eigen::Map<Jacobian>{J_lhs}.noalias() = J_t_p * J_p_l;
-    } else {
-      Jacobian J_t_p, J_p_ir, J_ir_r;
-      output_ = lhs_.gPlus(rhs_.gInv(J_ir_r.data()), nullptr, J_p_ir.data()).gLog(J_t_p.data());
-      Eigen::Map<Jacobian>{J_rhs}.noalias() = J_t_p * J_p_ir * J_ir_r;
-    }
-  }
+  static auto Evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs = nullptr, Scalar* J_rhs = nullptr) -> void;
 
   /// Evaluates the distance between elements.
   /// \param lhs Left element/input vector.
@@ -52,11 +31,7 @@ class SU2Metric final : public Metric {
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
   /// \return Distance between elements.
-  static auto Evaluate(const Input& lhs, const Input& rhs, Scalar* J_lhs = nullptr, Scalar* J_rhs = nullptr) -> Output {
-    Output output;
-    Evaluate(lhs.data(), rhs.data(), output.data(), J_lhs, J_rhs);
-    return output;
-  }
+  static auto Evaluate(const Input& lhs, const Input& rhs, Scalar* J_lhs = nullptr, Scalar* J_rhs = nullptr) -> Output;
 
   /// Retrieves the ambient input size.
   /// \return Ambient input size.
@@ -80,7 +55,7 @@ class SU2Metric final : public Metric {
   /// \param output Distance between elements.
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
-  auto evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void final { Evaluate(lhs, rhs, output, J_lhs, J_rhs); }
+  auto evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void final;
 };
 
 }  // namespace hyper::metrics

@@ -18,12 +18,9 @@ class SensitivityBase : public RnBase<TDerived> {
   using Scalar = typename Base::Scalar;
   using Base::Base;
 
-  using OrderVector = hyper::Vector<kOrder>;
-  using OrderMatrix = hyper::Matrix<kOrder, kOrder>;
-
-  using Input = OrderVector;
-  using InputJacobian = hyper::JacobianNM<OrderVector>;
-  using ParameterJacobian = hyper::JacobianNM<OrderVector, Base>;
+  using Input = Rn<kOrder>;
+  using InputJacobian = hyper::JacobianNM<Input>;
+  using ParameterJacobian = hyper::JacobianNM<Input, Base>;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SensitivityBase)
 
@@ -40,11 +37,9 @@ class SensitivityBase : public RnBase<TDerived> {
   /// \param J_i Input Jacobian.
   /// \param J_p Parameter Jacobian.
   /// \return Output.
-  auto act(const Eigen::Ref<const Input>& input, Scalar* J_i = nullptr, Scalar* J_p = nullptr) const -> OrderVector {
-    const auto this_as_matrix = asMatrix();
-
+  auto act(const Eigen::Ref<const Input>& input, Scalar* J_i = nullptr, Scalar* J_p = nullptr) const -> Rn<kOrder> {
     if (J_i) {
-      Eigen::Map<InputJacobian>{J_i}.noalias() = this_as_matrix;
+      Eigen::Map<InputJacobian>{J_i}.noalias() = asMatrix();
     }
 
     if (J_p) {
@@ -60,7 +55,7 @@ class SensitivityBase : public RnBase<TDerived> {
       }
     }
 
-    return this_as_matrix * input;
+    return asMatrix() * input;
   }
 };
 

@@ -36,4 +36,10 @@ using PrecisionN = MatrixNM<TDerived, TDerived>;
 
 using PrecisionX = MatrixX;
 
+template <int TOrder>
+using StandardGaussian = Gaussian<TOrder, GaussianType::STANDARD>;
+
+template <int TOrder>
+using InformationGaussian = Gaussian<TOrder, GaussianType::INFORMATION>;
+
 }  // namespace hyper::stochastics

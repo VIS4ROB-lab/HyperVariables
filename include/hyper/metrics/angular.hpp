@@ -26,37 +26,7 @@ class AngularMetric<variables::Rn<N>> final : public Metric {
   /// \param d Distance between elements.
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
-  static auto Evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* d, Scalar* J_lhs = nullptr, Scalar* J_rhs = nullptr) -> void {
-    const auto lhs_ = Eigen::Map<const Input>{lhs};
-    const auto rhs_ = Eigen::Map<const Input>{rhs};
-
-    const auto cross = lhs_.cross(rhs_).eval();
-    const auto ncross = cross.norm();
-    const auto dot = lhs_.dot(rhs_);
-
-    if (J_lhs || J_rhs) {
-      if (ncross < Eigen::NumTraits<Scalar>::epsilon()) {
-        if (J_lhs) {
-          Eigen::Map<Jacobian>{J_lhs}.setZero();
-        }
-        if (J_rhs) {
-          Eigen::Map<Jacobian>{J_rhs}.setZero();
-        }
-      } else {
-        const auto a = ncross * ncross + dot * dot;
-        const auto b = (dot / (a * ncross));
-        const auto c = (ncross / a);
-        if (J_lhs) {
-          Eigen::Map<Jacobian>{J_lhs}.noalias() = (b * rhs_.cross(cross) - c * rhs_).transpose();
-        }
-        if (J_rhs) {
-          Eigen::Map<Jacobian>{J_rhs}.noalias() = (b * cross.cross(lhs_) - c * lhs_).transpose();
-        }
-      }
-    }
-
-    Eigen::Map<Output>{d}[0] = std::atan2(ncross, dot);
-  }
+  static auto Evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* d, Scalar* J_lhs = nullptr, Scalar* J_rhs = nullptr) -> void;
 
   /// Evaluates the distance between elements.
   /// \param lhs Left element/input vector.
@@ -64,11 +34,7 @@ class AngularMetric<variables::Rn<N>> final : public Metric {
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
   /// \return Distance between elements.
-  static auto Evaluate(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, Scalar* J_lhs = nullptr, Scalar* J_rhs = nullptr) -> Output {
-    Output output;
-    Evaluate(lhs.data(), rhs.data(), output.data(), J_lhs, J_rhs);
-    return output;
-  }
+  static auto Evaluate(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, Scalar* J_lhs = nullptr, Scalar* J_rhs = nullptr) -> Output;
 
   /// Retrieves the ambient input size.
   /// \return Ambient input size.
@@ -92,7 +58,7 @@ class AngularMetric<variables::Rn<N>> final : public Metric {
   /// \param output Distance between elements.
   /// \param J_lhs Jacobian w.r.t. left element (optional).
   /// \param J_rhs Jacobian w.r.t. right element (optional).
-  auto evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void final { Evaluate(lhs, rhs, output, J_lhs, J_rhs); }
+  auto evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void final;
 };
 
 }  // namespace hyper::metrics

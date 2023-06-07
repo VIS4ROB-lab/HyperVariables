@@ -141,11 +141,11 @@ class Gaussian<TOrder, GaussianType::STANDARD> final {
 
   /// Converts this.
   /// \param information_gaussian Information Gaussian to write to.
-  auto toInformationGaussian(Gaussian<TOrder, GaussianType::INFORMATION>& information_gaussian) const -> void;
+  auto toInformationGaussian(InformationGaussian<TOrder>& information_gaussian) const -> void;
 
   /// Converts this.
   /// \return Information form.
-  auto toInformationGaussian() const -> Gaussian<TOrder, GaussianType::INFORMATION>;
+  auto toInformationGaussian() const -> InformationGaussian<TOrder>;
 
  private:
   Matrix matrix_;  ///< Matrix.
@@ -257,11 +257,11 @@ class Gaussian<TOrder, GaussianType::INFORMATION> final {
 
   /// Converts this.
   /// \param standard_gaussian Standard Gaussian to write to.
-  auto toStandardGaussian(Gaussian<TOrder, GaussianType::STANDARD>& standard_gaussian) const -> void;
+  auto toStandardGaussian(StandardGaussian<TOrder>& standard_gaussian) const -> void;
 
   /// Converts this.
   /// \return Standard form.
-  auto toStandardGaussian() const -> Gaussian<TOrder, GaussianType::STANDARD>;
+  auto toStandardGaussian() const -> StandardGaussian<TOrder>;
 
  private:
   Matrix matrix_;  ///< Matrix.
@@ -272,8 +272,8 @@ class DualGaussian final {
  public:
   // Definitions.
   using Index = Eigen::Index;
-  using StandardGaussian = Gaussian<TOrder, GaussianType::STANDARD>;
-  using InformationGaussian = Gaussian<TOrder, GaussianType::INFORMATION>;
+  using StandardGaussian = StandardGaussian<TOrder>;
+  using InformationGaussian = InformationGaussian<TOrder>;
 
   using Mu = typename StandardGaussian::Mu;
   using Sigma = typename StandardGaussian::Sigma;
@@ -370,29 +370,27 @@ class DualGaussian final {
 };
 
 template <int TOrder>
-auto Gaussian<TOrder, GaussianType::STANDARD>::toInformationGaussian(Gaussian<TOrder, GaussianType::INFORMATION>& information_gaussian) const -> void {
+auto StandardGaussian<TOrder>::toInformationGaussian(InformationGaussian<TOrder>& information_gaussian) const -> void {
   information_gaussian.lambda().noalias() = sigmaInverse();
   information_gaussian.eta().noalias() = information_gaussian.lambda() * mu();
 }
 
 template <int TOrder>
-auto Gaussian<TOrder, GaussianType::STANDARD>::toInformationGaussian() const -> Gaussian<TOrder, GaussianType::INFORMATION> {
-  using InformationGaussian = Gaussian<TOrder, GaussianType::INFORMATION>;
-  InformationGaussian information_gaussian{order()};
+auto StandardGaussian<TOrder>::toInformationGaussian() const -> InformationGaussian<TOrder> {
+  InformationGaussian<TOrder> information_gaussian{order()};
   toInformationGaussian(information_gaussian);
   return information_gaussian;
 }
 
 template <int TOrder>
-auto Gaussian<TOrder, GaussianType::INFORMATION>::toStandardGaussian(Gaussian<TOrder, GaussianType::STANDARD>& standard_gaussian) const -> void {
+auto InformationGaussian<TOrder>::toStandardGaussian(StandardGaussian<TOrder>& standard_gaussian) const -> void {
   standard_gaussian.sigma().noalias() = lambdaInverse();
   standard_gaussian.mu().noalias() = standard_gaussian.sigma() * eta();
 }
 
 template <int TOrder>
-auto Gaussian<TOrder, GaussianType::INFORMATION>::toStandardGaussian() const -> Gaussian<TOrder, GaussianType::STANDARD> {
-  using StandardGaussian = Gaussian<TOrder, GaussianType::STANDARD>;
-  StandardGaussian standard_gaussian{order()};
+auto InformationGaussian<TOrder>::toStandardGaussian() const -> StandardGaussian<TOrder> {
+  StandardGaussian<TOrder> standard_gaussian{order()};
   toStandardGaussian(standard_gaussian);
   return standard_gaussian;
 }

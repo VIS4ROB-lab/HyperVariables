@@ -20,12 +20,9 @@ class OrthonormalityAlignmentBase : public RnBase<TDerived> {
   using Scalar = typename Base::Scalar;
   using Base::Base;
 
-  using OrderVector = hyper::Vector<kOrder>;
-  using OrderMatrix = hyper::Matrix<kOrder, kOrder>;
-
-  using Input = OrderVector;
-  using InputJacobian = hyper::JacobianNM<OrderVector>;
-  using ParameterJacobian = hyper::JacobianNM<OrderVector, Base>;
+  using Input = Rn<kOrder>;
+  using InputJacobian = hyper::JacobianNM<Input>;
+  using ParameterJacobian = hyper::JacobianNM<Input, Base>;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(OrthonormalityAlignmentBase)
 
@@ -62,7 +59,7 @@ class OrthonormalityAlignmentBase : public RnBase<TDerived> {
 
   /// Returns the parameters in their matrix form.
   /// \return Orthonormality alignment as matrix.
-  [[nodiscard]] auto asMatrix() const -> OrderMatrix {
+  [[nodiscard]] auto asMatrix() const -> Matrix<kOrder> {
     auto matrix = scalingMatrix();
 
     auto i = 0;
@@ -78,12 +75,12 @@ class OrthonormalityAlignmentBase : public RnBase<TDerived> {
 
   /// Returns the scaling parameters in their matrix form.
   /// \return Scaling parameters as matrix.
-  [[nodiscard]] auto scalingMatrix() const -> OrderMatrix { return diagonalParameters().asDiagonal(); }
+  [[nodiscard]] auto scalingMatrix() const -> Matrix<kOrder> { return diagonalParameters().asDiagonal(); }
 
   /// Returns the alignment parameters in their matrix form.
   /// \return Alignment parameters as matrix.
-  [[nodiscard]] auto alignmentMatrix() const -> OrderMatrix {
-    OrderMatrix A = OrderMatrix::Identity();
+  [[nodiscard]] auto alignmentMatrix() const -> Matrix<kOrder> {
+    Matrix<kOrder> A = Matrix<kOrder>::Identity();
 
     auto i = 0;
     const auto i_diagonal_parameters = diagonalParameters().cwiseInverse().eval();
@@ -102,7 +99,7 @@ class OrthonormalityAlignmentBase : public RnBase<TDerived> {
   /// \param J_i Input Jacobian.
   /// \param J_p Parameter Jacobian.
   /// \return Output.
-  auto act(const Eigen::Ref<const Input>& input, Scalar* J_i = nullptr, Scalar* J_p = nullptr) const -> OrderVector {
+  auto act(const Eigen::Ref<const Input>& input, Scalar* J_i = nullptr, Scalar* J_p = nullptr) const -> Rn<kOrder> {
     const auto this_as_matrix = asMatrix();
 
     if (J_i) {

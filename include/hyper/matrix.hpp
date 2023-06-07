@@ -17,7 +17,7 @@ template <int TNumRows>
 using Vector = Eigen::Matrix<Scalar, TNumRows, 1>;
 
 template <typename TDerived>
-using VectorN = Vector<TDerived::SizeAtCompileTime>;
+using VectorN = Vector<TDerived::kNumParameters>;
 
 using VectorX = Vector<Eigen::Dynamic>;
 
@@ -25,13 +25,13 @@ template <int TNumRows, int TNumCols = TNumRows>
 using Matrix = Eigen::Matrix<Scalar, TNumRows, TNumCols, DefaultStorageOption(TNumRows, TNumCols)>;
 
 template <typename TDerived, typename TOtherDerived = TDerived>
-using MatrixNM = Matrix<TDerived::SizeAtCompileTime, TOtherDerived::SizeAtCompileTime>;
+using MatrixNM = Matrix<TDerived::kNumParameters, TOtherDerived::kNumParameters>;
 
 template <typename TDerived>
-using MatrixNX = Matrix<TDerived::SizeAtCompileTime, Eigen::Dynamic>;
+using MatrixNX = Matrix<TDerived::kNumParameters, Eigen::Dynamic>;
 
 template <typename TOtherDerived>
-using MatrixXN = Matrix<Eigen::Dynamic, TOtherDerived::SizeAtCompileTime>;
+using MatrixXN = Matrix<Eigen::Dynamic, TOtherDerived::kNumParameters>;
 
 using MatrixX = Matrix<Eigen::Dynamic, Eigen::Dynamic>;
 

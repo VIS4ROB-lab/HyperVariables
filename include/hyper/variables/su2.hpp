@@ -28,7 +28,6 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
   using TranslationJacobian = Jacobian<Traits<Translation>::kNumParameters>;
 
   // Constants.
-  static constexpr auto SizeAtCompileTime = (int)Base::Coefficients::SizeAtCompileTime;
   static constexpr auto kNumParameters = (int)Base::Coefficients::SizeAtCompileTime;
 
   // Order.
