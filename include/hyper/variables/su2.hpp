@@ -209,8 +209,6 @@ class Quaternion final : public QuaternionBase<Quaternion> {
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Quaternion)
 };
 
-HYPER_DECLARE_EIGEN_CLASS_TRAITS(Map, hyper::variables::Quaternion)
-
 class SU2 final : public SU2Base<SU2> {
  public:
   using Base = SU2Base<SU2>;
@@ -224,8 +222,6 @@ class SU2 final : public SU2Base<SU2> {
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(SU2)
 };
-
-HYPER_DECLARE_EIGEN_CLASS_TRAITS(Map, hyper::variables::SU2)
 
 template <typename TDerived>
 class SU2TangentBase : public RnBase<TDerived> {
@@ -295,8 +291,6 @@ class Tangent<SU2> final : public SU2TangentBase<Tangent<SU2>> {
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Tangent)
 };
-
-HYPER_DECLARE_TANGENT_MAP_TRAITS(hyper::variables::SU2)
 
 template <typename TDerived>
 auto QuaternionBase<TDerived>::Identity() -> Quaternion {
@@ -602,8 +596,6 @@ auto SU2Base<TDerived>::act(const Eigen::MatrixBase<Other_>& other, Scalar* J_th
 
 }  // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_CLASS(Map, hyper::variables::Quaternion, using Base::Base;)
-HYPER_DECLARE_CONST_EIGEN_CLASS(Map, hyper::variables::Quaternion, using Base::Base;)
-HYPER_DECLARE_EIGEN_CLASS(Map, hyper::variables::SU2, using Base::Base;)
-HYPER_DECLARE_CONST_EIGEN_CLASS(Map, hyper::variables::SU2, using Base::Base;)
-HYPER_DECLARE_TANGENT_MAP(hyper::variables::SU2)
+HYPER_DECLARE_EIGEN_CLASS_INTERFACE_NO_REF(hyper::variables, Quaternion)
+HYPER_DECLARE_EIGEN_CLASS_INTERFACE_NO_REF(hyper::variables, SU2)
+HYPER_DECLARE_EIGEN_TANGENT_INTERFACE(hyper::variables, SU2)

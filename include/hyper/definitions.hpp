@@ -13,6 +13,9 @@ using Time = double;
 using Scalar = double;
 
 template <typename>
+struct Traits;
+
+template <typename>
 struct NumTraits;
 
 template <typename TPointer, typename TSize = std::int32_t>
@@ -30,5 +33,7 @@ template <>
 struct NumTraits<double> {
   static constexpr double kSmallAngleTolerance = 1e-8;
 };
+
+static constexpr auto kGravityNorm = Scalar{9.80741};  // Magnitude of local gravity for Zurich in [m/s²].
 
 }  // namespace hyper

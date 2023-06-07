@@ -73,6 +73,7 @@ class BearingBase : public RnBase<TDerived> {
 
 class Bearing final : public BearingBase<Bearing> {
  public:
+  // Definitions.
   using Base = BearingBase<Bearing>;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Bearing)
@@ -90,8 +91,6 @@ class Bearing final : public BearingBase<Bearing> {
   }
 };
 
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Bearing)
-
 }  // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Bearing)
+HYPER_DECLARE_EIGEN_CLASS_INTERFACE(hyper::variables, Bearing)

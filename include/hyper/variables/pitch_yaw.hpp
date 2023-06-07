@@ -49,8 +49,6 @@ class PitchYaw final : public PitchYawBase<PitchYaw> {
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(PitchYaw)
 };
 
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::PitchYaw)
-
 }  // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::PitchYaw)
+HYPER_DECLARE_EIGEN_CLASS_INTERFACE(hyper::variables, PitchYaw)

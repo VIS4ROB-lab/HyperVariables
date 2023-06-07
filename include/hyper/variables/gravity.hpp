@@ -18,7 +18,7 @@ class GravityBase : public RnBase<TDerived> {
   using Base::Base;
 
   // Constants.
-  static constexpr auto kNorm = Scalar{9.80741};  // Magnitude of local gravity for Zurich in [m/s²].
+  static constexpr auto kNorm = kGravityNorm;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(GravityBase)
 
@@ -29,6 +29,7 @@ class GravityBase : public RnBase<TDerived> {
 
 class Gravity final : public GravityBase<Gravity> {
  public:
+  // Definitions.
   using Base = GravityBase<Gravity>;
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Gravity)
@@ -46,8 +47,6 @@ class Gravity final : public GravityBase<Gravity> {
   }
 };
 
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Gravity)
-
 }  // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Gravity)
+HYPER_DECLARE_EIGEN_CLASS_INTERFACE(hyper::variables, Gravity)

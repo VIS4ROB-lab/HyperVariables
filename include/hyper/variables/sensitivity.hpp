@@ -73,8 +73,6 @@ class Sensitivity final : public SensitivityBase<Sensitivity<TOrder>> {
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Sensitivity)
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::Sensitivity, int)
-
 }  // namespace hyper::variables
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::Sensitivity, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_CLASS_INTERFACE(hyper::variables, Sensitivity, int)

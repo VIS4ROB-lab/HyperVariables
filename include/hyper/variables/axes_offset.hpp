@@ -7,8 +7,4 @@
 
 #include "hyper/variables/rn.hpp"
 
-namespace hyper::variables {
-
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::AxesOffset, int)
-
-}
+//HYPER_DECLARE_TEMPLATED_EIGEN_CLASS_INTERFACE(hyper::variables, AxesOffset, int)

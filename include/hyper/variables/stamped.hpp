@@ -162,4 +162,4 @@ class Stamped final : public StampedBase<Stamped<TVariable>> {
 
 }  // namespace hyper::variables
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::Stamped, typename)
+HYPER_DECLARE_TEMPLATED_EIGEN_CLASS_INTERFACE(hyper::variables, Stamped, typename)

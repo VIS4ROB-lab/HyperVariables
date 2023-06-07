@@ -232,4 +232,4 @@ auto IterativeRadialDistortionBase<TDerived>::InverseIterativePixelDistortionJac
 
 }  // namespace hyper::variables
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::IterativeRadialDistortion, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_CLASS_INTERFACE(hyper::variables, IterativeRadialDistortion, int)

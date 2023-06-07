@@ -125,14 +125,6 @@ class Rn final : public RnBase<Rn<TOrder>> {
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Rn)
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::Rn, int)
-
-}  // namespace hyper::variables
-
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::Rn, int)
-
-namespace hyper::variables {
-
 template <typename TDerived>
 class RnTangentBase : public RnBase<TDerived> {
  public:
@@ -185,3 +177,5 @@ class Map<const Tangent<TDerived>, TMapOptions> final : public RnTangentBase<Map
 };
 
 }  // namespace Eigen
+
+HYPER_DECLARE_TEMPLATED_EIGEN_CLASS_INTERFACE(hyper::variables, Rn, int)

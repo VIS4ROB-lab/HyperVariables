@@ -154,8 +154,6 @@ class Intrinsics final : public IntrinsicsBase<Intrinsics> {
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Intrinsics)
 };
 
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::Intrinsics)
-
 }  // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::Intrinsics)
+HYPER_DECLARE_EIGEN_CLASS_INTERFACE(hyper::variables, Intrinsics)

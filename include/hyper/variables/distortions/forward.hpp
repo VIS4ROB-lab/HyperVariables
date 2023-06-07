@@ -5,7 +5,9 @@
 
 #include "hyper/variables/forward.hpp"
 
-namespace hyper::variables {
+namespace hyper {
+
+namespace variables {
 
 class Distortion;
 
@@ -15,33 +17,29 @@ template <int TOrder>
 class EquidistantDistortion;
 
 template <int TOrder>
-struct Traits<EquidistantDistortion<TOrder>> : public Traits<Rn<TOrder>> {
-  static constexpr auto kOrder = TOrder;
-  using PlainDistortion = EquidistantDistortion<TOrder>;
-};
-
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::EquidistantDistortion, int)
-
-template <int TOrder>
 class RadialTangentialDistortion;
-
-template <int TOrder>
-struct Traits<RadialTangentialDistortion<TOrder>> : public Traits<Rn<TOrder + 2>> {
-  static constexpr auto kOrder = TOrder;
-  using PlainDistortion = RadialTangentialDistortion<TOrder>;
-};
-
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::RadialTangentialDistortion, int)
 
 template <int TOrder>
 class IterativeRadialDistortion;
 
+}  // namespace variables
+
 template <int TOrder>
-struct Traits<IterativeRadialDistortion<TOrder>> : public Traits<Rn<TOrder>> {
+struct Traits<variables::EquidistantDistortion<TOrder>> : public Traits<variables::Rn<TOrder>> {
   static constexpr auto kOrder = TOrder;
-  using PlainDistortion = IterativeRadialDistortion<TOrder>;
+  using PlainDistortion = variables::EquidistantDistortion<TOrder>;
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::IterativeRadialDistortion, int)
+template <int TOrder>
+struct Traits<variables::RadialTangentialDistortion<TOrder>> : public Traits<variables::Rn<TOrder + 2>> {
+  static constexpr auto kOrder = TOrder;
+  using PlainDistortion = variables::RadialTangentialDistortion<TOrder>;
+};
 
-}  // namespace hyper::variables
+template <int TOrder>
+struct Traits<variables::IterativeRadialDistortion<TOrder>> : public Traits<variables::Rn<TOrder>> {
+  static constexpr auto kOrder = TOrder;
+  using PlainDistortion = variables::IterativeRadialDistortion<TOrder>;
+};
+
+}  // namespace hyper

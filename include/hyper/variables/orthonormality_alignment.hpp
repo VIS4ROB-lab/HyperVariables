@@ -140,8 +140,6 @@ class OrthonormalityAlignment final : public OrthonormalityAlignmentBase<Orthono
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(OrthonormalityAlignment)
 };
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE_TRAITS(hyper::variables::OrthonormalityAlignment, int)
-
 }  // namespace hyper::variables
 
-HYPER_DECLARE_TEMPLATED_EIGEN_INTERFACE(hyper::variables::OrthonormalityAlignment, int)
+HYPER_DECLARE_TEMPLATED_EIGEN_CLASS_INTERFACE(hyper::variables, OrthonormalityAlignment, int)

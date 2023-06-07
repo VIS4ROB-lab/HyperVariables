@@ -180,8 +180,6 @@ class SE3 final : public SE3Base<SE3> {
   }
 };
 
-HYPER_DECLARE_EIGEN_INTERFACE_TRAITS(hyper::variables::SE3)
-
 template <typename TDerived>
 class SE3TangentBase : public RnBase<TDerived> {
  public:
@@ -245,8 +243,6 @@ class Tangent<SE3> final : public SE3TangentBase<Tangent<SE3>> {
 
   HYPER_INHERIT_ASSIGNMENT_OPERATORS(Tangent)
 };
-
-HYPER_DECLARE_TANGENT_MAP_TRAITS(hyper::variables::SE3)
 
 template <typename TDerived>
 auto SE3Base<TDerived>::Identity() -> SE3 {
@@ -484,5 +480,5 @@ auto SE3TangentBase<TDerived>::gExp(SE3TangentBase::Scalar* J_this) const -> SE3
 
 }  // namespace hyper::variables
 
-HYPER_DECLARE_EIGEN_INTERFACE(hyper::variables::SE3)
-HYPER_DECLARE_TANGENT_MAP(hyper::variables::SE3)
+HYPER_DECLARE_EIGEN_CLASS_INTERFACE(hyper::variables, SE3)
+HYPER_DECLARE_EIGEN_TANGENT_INTERFACE(hyper::variables, SE3)
