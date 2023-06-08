@@ -41,8 +41,8 @@ class Gaussian<TOrder, GaussianType::STANDARD> final {
   // Definitions.
   using Index = Eigen::Index;
   using Mu = Vector<TOrder>;
-  using Sigma = Matrix<TOrder, TOrder>;
-  using Matrix = Matrix<TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
+  using Sigma = hyper::Matrix<TOrder>;
+  using Matrix = hyper::Matrix<TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
 
   /// Zero Gaussian.
   /// \return Gaussian.
@@ -157,8 +157,8 @@ class Gaussian<TOrder, GaussianType::INFORMATION> final {
   // Definitions.
   using Index = Eigen::Index;
   using Eta = Vector<TOrder>;
-  using Lambda = Matrix<TOrder, TOrder>;
-  using Matrix = Matrix<TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
+  using Lambda = hyper::Matrix<TOrder>;
+  using Matrix = hyper::Matrix<TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
 
   /// Zero Gaussian.
   /// \return Gaussian.
@@ -272,8 +272,8 @@ class DualGaussian final {
  public:
   // Definitions.
   using Index = Eigen::Index;
-  using StandardGaussian = StandardGaussian<TOrder>;
-  using InformationGaussian = InformationGaussian<TOrder>;
+  using StandardGaussian = stochastics::StandardGaussian<TOrder>;
+  using InformationGaussian = stochastics::InformationGaussian<TOrder>;
 
   using Mu = typename StandardGaussian::Mu;
   using Sigma = typename StandardGaussian::Sigma;

@@ -8,7 +8,8 @@
 
 namespace hyper::metrics {
 
-class SU2Metric final : public Metric {
+template <>
+class GroupMetric<variables::SU2> final : public Metric {
  public:
   // Definitions.
   using Input = variables::SU2;

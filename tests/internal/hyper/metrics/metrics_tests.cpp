@@ -46,13 +46,13 @@ TEST(MetricsTests, Euclidean) {
 
 TEST(MetricsTests, SU2Manifold) {
   for (auto k = 0; k < kItr; ++k) {
-    CheckMetric<SU2Metric>();
+    CheckMetric<GroupMetric<variables::SU2>>();
   }
 }
 
 TEST(MetricsTests, SE3Manifold) {
   for (auto k = 0; k < kItr; ++k) {
-    CheckMetric<SE3Metric>();
+    CheckMetric<GroupMetric<variables::SE3>>();
   }
 }
 

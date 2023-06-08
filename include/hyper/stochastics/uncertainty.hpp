@@ -104,6 +104,15 @@ class Uncertainty {
     DCHECK(covariance_llt_.info() != Eigen::NumericalIssue);
   }
 
+  /// Acts on a value.
+  /// \tparam TDerived Derived type.
+  /// \param x Value (i.e. vector or matrix).
+  /// \return Weighted value (i.e. value weighted by square root precision).
+  template <typename TDerived>
+  inline auto act(const Eigen::MatrixBase<TDerived>& x) -> Matrix<TDerived::RowsAtCompileTime, TDerived::ColsAtCompileTime> {
+    return sqrtPrecision().matrixL().transpose() * x;
+  }
+
  private:
   Covariance covariance_;                                ///< Covariance.
   Eigen::LLT<Covariance, Eigen::Lower> covariance_llt_;  ///< Cholesky decomposition of covariance.

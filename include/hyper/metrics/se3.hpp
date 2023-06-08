@@ -8,7 +8,8 @@
 
 namespace hyper::metrics {
 
-class SE3Metric final : public Metric {
+template <>
+class GroupMetric<variables::SE3> final : public Metric {
  public:
   // Definitions.
   using Input = variables::SE3;

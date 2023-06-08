@@ -5,7 +5,7 @@
 
 namespace hyper::metrics {
 
-auto SE3Metric::Evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void {
+auto GroupMetric<variables::SE3>::Evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void {
   const auto lhs_ = Eigen::Map<const Input>{lhs};
   const auto rhs_ = Eigen::Map<const Input>{rhs};
   auto output_ = Eigen::Map<Output>{output};
@@ -28,13 +28,13 @@ auto SE3Metric::Evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, S
   }
 }
 
-auto SE3Metric::Evaluate(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, Scalar* J_lhs, Scalar* J_rhs) -> Output {
+auto GroupMetric<variables::SE3>::Evaluate(const Eigen::Ref<const Input>& lhs, const Eigen::Ref<const Input>& rhs, Scalar* J_lhs, Scalar* J_rhs) -> Output {
   Output output;
   Evaluate(lhs.data(), rhs.data(), output.data(), J_lhs, J_rhs);
   return output;
 }
 
-auto SE3Metric::evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void {
+auto GroupMetric<variables::SE3>::evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void {
   Evaluate(lhs, rhs, output, J_lhs, J_rhs);
 }
 

@@ -5,7 +5,7 @@
 
 namespace hyper::metrics {
 
-auto SU2Metric::Evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void {
+auto GroupMetric<variables::SU2>::Evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void {
   const auto lhs_ = Eigen::Map<const Input>{lhs};
   const auto rhs_ = Eigen::Map<const Input>{rhs};
   auto output_ = Eigen::Map<Output>{output};
@@ -28,13 +28,13 @@ auto SU2Metric::Evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, S
   }
 }
 
-auto SU2Metric::Evaluate(const Input& lhs, const Input& rhs, Scalar* J_lhs, Scalar* J_rhs) -> Output {
+auto GroupMetric<variables::SU2>::Evaluate(const Input& lhs, const Input& rhs, Scalar* J_lhs, Scalar* J_rhs) -> Output {
   Output output;
   Evaluate(lhs.data(), rhs.data(), output.data(), J_lhs, J_rhs);
   return output;
 }
 
-auto SU2Metric::evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void {
+auto GroupMetric<variables::SU2>::evaluate(const Scalar* lhs, const Scalar* rhs, Scalar* output, Scalar* J_lhs, Scalar* J_rhs) -> void {
   Evaluate(lhs, rhs, output, J_lhs, J_rhs);
 }
 

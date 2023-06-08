@@ -12,6 +12,8 @@ namespace hyper {
 using Time = double;
 using Scalar = double;
 
+using String = std::string;
+
 template <typename>
 struct Traits;
 

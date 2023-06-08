@@ -15,7 +15,7 @@ class AngularMetric;
 template <typename TInput>
 class EuclideanMetric;
 
-class SU2Metric;
-class SE3Metric;
+template <typename TGroup>
+class GroupMetric;
 
 }  // namespace hyper::metrics
