@@ -7,34 +7,9 @@
 
 #include "hyper/matrix.hpp"
 
-namespace hyper::stochastics {
+namespace hyper {
 
-enum class GaussianType { STANDARD, INFORMATION };
-
-template <int TOrder>
-class Uncertainty;
-
-template <typename TDerived>
-using UncertaintyN = Uncertainty<TDerived::kNumParameters>;
-
-using UncertaintyX = Uncertainty<Eigen::Dynamic>;
-
-template <int TOrder, GaussianType>
-class Gaussian;
-
-template <typename TDerived, GaussianType gaussianType>
-using GaussianN = Gaussian<TDerived::kNumParameters, gaussianType>;
-
-template <GaussianType gaussianType>
-using GaussianX = Gaussian<Eigen::Dynamic, gaussianType>;
-
-template <int TOrder>
-class DualGaussian;
-
-template <typename TDerived>
-using DualGaussianN = DualGaussian<TDerived::kNumParameters>;
-
-using DualGaussianX = DualGaussian<Eigen::Dynamic>;
+namespace stochastics {
 
 template <int TSize>
 using Covariance = Matrix<TSize, TSize>;
@@ -53,27 +28,47 @@ using PrecisionN = MatrixNM<TDerived, TDerived>;
 using PrecisionX = MatrixX;
 
 template <int TOrder>
-using StandardGaussian = Gaussian<TOrder, GaussianType::STANDARD>;
+class Uncertainty;
+
+template <typename TDerived>
+using UncertaintyN = Uncertainty<TDerived::kNumParameters>;
+
+using UncertaintyX = Uncertainty<Eigen::Dynamic>;
 
 template <int TOrder>
-using InformationGaussian = Gaussian<TOrder, GaussianType::INFORMATION>;
+class Gaussian;
 
 template <typename TDerived>
-using StandardGaussianN = StandardGaussian<TDerived::kNumParameters>;
+using GaussianN = Gaussian<TDerived::kNumParameters>;
 
-template <typename TDerived>
-using InformationGaussianN = InformationGaussian<TDerived::kNumParameters>;
-
-using StandardGaussianX = StandardGaussian<Eigen::Dynamic>;
-
-using InformationGaussianX = InformationGaussian<Eigen::Dynamic>;
+using GaussianX = Gaussian<Eigen::Dynamic>;
 
 template <int TOrder>
-using Prior = InformationGaussian<TOrder>;
+class InverseGaussian;
 
 template <typename TDerived>
-using PriorN = InformationGaussianN<TDerived>;
+using InverseGaussianN = InverseGaussian<TDerived::kNumParameters>;
 
-using PriorX = InformationGaussianX;
+using InverseGaussianX = InverseGaussian<Eigen::Dynamic>;
 
-}  // namespace hyper::stochastics
+}  // namespace stochastics
+
+template <int TOrder>
+struct Traits<stochastics::Gaussian<TOrder>> {
+  // Constants.
+  static constexpr auto kOrder = TOrder;
+
+  // Definitions.
+  using Base = Matrix<TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
+};
+
+template <int TOrder>
+struct Traits<stochastics::InverseGaussian<TOrder>> {
+  // Constants.
+  static constexpr auto kOrder = TOrder;
+
+  // Definitions.
+  using Base = Matrix<TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
+};
+
+}  // namespace hyper

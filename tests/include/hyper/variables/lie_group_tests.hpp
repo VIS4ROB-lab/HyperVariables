@@ -70,7 +70,7 @@ class LieGroupTests : public testing::Test {
 
   [[nodiscard]] auto checkGroupExponentialMap() const -> bool {
     const auto group = group_.gLog().gExp();
-    return group.isApprox(group_, kTol);
+    return group.gIsApprox(group_, kTol);
   }
 
   [[nodiscard]] auto checkGroupExponentialMapJacobians() const -> bool {
@@ -86,7 +86,7 @@ class LieGroupTests : public testing::Test {
       J_e_n.col(j) = d_tangent.gExp().tMinus(group_) / kInc;
     }
 
-    return group.isApprox(group_, kTol) && (J_l_a * J_e_a).isIdentity(kTol) && J_l_n.isApprox(J_l_a, kTol) && J_e_n.isApprox(J_e_a, kTol);
+    return group.gIsApprox(group_, kTol) && (J_l_a * J_e_a).isIdentity(kTol) && J_l_n.isApprox(J_l_a, kTol) && J_e_n.isApprox(J_e_a, kTol);
   }
 
   [[nodiscard]] auto checkTangentJacobian() const -> bool {

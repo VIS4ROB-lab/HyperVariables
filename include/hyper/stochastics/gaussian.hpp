@@ -13,7 +13,7 @@
 
 namespace hyper::stochastics {
 
-namespace gaussian {
+namespace internal {
 
 template <int TSize, typename TDerived>
 auto invertPSDMatrix(const Eigen::MatrixBase<TDerived>& matrix, const bool full_rank = true) -> Eigen::Matrix<Scalar, TSize, TSize> {
@@ -33,28 +33,18 @@ auto invertPSDMatrix(const Eigen::MatrixBase<TDerived>& matrix, const bool full_
   return svd.solve(SVDMatrix::Identity(size, size));
 }
 
-}  // namespace gaussian
+}  // namespace internal
 
 template <int TOrder>
-class Gaussian<TOrder, GaussianType::STANDARD> final {
+class Gaussian final {
  public:
   // Definitions.
-  using Index = Eigen::Index;
-  using Mu = Vector<TOrder>;
+  using Mu = hyper::Vector<TOrder>;
   using Sigma = hyper::Matrix<TOrder>;
-  using Matrix = hyper::Matrix<TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
-
-  /// Zero Gaussian.
-  /// \return Gaussian.
-  static auto Zero(Index size) -> Gaussian {
-    Gaussian gaussian{size};
-    gaussian.setZero(size);
-    return gaussian;
-  }
 
   /// Constructor from order.
-  /// \param order Input order.
-  explicit Gaussian(Index order = TOrder) : matrix_{order, order + 1} {}
+  /// \param order Order.
+  explicit Gaussian(int order = TOrder) : matrix_{order, order + 1} {}
 
   /// Constructor from mu and sigma.
   /// \param mu Mu.
@@ -65,15 +55,7 @@ class Gaussian<TOrder, GaussianType::STANDARD> final {
     this->sigma() = sigma;
   }
 
-  /// Constructor from order.
-  /// \param order Input order.
-  /// \return Gaussian.
-  inline auto setZero(Index order) -> Gaussian& {
-    matrix_.setZero(order, order + 1);
-    return *this;
-  }
-
-  /// Retrieves the order.
+  /// Order accessor.
   /// \return Order.
   [[nodiscard]] inline auto order() const { return matrix_.rows(); }
 
@@ -107,89 +89,62 @@ class Gaussian<TOrder, GaussianType::STANDARD> final {
     }
   }
 
-  /// Plus operator.
-  /// \param other Other Gaussian.
-  /// \return Gaussian.
-  auto operator+(const Gaussian& other) -> Gaussian { return {mu() + other.mu(), sigma() + other.sigma()}; }
-
-  /// Minus operator.
-  /// \param other Other Gaussian.
-  /// \return Gaussian.
-  auto operator-(const Gaussian& other) -> Gaussian { return {mu() - other.mu(), sigma() - other.sigma()}; }
-
-  /// Plus operator (in-place).
-  /// \param other Other Gaussian.
-  /// \return Gaussian.
-  auto operator+=(const Gaussian& other) -> Gaussian& {
-    mu() += other.mu();
-    sigma() += other.sigma();
-    return *this;
-  }
-
-  /// Minus operator (in-place).
-  /// \param other Other Gaussian.
-  /// \return Gaussian.
-  auto operator-=(const Gaussian& other) -> Gaussian& {
-    mu() -= other.mu();
-    sigma() -= other.sigma();
-    return *this;
-  }
-
   /// Inverse sigma.
   /// \return Inverse sigma.
-  inline auto sigmaInverse() const { return gaussian::invertPSDMatrix<TOrder>(sigma()); }
+  inline auto sigmaInverse() const { return internal::invertPSDMatrix<TOrder>(sigma()); }
 
   /// Converts this.
-  /// \param information_gaussian Information Gaussian to write to.
-  auto toInformationGaussian(InformationGaussian<TOrder>& information_gaussian) const -> void;
+  /// \param inverse_gaussian Inverse Gaussian.
+  auto toInverseGaussian(InverseGaussian<TOrder>& inverse_gaussian) const -> void;
 
   /// Converts this.
-  /// \return Information form.
-  auto toInformationGaussian() const -> InformationGaussian<TOrder>;
+  /// \return Inverse Gaussian.
+  auto toInverseGaussian() const -> InverseGaussian<TOrder>;
 
  private:
+  // Definitions.
+  using Matrix = hyper::Traits<Gaussian<TOrder>>::Base;
+
   Matrix matrix_;  ///< Matrix.
 };
 
 template <int TOrder>
-class Gaussian<TOrder, GaussianType::INFORMATION> final {
+class InverseGaussian final {
  public:
   // Definitions.
-  using Index = Eigen::Index;
-  using Eta = Vector<TOrder>;
+  using Eta = hyper::Vector<TOrder>;
   using Lambda = hyper::Matrix<TOrder>;
-  using Matrix = hyper::Matrix<TOrder, (TOrder != Eigen::Dynamic) ? (TOrder + 1) : Eigen::Dynamic>;
 
-  /// Zero Gaussian.
-  /// \return Gaussian.
-  static auto Zero(Index size) -> Gaussian {
-    Gaussian gaussian{size};
-    gaussian.setZero(size);
-    return gaussian;
+  /// Zero inverse Gaussian.
+  /// \return Inverse Gaussian.
+  static auto Zero(int size) -> InverseGaussian {
+    InverseGaussian inverse_gaussian{size};
+    inverse_gaussian.setZero();
+    return inverse_gaussian;
   }
 
   /// Constructor from order.
-  /// \param order Input order.
-  explicit Gaussian(Index order = TOrder) : matrix_{order, order + 1} {}
+  /// \param order Order.
+  explicit InverseGaussian(int order = TOrder) : matrix_{order, order + 1} {}
 
   /// Constructor from eta and lambda.
   /// \param eta Eta.
   /// \param sigma Lambda.
   template <typename TDerived_, typename TOtherDerived_>
-  Gaussian(const Eigen::MatrixBase<TDerived_>& eta, const Eigen::MatrixBase<TOtherDerived_>& lambda) : Gaussian{eta.size()} {
+  InverseGaussian(const Eigen::MatrixBase<TDerived_>& eta, const Eigen::MatrixBase<TOtherDerived_>& lambda) : InverseGaussian{eta.size()} {
     this->eta() = eta;
     this->lambda() = lambda;
   }
 
-  /// Constructor from order.
-  /// \param order Input order.
-  /// \return Gaussian.
-  inline auto setZero(Index order) -> Gaussian& {
+  /// Sets this to zero.
+  /// \return Inverse Gaussian.
+  inline auto setZero() -> InverseGaussian& {
+    const auto order = this->order();
     matrix_.setZero(order, order + 1);
     return *this;
   }
 
-  /// Retrieves the order.
+  /// Order accessor.
   /// \return Order.
   [[nodiscard]] inline auto order() const { return matrix_.rows(); }
 
@@ -225,174 +180,91 @@ class Gaussian<TOrder, GaussianType::INFORMATION> final {
 
   /// Inverse lambda.
   /// \return Inverse lambda.
-  inline auto lambdaInverse() const { return gaussian::invertPSDMatrix<TOrder>(lambda()); }
+  inline auto lambdaInverse() const { return internal::invertPSDMatrix<TOrder>(lambda()); }
 
   /// Plus operator.
-  /// \param other Other Gaussian.
-  /// \return Gaussian.
-  auto operator+(const Gaussian& other) -> Gaussian { return {eta() + other.eta(), lambda() + other.lambda()}; }
-
-  /// Minus operator.
-  /// \param other Other Gaussian.
-  /// \return Gaussian.
-  auto operator-(const Gaussian& other) -> Gaussian { return {eta() - other.eta(), lambda() - other.lambda()}; }
+  /// \param other Other inverse Gaussian.
+  /// \return Inverse Gaussian.
+  inline auto operator+(const InverseGaussian& other) const -> InverseGaussian { return {matrix_ + other.matrix_}; }
 
   /// Plus operator (in-place).
   /// \param other Other Gaussian.
   /// \return Gaussian.
-  auto operator+=(const Gaussian& other) -> Gaussian& {
-    eta() += other.eta();
-    lambda() += other.lambda();
+  inline auto operator+=(const InverseGaussian& other) -> InverseGaussian& {
+    matrix_ += other.matrix_;
     return *this;
   }
 
-  /// Minus operator (in-place).
-  /// \param other Other Gaussian.
+  /// Product operator.
+  /// \param scalar Scalar.
+  /// \return Inverse Gaussian.
+  inline auto operator*(const Scalar scalar) const -> InverseGaussian { return {scalar * matrix_}; }
+
+  /// Product operator (in-place).
+  /// \param scalar Scalar.
   /// \return Gaussian.
-  auto operator-=(const Gaussian& other) -> Gaussian& {
-    eta() -= other.eta();
-    lambda() -= other.lambda();
+  inline auto operator*=(const Scalar scalar) -> InverseGaussian& {
+    matrix_ *= scalar;
     return *this;
   }
 
   /// Converts this.
-  /// \param standard_gaussian Standard Gaussian to write to.
-  auto toStandardGaussian(StandardGaussian<TOrder>& standard_gaussian) const -> void;
+  /// \param gaussian Gaussian.
+  auto toGaussian(Gaussian<TOrder>& gaussian) const -> void;
 
   /// Converts this.
-  /// \return Standard form.
-  auto toStandardGaussian() const -> StandardGaussian<TOrder>;
+  /// \return Gaussian.
+  auto toGaussian() const -> Gaussian<TOrder>;
 
  private:
+  // Definitions.
+  using Matrix = hyper::Traits<InverseGaussian<TOrder>>::Base;
+
+  /// Constructor from matrix.
+  /// \tparam TDerived_ Derived type.
+  /// \param matrix Matrix.
+  template <typename TDerived_>
+  InverseGaussian(const Eigen::MatrixBase<TDerived_>& matrix) : InverseGaussian{matrix.rows()} {
+    matrix_ = matrix;
+  }
+
   Matrix matrix_;  ///< Matrix.
 };
 
 template <int TOrder>
-class DualGaussian final {
- public:
-  // Definitions.
-  using Index = Eigen::Index;
-  using StandardGaussian = stochastics::StandardGaussian<TOrder>;
-  using InformationGaussian = stochastics::InformationGaussian<TOrder>;
-
-  using Mu = typename StandardGaussian::Mu;
-  using Sigma = typename StandardGaussian::Sigma;
-  using Eta = typename InformationGaussian::Eta;
-  using Lambda = typename InformationGaussian::Lambda;
-
-  /// Initialization as identity.
-  /// \param order Order.
-  /// \return Uncertainty.
-  static auto Identity(Index order = TOrder) -> DualGaussian {
-    DualGaussian dual_gaussian{order};
-    dual_gaussian.standard_gaussian_ = {Mu::Zero(order), Sigma::Identity(order, order)};
-    dual_gaussian.information_gaussian_ = {Eta::Zero(order), Lambda::Identity(order, order)};
-    return dual_gaussian;
-  }
-
-  /// Constructor from order.
-  /// \param order Input order.
-  explicit DualGaussian(Index order = TOrder) : standard_gaussian_{order}, information_gaussian_{order} {}
-
-  /// Constructor from order.
-  /// \param order Input order.
-  /// \return Gaussian.
-  inline auto setIdentity(Index order = TOrder) -> DualGaussian& {
-    *this = Identity(order);
-    return *this;
-  }
-
-  /// Retrieves the order.
-  /// \return Order.
-  [[nodiscard]] inline auto order() const { return standard_gaussian_.order(); }
-
-  /// Standard form accessor.
-  /// \return Gaussian in standard form.
-  inline auto standardGaussian() const -> const StandardGaussian& { return standard_gaussian_; }
-
-  /// Information form accessor.
-  /// \return Gaussian in information form.
-  inline auto informationGaussian() const -> const InformationGaussian& { return information_gaussian_; }
-
-  /// Mu setter.
-  /// \tparam TDerived_ Derived type.
-  /// \param mu Mu.
-  template <typename TDerived_>
-  inline auto setMu(const Eigen::MatrixBase<TDerived_>& mu) -> void {
-    standard_gaussian_.mu() = mu;
-    information_gaussian_.eta() = information_gaussian_.lambda() * mu;
-  }
-
-  /// Sigma setter.
-  /// \tparam TDerived_ Derived type.
-  /// \param sigma Sigma.
-  template <typename TDerived_>
-  inline auto setSigma(const Eigen::MatrixBase<TDerived_>& sigma) -> void {
-    standard_gaussian_.sigma() = sigma;
-    standard_gaussian_.toInformationGaussian(information_gaussian_);
-  }
-
-  /// Eta setter.
-  /// \tparam TDerived_ Derived type.
-  /// \param eta Eta.
-  template <typename TDerived_>
-  inline auto setEta(const Eigen::MatrixBase<TDerived_>& eta) -> void {
-    information_gaussian_.eta() = eta;
-    standard_gaussian_.mu() = standard_gaussian_.sigma() * eta;
-  }
-
-  /// Lambda setter.
-  /// \tparam TDerived_ Derived type.
-  /// \param lambda Lambda.
-  template <typename TDerived_>
-  inline auto setLambda(const Eigen::MatrixBase<TDerived_>& lambda) -> void {
-    information_gaussian_.lambda() = lambda;
-    information_gaussian_.toStandardGaussian(standard_gaussian_);
-  }
-
-  /// Sets the standard Gaussian form.
-  /// \param standard_gaussian Standard Gaussian.
-  auto setStandardGaussian(const StandardGaussian& standard_gaussian) -> void {
-    standard_gaussian.toInformationGaussian(information_gaussian_);
-    standard_gaussian_ = standard_gaussian;
-  }
-
-  /// Sets the information Gaussian form.
-  /// \param information_gaussian Information Gaussian.
-  auto setInformationGaussian(const InformationGaussian& information_gaussian) -> void {
-    information_gaussian.toStandardGaussian(standard_gaussian_);
-    information_gaussian_ = information_gaussian;
-  }
-
- private:
-  StandardGaussian standard_gaussian_;
-  InformationGaussian information_gaussian_;
-};
-
-template <int TOrder>
-auto StandardGaussian<TOrder>::toInformationGaussian(InformationGaussian<TOrder>& information_gaussian) const -> void {
-  information_gaussian.lambda().noalias() = sigmaInverse();
-  information_gaussian.eta().noalias() = information_gaussian.lambda() * mu();
+auto operator*(const Scalar scalar, const InverseGaussian<TOrder>& inverseGaussian) -> InverseGaussian<TOrder> {
+  return inverseGaussian * scalar;
 }
 
 template <int TOrder>
-auto StandardGaussian<TOrder>::toInformationGaussian() const -> InformationGaussian<TOrder> {
-  InformationGaussian<TOrder> information_gaussian{order()};
-  toInformationGaussian(information_gaussian);
-  return information_gaussian;
+auto operator*(const Scalar scalar, InverseGaussian<TOrder>& inverseGaussian) -> InverseGaussian<TOrder>& {
+  return inverseGaussian *= scalar;
 }
 
 template <int TOrder>
-auto InformationGaussian<TOrder>::toStandardGaussian(StandardGaussian<TOrder>& standard_gaussian) const -> void {
-  standard_gaussian.sigma().noalias() = lambdaInverse();
-  standard_gaussian.mu().noalias() = standard_gaussian.sigma() * eta();
+auto Gaussian<TOrder>::toInverseGaussian(InverseGaussian<TOrder>& inverse_gaussian) const -> void {
+  inverse_gaussian.lambda().noalias() = sigmaInverse();
+  inverse_gaussian.eta().noalias() = inverse_gaussian.lambda() * mu();
 }
 
 template <int TOrder>
-auto InformationGaussian<TOrder>::toStandardGaussian() const -> StandardGaussian<TOrder> {
-  StandardGaussian<TOrder> standard_gaussian{order()};
-  toStandardGaussian(standard_gaussian);
-  return standard_gaussian;
+auto Gaussian<TOrder>::toInverseGaussian() const -> InverseGaussian<TOrder> {
+  InverseGaussian<TOrder> inverse_gaussian{order()};
+  toInverseGaussian(inverse_gaussian);
+  return inverse_gaussian;
+}
+
+template <int TOrder>
+auto InverseGaussian<TOrder>::toGaussian(Gaussian<TOrder>& gaussian) const -> void {
+  gaussian.sigma().noalias() = lambdaInverse();
+  gaussian.mu().noalias() = gaussian.sigma() * eta();
+}
+
+template <int TOrder>
+auto InverseGaussian<TOrder>::toGaussian() const -> Gaussian<TOrder> {
+  Gaussian<TOrder> gaussian{order()};
+  toGaussian(gaussian);
+  return gaussian;
 }
 
 }  // namespace hyper::stochastics

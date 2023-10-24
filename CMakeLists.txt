@@ -78,7 +78,7 @@ if (BUILD_TESTING)
                 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
                 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/tests/include>
                 $<INSTALL_INTERFACE:include>
-                )
+        )
         target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME})
     endif ()
 endif ()
@@ -93,7 +93,7 @@ if (BUILD_BENCHMARKS)
                 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
                 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks/include>
                 $<INSTALL_INTERFACE:include>
-                )
+        )
         target_link_libraries(${PROJECT_NAME}_benchmarks ${PROJECT_NAME})
     endif ()
 endif ()

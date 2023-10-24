@@ -80,6 +80,15 @@ class QuaternionBase : public Traits<TDerived>::Base, public ConditionalConstBas
   /// \return Derived type.
   auto derived() -> TDerived& { return const_cast<TDerived&>(std::as_const(*this).derived()); }
 
+  /// Compares elements.
+  /// \tparam Other_ Other type.
+  /// \param other Other element.
+  /// \param tolerance Tolerance.
+  /// \return True if elements are approximately
+  /// identical representations within the group.
+  template <typename Other_>
+  [[nodiscard]] auto gIsApprox(const Eigen::QuaternionBase<Other_>& other, Scalar tolerance) const -> bool;
+
   /// Group inverse.
   /// \return Inverse element.
   [[nodiscard]] auto gInv() const -> Quaternion;
@@ -314,6 +323,12 @@ auto QuaternionBase<TDerived>::setRandom() -> TDerived& {
 }
 
 template <typename TDerived>
+template <typename Other_>
+auto QuaternionBase<TDerived>::gIsApprox(const Eigen::QuaternionBase<Other_>& other, const Scalar tolerance) const -> bool {
+  return this->coeffs().isApprox(other.coeffs(), tolerance) || this->coeffs().isApprox(-other.coeffs(), tolerance);
+}
+
+template <typename TDerived>
 auto QuaternionBase<TDerived>::gInv() const -> Quaternion {
   return this->inverse();
 }
@@ -334,7 +349,7 @@ auto QuaternionBase<TDerived>::glog() const -> Quaternion {
   const auto nq = std::sqrt(nq2);
 
   DLOG_IF(FATAL, nq < Eigen::NumTraits<Scalar>::epsilon()) << "Quaternion norm is zero.";
-  const auto a = (nv < Eigen::NumTraits<Scalar>::epsilon()) ? (Scalar{1} / nq) : (std::atan2(nv, this->w()) / nv);
+  const auto a = (nv < Eigen::NumTraits<Scalar>::epsilon()) ? (Scalar{1} / nq) : ((this->w() < Scalar{0} ? std::atan2(-nv, -this->w()) : std::atan2(nv, this->w())) / nv);
   return {std::log(nq), a * this->x(), a * this->y(), a * this->z()};
 }
 
@@ -424,18 +439,17 @@ auto SU2Base<TDerived>::gLog(Scalar* J_this) const -> Tangent {
   const auto nq = std::sqrt(nq2);
 
   DLOG_IF(FATAL, nq < Eigen::NumTraits<Scalar>::epsilon()) << "Quaternion norm is zero.";
-  const auto a = (nv < Eigen::NumTraits<Scalar>::epsilon()) ? (Scalar{1} / nq) : (std::atan2(nv, this->w()) / nv);
+  const auto a = (nv < Eigen::NumTraits<Scalar>::epsilon()) ? (Scalar{1} / nq) : ((this->w() < Scalar{0} ? std::atan2(-nv, -this->w()) : std::atan2(nv, this->w())) / nv);
   Tangent log = kAlpha * a * this->vec();
 
   if (!J_this) {
     return log;
   }
 
-  const auto nw2 = kAlpha * kAlpha * a * a * nv2;
   const auto nw = kAlpha * a * nv;
-  const auto nw3 = nw * nw2;
+  const auto nw2 = nw * nw;
 
-  if (nw3 < Eigen::NumTraits<Scalar>::epsilon()) {
+  if (nw2 < Eigen::NumTraits<Scalar>::epsilon()) {
     Eigen::Map<TangentJacobian>{J_this}.setIdentity();
   } else {
     const auto Wx = log.hat();

@@ -87,6 +87,15 @@ class SE3Base : public RnBase<TDerived> {
   /// \return Translation.
   inline auto translation() { return Eigen::Map<TranslationWithConstIfNotLvalue>{this->data() + kTranslationOffset}; }
 
+  /// Compares elements.
+  /// \tparam Other_ Other type.
+  /// \param other Other element.
+  /// \param tolerance Tolerance.
+  /// \return True if elements are approximately
+  /// identical representations within the group.
+  template <typename TOther_>
+  [[nodiscard]] auto gIsApprox(const SE3Base<TOther_>& other, Scalar tolerance) const -> bool;
+
   /// Group inverse.
   /// \param J_this Jacobian w.r.t. this.
   /// \return Group element.
@@ -266,6 +275,12 @@ auto SE3Base<TDerived>::setRandom() -> TDerived& {
   rotation().setRandom();
   translation().setRandom();
   return this->derived();
+}
+
+template <typename TDerived>
+template <typename TOther_>
+auto SE3Base<TDerived>::gIsApprox(const SE3Base<TOther_>& other, const Scalar tolerance) const -> bool {
+  return rotation().gIsApprox(other.rotation(), tolerance) && translation().isApprox(other.translation());
 }
 
 template <typename TDerived>

@@ -17,7 +17,7 @@ class QuaternionTests : public testing::Test {
   [[nodiscard]] auto checkGroupExponentials() const -> bool {
     const auto qle = quaternion_.glog().gexp();
     const auto qel = quaternion_.gexp().glog();
-    return qle.isApprox(quaternion_, kTol) && qel.isApprox(quaternion_, kTol);
+    return qle.gIsApprox(quaternion_, kTol) && qel.gIsApprox(quaternion_, kTol);
   }
 
   Quaternion quaternion_;
