@@ -1,25 +1,3 @@
-[contributors-shield]: https://img.shields.io/github/contributors/VIS4ROB-lab/HyperVariables.svg?style=for-the-badge
-[contributors-url]: https://github.com/VIS4ROB-lab/HyperVariables/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/VIS4ROB-lab/HyperVariables.svg?style=for-the-badge
-[forks-url]: https://github.com/VIS4ROB-lab/HyperVariables/network/members
-[stars-shield]: https://img.shields.io/github/stars/VIS4ROB-lab/HyperVariables.svg?style=for-the-badge
-[stars-url]: https://github.com/VIS4ROB-lab/HyperVariables/stargazers
-[issues-shield]: https://img.shields.io/github/issues/VIS4ROB-lab/HyperVariables.svg?style=for-the-badge
-[issues-url]: https://github.com/VIS4ROB-lab/HyperVariables/issues
-[license-shield]: https://img.shields.io/github/license/VIS4ROB-lab/HyperVariables.svg?style=for-the-badge
-[license-url]: https://github.com/VIS4ROB-lab/HyperVariables/blob/master/LICENSE
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/davidhug
-
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![BSD-3-Clause License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-<br />
-<br />
 <div align="center">
   <a href="https://github.com/VIS4ROB-lab/HyperVariables">
     <img src="https://drive.google.com/uc?export=view&id=1UAFr3tepqKwdnTomhKaeI2eIag3HOISY" alt="" style="width: 150px;">
@@ -56,6 +34,8 @@ Jacobians for the implemented operations. If you use this repository, please cit
     doi={10.1109/LRA.2022.3173705}
 }
 ```
+
+***Note:*** Development on HyperSLAM-related repositories has been discontinued.
 
 ## Installation
 
